@@ -1,43 +1,41 @@
 'use client'
-import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react'
 import ChatButton from '../Chat/ChatButton';
 import ChatInterface from '../Chat/ChatInterface';
 
-const EventDetail = ({eventId}) => {
+interface EventDetailProps {
+  eventId: string;
+}
+
+const EventDetail = ({ eventId }: EventDetailProps) => {
   const [isChatOpen, setIsChatOpen]=useState(false);
   const [eventData, setEventData]=useState<any>({});
 
   useEffect( () => {
     const token=localStorage.getItem("token");
-    const userId=localStorage.getItem("userId");
-    console.log(eventId)
     const getEventDetail=async ()=>{
       try{
-        const response = await fetch('http://localhost:4000/api/event-details/',{
-          method: 'POST',
+        const response = await fetch(`/api/events/event-details?eventId=${eventId}`,{
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
           credentials: 'include',
-          body: JSON.stringify({eventId})
         });
 
         if(!response.ok){
           throw new Error('Failed to fetch event detail!')
         }
         const data = await response.json();
-        console.log(data);
         const selectedEvent=data.data.event;
-        console.log(selectedEvent);
         setEventData(selectedEvent);
-        }catch(error){
+        }catch(error: any){
           alert(error.message);
         }
       };
       getEventDetail();
-  }, [])
+  }, [eventId])
 
   
   const toggleChat=()=>{

@@ -16,11 +16,9 @@
 
 }
 
-.marker {
-    .marker {
+.marker .marker {
     width: 50px;
     height: 50px;
-    }
 }
 
 .map-container {
@@ -54,17 +52,18 @@
     color: black;
     z-index: 999;
     padding: 0;
+}
 
-li {
+.addressSuggestions li {
     list-style: none;
     border-bottom: 1px solid black;
     padding: 0.5em 1em;
-    &:hover {
-        background-color: rgb(22, 66, 128);
-        color: white;
-        cursor: pointer;
-    }
-    }
+}
+
+.addressSuggestions li:hover {
+    background-color: rgb(22, 66, 128);
+    color: white;
+    cursor: pointer;
 }
 
 .inputBar{

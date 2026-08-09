@@ -8,9 +8,13 @@ const { initializeSocketService } = require('./websockets-service/socket.server.
 dotenv.config();
 
 process.on("uncaughtException", (err) => {
-    console.log(err);
+    console.error(err);
     console.log("UNCAUGHT Exception! Shutting down ...");
     process.exit(1); // Exit Code 1 indicates that a container shut down, either because of an application failure.
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("UNHANDLED REJECTION! (logged, server keeps running)", reason);
 });
 
 const httpServer = http.createServer(appMain);
@@ -31,8 +35,10 @@ async function connectToDatabase() {
             throw new Error('DB_URI is undefined');
         }
     } catch (err) {
-        console.error('Error connecting to the database:', err);
-        throw err; // or handle it more gracefully
+        // Keep the HTTP server alive even if the DB is temporarily unavailable —
+        // the health endpoint can still report status and the app can retry.
+        console.error('Error connecting to the database:', err.message || err);
+        setTimeout(connectToDatabase, 5000); // retry every 5 seconds
     }
 }
 connectToDatabase();

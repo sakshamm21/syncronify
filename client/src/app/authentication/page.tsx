@@ -5,19 +5,21 @@ import UserRegister from '@/components/UserRegister/UserRegister'
 import React, { useState } from 'react'
 
 const Authentication = () => {
-  const[newUser, setNewUser]=useState(true);
+  const [newUser, setNewUser] = useState(true);
 
-  const handleClick=()=>{
+  const handleClick = () => {
     setNewUser(!newUser);
   }
 
-
   return (
-    <div className='bg-cover relative bg-center h-screen flex items-center justify-center' style={{ backgroundImage: `url('card1.svg')` }}>
-      {/* <div className="absolute top-0 bottom-0 left-0 right-0 bg-inherit blur-md contents"></div> */}
-      {!newUser?
-      <Login handleClick={()=>handleClick()}/>:
-      <UserRegister handleClick={()=>handleClick()}/>}
+    <div className='relative min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-violet-50 px-4 py-10'>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-indigo-200/40 blur-3xl"></div>
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-violet-200/40 blur-3xl"></div>
+      </div>
+      {!newUser ?
+        <Login handleClick={() => handleClick()} /> :
+        <UserRegister handleClick={() => handleClick()} />}
     </div>
   )
 }

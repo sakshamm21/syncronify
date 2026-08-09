@@ -26,7 +26,7 @@ function MapboxComponent({ longitude = 80.2329, latitude = 26.512339 }) {
 
 
 
-    const [path, setPath] = useState([]);
+    const [path, setPath] = useState<any[]>([]);
     const [ userLocation, setUserLocation ] = useState({latitude: 26.512339, longitude: 80.2329});
     const [ track, setTrack ] = useState(false);
 
@@ -90,13 +90,13 @@ function MapboxComponent({ longitude = 80.2329, latitude = 26.512339 }) {
     }, [marker]);
 
     const geojson = {
-        type: "FeatureCollection",
+        type: "FeatureCollection" as const,
         features: [
         {
-            type: "Feature",
+            type: "Feature" as const,
             geometry: {
-            type: "LineString",
-            coordinates:path,
+            type: "LineString" as const,
+            coordinates: path,
             },
             properties: {},
         },
@@ -234,11 +234,9 @@ function MapboxComponent({ longitude = 80.2329, latitude = 26.512339 }) {
             <GeolocateControl 
                 positionOptions={{enableHighAccuracy: true}}
                 trackUserLocation={true}
-                auto
-                className="z-[1]"
             />
-            <NavigationControl className="z-[1]"/>
-            <FullscreenControl className="z-[1]"/>
+            <NavigationControl />
+            <FullscreenControl />
         </ReactMapGl>
         </div>
         </ div>

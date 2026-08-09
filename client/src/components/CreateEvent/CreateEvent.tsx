@@ -70,7 +70,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({
   const handleSelectedSuggestion=(suggestion:any)=>{
     console.log(suggestion);
     setEventDetail({...eventDetail, location:suggestion.place_name});
-    setLocation({name: suggestion.place_name, latitude: suggestion.center[0], longitude: suggestion.center[1]});
+    setLocation({name: suggestion.place_name, latitude: suggestion.center[0], longitude: suggestion.center[1], selected: true});
     setSuggestions([]);
   }
 

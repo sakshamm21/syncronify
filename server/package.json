@@ -4,9 +4,8 @@
   "description": "",
   "main": "serverMain.js",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
     "start": "nodemon serverMain.js",
-    "test": "npm run build && mocha dist/test/*"
+    "test": "mocha test/*.test.js"
   },
   "keywords": [],
   "author": "",
@@ -51,6 +50,7 @@
     "@types/supertest": "^2.0.12",
     "@types/winston": "^2.4.4",
     "chai": "^4.3.8",
+    "mocha": "^11.8.0",
     "prisma": "^5.8.1"
   }
 }

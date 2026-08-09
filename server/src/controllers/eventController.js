@@ -76,7 +76,7 @@ exports.getAllPostedEventsByAdmin = catchAsync(async (req, res, next) => {
 
 exports.getEventDetails = catchAsync(async (req, res, next) => {
   const { eventId } = req.query; // Assuming event ID is passed as a query parameter
-  const event = await Event.findById(eventId);
+  const event = await Event.findById(eventId).populate('location');
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));

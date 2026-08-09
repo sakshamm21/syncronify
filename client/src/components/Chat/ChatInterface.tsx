@@ -15,7 +15,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     setMessage(event.target.value);
   };
 
-  const handleSendClick = (e) => {
+  const handleSendClick = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (message.trim() !== '') {
       setMessages([...messages, message]);

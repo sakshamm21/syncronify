@@ -1,15 +1,16 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-// import { AuthProvider } from '@/context/AuthContext'
 import ContextWrapper from './contextWrapper'
-import Head from 'next/head'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Syncronify',
   description: 'An emerging platform for management of your all Events.',
+  icons: {
+    icon: '/icons/sample-icon.svg',
+  },
 }
 
 export default function RootLayout({
@@ -19,14 +20,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Head >
-      <link
-        rel="icon"
-        href="/icons/sample-icon.svg"
-        type="image/<generated>"
-        sizes="<generated>"
-/>
-      </Head>
       <body className={inter.className}>
         <ContextWrapper>
         {children}

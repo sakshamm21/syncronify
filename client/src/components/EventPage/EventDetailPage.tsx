@@ -4,7 +4,11 @@ import { Button } from '../ui/button';
 import ChatButton from '../Chat/ChatButton';
 import ChatInterface from '../Chat/ChatInterface';
 
-const EventDetailPage = ({eventData}) => {
+interface EventDetailPageProps {
+  eventData: any;
+}
+
+const EventDetailPage = ({ eventData }: EventDetailPageProps) => {
     const [isChatOpen, setIsChatOpen]=useState(false);
 
     const toggleChat=()=>{

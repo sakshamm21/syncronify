@@ -13,36 +13,18 @@ import { FaPlus, FaSearch } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
 interface eventData {
-  id: number;
-  event: object;
-  description: object;
-  admin: object;
+  _id: string;
+  title: string;
+  description: string;
+  imgLink?: string;
+  eventDate?: string;
 }
 
-interface event {
-  community_photo: string;
-  community_name: string;
-  event_photo: string;
-  event_title: string;
+interface AdminEventProps {
+  eventArray: eventData[];
 }
 
-interface description {
-  dateFrom: string;
-  timeFrom: string;
-  dateTo: string;
-  timeTo: string;
-  about: string;
-  place: string;
-}
-
-interface admin {
-  photo: string;
-  name: string;
-  info: string;
-  email: string;
-}
-
-const AdminEvent = ({eventArray}) => {
+const AdminEvent = ({ eventArray }: AdminEventProps) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   // const eventArray = [
   //   {
@@ -121,7 +103,7 @@ const AdminEvent = ({eventArray}) => {
 
   const router = useRouter();
 
-  const searchEvents = (event) => {
+  const searchEvents = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 

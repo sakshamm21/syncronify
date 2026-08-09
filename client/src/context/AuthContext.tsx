@@ -53,31 +53,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (loginData: LoginData) => {
         try {
-            // const response = await axiosInstance.post<any>('/api/auth/login', loginData);
-            const response = await fetch('http://localhost:4000/api/auth/login',{
-                method: 'POST',
-                headers:{
-                    'Content-Type':'application/json',
-                },
-                body: JSON.stringify(loginData),
-            });
-            if(!response){
-                return {message:"api call failed!"};
+            const response = await axiosInstance.post<any>('/api/auth/login', loginData);
+            const { data } = response;
+            if (data?.status === 'success' && data?.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user_id', data.user_id);
+                localStorage.setItem('userType', data.userType);
+                setAuthState({
+                    isAuthenticated: true,
+                    user: { userName: '', email: loginData.email, password: '', userType: data.userType },
+                    token: data.token,
+                });
             }
-            const data  = await response.json();
-            // localStorage.setItem("token", data.token);
-            // localStorage.setItem("user_id", data.user_id);
-            // console.log(data)
-            // setAuthState({
-            //     isAuthenticated: true,
-            //     user: data.user,
-            //     token: data.token,
-            // });
-            // return data;
-            console.log(data);
-            return "success!";
+            return data;
         } catch (error) {
-            return console.log({message:'something went wrong!!!', error});
+            throw error;
         }
     };
 
@@ -97,6 +87,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try{
         const response = await axiosInstance.post<any>('/api/auth/verify-otp', otpData);
         const { data } = response;
+        if (data?.status === 'success' && data?.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user_id', data.user_id);
+          localStorage.setItem('userType', data.userType);
+          setAuthState({
+            isAuthenticated: true,
+            user: { userName: '', email: otpData.email, password: '', userType: data.userType },
+            token: data.token,
+          });
+        }
         return data;
       }catch(error){
         throw error;

@@ -1,18 +1,17 @@
 import React from 'react'
-import { FaUsers } from 'react-icons/fa'
 
-const LandingCard = ({detail}) => {
+const LandingCard = ({ detail }: { detail: { icon: React.ElementType; title: string; description: string } }) => {
   return (
-    <div className='w-[250px] h-[320px] p-5 bg-gray-300 rounded-2xl truncate whitespace-normal'>
-      <div className="flex flex-col gap-5 overflow-hidden">
-        <div className="">
-          {/* <{detail.icon} className='text-5xl'/> */}
-          {React.createElement(detail.icon, {fontSize:'30px'}, )}
-          {/* <img src={detail.logo} alt="logo" className=''/> */}
+    <div className='group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col'>
+      <div className="flex flex-col gap-4 flex-1">
+        <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+          {React.createElement(detail.icon, { fontSize: '24px' })}
         </div>
-        <h3 className="text-2xl font-semibold">{detail.title}</h3>
-        <p className="text-md font-thin h-[100px] truncate whitespace-normal">{detail.description}</p>
-        <button className='w-fit border-2 border-gray-700/70 p-1 rounded-lg font-semibold bg-black text-white'>Read More</button>
+        <h3 className="text-lg font-bold text-slate-900">{detail.title}</h3>
+        <p className="text-sm text-slate-500 leading-relaxed flex-1">{detail.description}</p>
+        <button className='w-fit text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors'>
+          Read More →
+        </button>
       </div>
     </div>
   )

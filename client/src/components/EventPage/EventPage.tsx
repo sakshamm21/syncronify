@@ -121,7 +121,7 @@ const EventPage = () => {
 
   const router = useRouter();
 
-  const searchEvents = (event) => {
+  const searchEvents = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 

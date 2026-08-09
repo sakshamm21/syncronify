@@ -5,7 +5,11 @@ import EventDetailPage from "@/components/EventPage/EventDetailPage";
 
 // import { useRouter } from 'next/router';
 
-const EventDetailPage1 = ({params}) => {
+interface EventDetailPageProps {
+  params: { eventId: string };
+}
+
+const EventDetailPage1 = ({ params }: EventDetailPageProps) => {
 const {eventId} = params;
   interface eventArray {
     id: number;

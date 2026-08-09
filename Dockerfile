@@ -1,16 +1,14 @@
-FROM node:16.15.0 as build
-
-ARG BUILD_ENV=prod
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY ./server/package.json /app/package.json
 COPY ./server/package-lock.json /app/package-lock.json
 
-RUN npm cache clean --force
 RUN npm install
-RUN npm install -g ts-node --save
 
 COPY ./server .
 
-CMD ["ts-node", "./server/src/app.ts"]
+EXPOSE 4000
+
+CMD ["node", "serverMain.js"]

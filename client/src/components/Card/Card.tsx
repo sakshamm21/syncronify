@@ -7,7 +7,13 @@ export interface CardProps {
   children?: React.ReactNode;
 }
 
-const Card = ({event}) => {
+interface CardEvent {
+  source: string;
+  title: string;
+  description: string;
+}
+
+const Card = ({ event }: { event: CardEvent }) => {
   
   return (
     <>

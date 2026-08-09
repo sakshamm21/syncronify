@@ -1,5 +1,14 @@
 {
-  "dependencies": {
-    "@types/redis": "^4.0.11"
+  "name": "syncronify",
+  "version": "1.0.0",
+  "description": "Syncronify — Event Management Software",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm --prefix server start\" \"npm --prefix client run dev\"",
+    "install:all": "npm --prefix server install && npm --prefix client install --legacy-peer-deps",
+    "test": "npm --prefix server test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

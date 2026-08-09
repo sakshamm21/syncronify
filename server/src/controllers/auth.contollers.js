@@ -30,11 +30,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 
 const signToken = (userId, userType) => {
-  if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not defined');
-
   return jwt.sign(
     { userId, userType },
-    process.env.JWT_SECRET,
+    JWT_SECRET,
     { expiresIn: '1d' } // Token expires in one day
   );
 };
@@ -93,8 +91,7 @@ exports.register = catchAsync(async (req , res , next ) => {
       message: "Email already in use, Please login.",
     });
   } else if (existing_user) {
-    // if not verified than update prev one
-
+    // user exists but is not verified yet — update their details and resend OTP
     await UserDiscriminator.findOneAndUpdate({ email: email }, filteredBody, {
       new: true,
       validateModifiedOnly: true,
@@ -103,11 +100,8 @@ exports.register = catchAsync(async (req , res , next ) => {
     // generate an otp and send to email
     req.userId = existing_user._id;
     req.userType = existing_user.userType;
-    next();  
-  } else if(existing_user && !existing_user.verified) {
     next();
-  }  
-  else {
+  } else {
     // if user is not created before than create a new one
     const new_user = await UserDiscriminator.create(filteredBody);
 
@@ -119,7 +113,15 @@ exports.register = catchAsync(async (req , res , next ) => {
 });
 
 exports.sendOTP = catchAsync(async (req , res , next ) => {
-    const { userId, userType } = req;
+    // Support both middleware-passed userId (register flow) and direct body payload (resend OTP flow)
+    const { userId = req.userId, userType = req.userType } = req.body || {};
+
+    if (!userId || !userType) {
+      return res.status(400).json({
+        status: "error",
+        message: "userId and userType are required",
+      });
+    }
 
     let UserDiscriminator;
 
@@ -165,22 +167,41 @@ exports.sendOTP = catchAsync(async (req , res , next ) => {
   
     await user.save({ validateModifiedOnly: true });
   
-    console.log(new_otp);
     const mailDetails={
       email: user.email,
       subject:'Syncronify Registration Verification OTP',
       message:`Your OTP for registering to Syncronify is ${new_otp}`
     }
-    sendEmail(mailDetails);
-  
-    res.status(200).json({
+
+    // Email sending must NEVER crash the API. If SMTP is not configured or
+    // unavailable, log the error and still respond successfully — the user
+    // can retrieve the OTP via the resend flow / dev logs.
+    let emailSkipped = false;
+    try {
+      const result = await sendEmail(mailDetails);
+      emailSkipped = !!(result && result.skipped);
+      if (!emailSkipped) console.log(`OTP email sent to ${user.email}`);
+    } catch (emailError) {
+      emailSkipped = true;
+      console.error('Failed to send OTP email:', emailError.message || emailError);
+    }
+
+    const responseBody = {
       status: "success",
       message: "OTP Sent Successfully!",
-      user:{
+      user: {
         userId,
         userType,
       },
-    });
+    };
+
+    // DEV-ONLY fallback: when no SMTP is configured, expose the OTP in the
+    // response so the frontend can display it. NEVER do this in production.
+    if (emailSkipped && process.env.NODE_ENV !== 'production') {
+      responseBody.devOtp = new_otp.toString();
+    }
+
+    res.status(200).json(responseBody);
 });
   
 
@@ -300,7 +321,8 @@ exports.verifyOTP = catchAsync(async (req , res , next ) => {
       status: "success",
       message: "OTP verified successfully!",
       user_id: user._id,
-      // Optionally, include other user details as needed but exclude sensitive information
+      userType: user.userType,
+      token,
     });
 
 });    
@@ -339,22 +361,19 @@ exports.login = catchAsync(async (req , res , next ) => {
 
   const user = await UserDiscriminator.findOne({ email: email }).select("+password");
 
-  if (!user || !user.password) {
-    res.status(400).json({
-      status: "error",
-      message: "Incorrect password",
-    });
-
-    return;
-  }
-
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    res.status(400).json({
+  if (!user || !user.password || !(await user.correctPassword(password, user.password))) {
+    // Same message for missing user and wrong password to avoid leaking which emails are registered
+    return res.status(400).json({
       status: "error",
       message: "Email or password is incorrect",
     });
+  }
 
-    return;
+  if (!user.verified) {
+    return res.status(403).json({
+      status: "error",
+      message: "Email not verified. Please verify your email first.",
+    });
   }
 
   const token = signToken(user._id, user.userType);
@@ -369,7 +388,8 @@ exports.login = catchAsync(async (req , res , next ) => {
     status: "success",
     message: "Logged in successfully!",
     user_id: user._id,
-    // Optionally, include other user details as needed but exclude sensitive information
+    userType: user.userType,
+    token,
   });
 });
 
@@ -524,7 +544,7 @@ exports.protectAdminUser = async (req, res, next) => {
 };
 
 
-exports.protectApplicayionAdminUser = async (req, res, next) => {
+exports.protectApplicationAdminUser = async (req, res, next) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
@@ -612,11 +632,8 @@ exports.forgotPassword = catchAsync(async (req , res , next ) => {
   // 3) Send it to user's email
   try {
     const resetURL = `http://localhost:3000/auth/new-password?token=${resetToken}`;
-    // TODO => Send Email with this Reset URL to user's email address
 
-    console.log(resetURL);
-
-    sendEmail({
+    await sendEmail({
       from: "adityajohri2015@gmail.com",
       to: user.email,
       subject: "Reset Password",
@@ -641,7 +658,14 @@ exports.forgotPassword = catchAsync(async (req , res , next ) => {
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
-  const {password, userType} = req.body;
+  const {password, userType, token: rawToken} = req.body;
+
+  if (!rawToken || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Token and password are required",
+    });
+  }
 
   let UserDiscriminator;
 
@@ -664,7 +688,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   const hashedToken = crypto
     .createHash("sha256")
-    .update(req.body.token)
+    .update(rawToken)
     .digest("hex");
 
   const user = await UserDiscriminator.findOne({

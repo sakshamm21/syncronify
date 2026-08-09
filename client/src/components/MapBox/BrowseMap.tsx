@@ -11,7 +11,11 @@ import { useLocation } from "@/context/LocationContext";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
-function BrowseMap({handleBrowseMap}) {
+interface BrowseMapProps {
+  handleBrowseMap?: (event: any) => void;
+}
+
+function BrowseMap({ handleBrowseMap }: BrowseMapProps) {
     const [viewport, setViewport] = useState({
         latitude : 26.512339,
         longitude : 80.2329,
@@ -66,7 +70,7 @@ function BrowseMap({handleBrowseMap}) {
             }));
     }
 
-    const [suggestions, setSuggestions] = useState([]);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
     const [value, setValue] = useState('');
 
     const handleOnChange = (event:any) => {
@@ -101,7 +105,7 @@ function BrowseMap({handleBrowseMap}) {
         handleLocation({name, latitude, longitude, selected: true});
         console.log("location",location);
         console.log("userLocation",userLocation)
-        handleBrowseMap(event);
+        handleBrowseMap?.(event);
 
     }
 

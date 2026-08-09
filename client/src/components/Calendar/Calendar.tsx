@@ -9,7 +9,6 @@ import { DateClickArg } from '@fullcalendar/interaction';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaPlug } from 'react-icons/fa';
-
 const Calendar = () => {
   const router = useRouter();
 
@@ -40,7 +39,7 @@ const Calendar = () => {
     },
   ];
   const [allEvents, setAllEvents]=useState(data)
-  const calendarRef = useRef(null);
+  const calendarRef = useRef<FullCalendar | null>(null);
 
   const handleCreateEvent=(startTime: Date)=>{
     alert(`called create Event ${startTime}`)
@@ -159,11 +158,6 @@ const Calendar = () => {
             text: 'Create New Event +',
             // hint: "Next 2022",
             click: () => {
-              if (calendarRef.current) {
-                console.log(
-                  calendarRef.current.calendar.currentData.dateProfile.currentRange
-                );
-              }
               handleCreateEvent(start)
             },
           },

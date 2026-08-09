@@ -27,17 +27,25 @@ function initializeSocketService(httpServer) {
         const receiver = await User.findById(receiverId);
         if (receiver && receiver.socket_id) {
           io.to(receiver.socket_id).emit("receiveMessage", { senderId, text });
-          
-          await OneToOneMessage.create({
-            participants: [senderId, receiverId],
-            messages: [{
-              from: senderId,
-              to: receiverId,
-              text: text,
-              type: 'Text', // Adjust as needed
-              created_at: new Date(),
-            }]
-          });
+
+          // Append the message to the existing conversation (or create one) instead
+          // of creating a fresh document for every single message.
+          await OneToOneMessage.findOneAndUpdate(
+            { participants: { $all: [senderId, receiverId] } },
+            {
+              $setOnInsert: { participants: [senderId, receiverId] },
+              $push: {
+                messages: {
+                  from: senderId,
+                  to: receiverId,
+                  text: text,
+                  type: 'Text', // Adjust as needed
+                  created_at: new Date(),
+                },
+              },
+            },
+            { upsert: true, new: true }
+          );
         }
       } catch (error) {
         console.error("Send Message Error:", error);

@@ -1,7 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios from "../../../utils/axios";
-// import { showSnackbar } from "./app";
-import { AppThunk } from "../../store";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -65,61 +62,6 @@ const authSlice = createSlice({
 export const { updateIsLoading, logIn, signOut, updateRegisterEmail } = authSlice.actions;
 
 export default authSlice.reducer;
-
-export const loginUser = (formValues: any): AppThunk => async (dispatch, getState) => {
-  dispatch(updateIsLoading({ isLoading: true, error: false }));
-  try {
-    const response = await axios.post("/auth/login", formValues, {
-      headers: { "Content-Type": "application/json" },
-    });
-    dispatch(logIn({
-      isLoggedIn: true,
-      token: response.data.token,
-      user_id: response.data.user_id
-    }));
-    window.localStorage.setItem("user_id", response.data.user_id);
-    dispatch(showSnackbar({ severity: "success", message: response.data.message }));
-    dispatch(updateIsLoading({ isLoading: false, error: false }));
-  } catch (error) {
-    console.error(error);
-    dispatch(showSnackbar({ severity: "error", message: error.message }));
-    dispatch(updateIsLoading({ isLoading: false, error: true }));
-  }
-};
-
-
-export const logoutUser = (): AppThunk => async (dispatch) => {
-  window.localStorage.removeItem("user_id");
-  dispatch(signOut());
-};
-
-
-interface RegisterFormValues {
-  email: string;
-  password: string;
-  userName: string;
-  userType: string;
-}
-
-export const registerUser = (formValues: RegisterFormValues): AppThunk => async (dispatch) => {
-  dispatch(updateIsLoading({ isLoading: true, error: false }));
-  try {
-    const response = await axios.post("/auth/register", formValues, {
-      headers: { "Content-Type": "application/json" },
-    });
-    dispatch(updateRegisterEmail({ email: formValues.email }));
-    dispatch(showSnackbar({ severity: "success", message: response.data.message }));
-    dispatch(updateIsLoading({ isLoading: false, error: false }));
-    // Optionally redirect or perform further actions
-    if (!dispatch(getState()).auth.error) {
-      window.location.href = "/auth/verify";  // Redirect after successful registration
-    }
-  } catch (error) {
-    console.error(error);
-    dispatch(showSnackbar({ severity: "error", message: error.message }));
-    dispatch(updateIsLoading({ error: true, isLoading: false }));
-  }
-};
 
 
 // import { createSlice, PayloadAction } from '@reduxjs/toolkit';

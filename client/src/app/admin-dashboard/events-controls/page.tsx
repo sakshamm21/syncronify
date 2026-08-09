@@ -96,7 +96,7 @@ const eventControls = () => {
         
         {isBrowseActive &&
           <div className="absolute w-[94vw] left-[3vw] right-[3vw] h-[94vh] top-[3vh] bottom-[3vh] z-20">
-              <BrowseMap setLocation = {setLocation}/>
+              <BrowseMap handleBrowseMap = {handleBrowseMap}/>
           </div>
         }
         

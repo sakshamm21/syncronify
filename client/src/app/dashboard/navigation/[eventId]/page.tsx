@@ -2,49 +2,48 @@
 import MapboxComponent from '@/components/MapBox/MapBox';
 import React, { useEffect, useState } from 'react'
 
-const LocateInMap = ({params}) => {
+interface LocateInMapProps {
+  params: { eventId: string };
+}
+
+const LocateInMap = ({ params }: LocateInMapProps) => {
   const [location,setLocation]=useState<any>({});
   const {eventId}=params;
   // let tempLocation;
 
   useEffect(()=>{
     const token=localStorage.getItem('token');
-    const userId=localStorage.getItem('userId');
     const fetchEvent = async()=>{
       try{
-        const response = await fetch(`http://localhost:4000/api/event-details`,{
-          method:'POST',
+        const response = await fetch(`/api/events/event-details?eventId=${eventId}`,{
+          method:'GET',
           headers:{
             'Content-Type':'application/json',
             'Authorization':`Bearer ${token}`
-          },
-          body:JSON.stringify({
-            eventId
-          })
+          }
         });
         if(!response.ok){
           throw new Error(response.statusText)
         }
         const {data} = await response.json()
-        console.log(data);
-        // tempLocation=data.event.location;
-        console.log(data.event.location)
-        setLocation(data.event.location.coordinates);
-        // console.log(location)
+        const loc = data.event.location;
+        setLocation({
+          latitude: loc?.coordinates?.latitude,
+          longitude: loc?.coordinates?.longitude,
+          name: loc?.locationName,
+        });
       }catch(error){
         console.log(error)
       }
     };
     fetchEvent();
     
-  },[])
+  },[eventId])
   return (
     <div className='m-1 p-5 text-lg'>
-      <h1 className="p-1 text-3xl"></h1>
+      <h1 className="p-1 text-3xl">{location.name || ''}</h1>
       <div className="w-[90vw] h-[90vh]">
-        {/* {location.locationName} */}
-        {/* {location.latitude} */}
-        <MapboxComponent locationData={location.coordinates}/>
+        <MapboxComponent longitude={location.longitude} latitude={location.latitude}/>
       </div>
     </div>
   )

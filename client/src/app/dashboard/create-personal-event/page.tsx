@@ -1,14 +1,21 @@
 "use client"
 
 import CreateEvent from '@/components/CreateEvent/CreateEvent'
-import {EventData} from '@/components/CreateEvent/type'
-import React from 'react'
+import React, { useState } from 'react'
 
 const personalEvents = () => {
-  return (
-    <CreateEvent onAddEvent={function (event: EventData): void {
+  const [isCreateActive, setIsCreateActive] = useState(true);
 
-    } }/>
+  const handleCreateActive = (toggleActive: boolean | ((prevState: boolean) => boolean)) => {
+    setIsCreateActive(toggleActive);
+  };
+
+  const handleBrowseMap = (event: React.MouseEvent) => {
+    event.preventDefault();
+  };
+
+  return (
+    <CreateEvent isCreateActive={isCreateActive} handleCreateActive={handleCreateActive} handleBrowseMap={handleBrowseMap} />
   )
 }
 
