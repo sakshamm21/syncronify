@@ -2,6 +2,8 @@
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react'
 
+export const dynamic = 'force-dynamic';
+
 interface AdminDetailProps {
     id: number;
     admin_detail: {

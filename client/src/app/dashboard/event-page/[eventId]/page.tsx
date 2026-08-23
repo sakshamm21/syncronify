@@ -1,99 +1,44 @@
-// pages/events/[eventId].js
+"use client"
 
-import { useRouter, useSearchParams } from "next/navigation";
+import React from 'react';
 import EventDetailPage from "@/components/EventPage/EventDetailPage";
 
-// import { useRouter } from 'next/router';
+export const dynamic = 'force-dynamic';
 
 interface EventDetailPageProps {
   params: { eventId: string };
 }
 
-const EventDetailPage1 = ({ params }: EventDetailPageProps) => {
-const {eventId} = params;
-  interface eventArray {
-    id: number;
-    event: object;
-    description: object;
-    admin: object;
-  }
+const EventDetailPageContainer = ({ params }: EventDetailPageProps) => {
+  const { eventId } = params;
 
-  const eventArray : eventArray[] = [
-    {
-      id: 0,
-      event: {
-        community_photo: "/card1.svg",
-        community_name: "Games and Sports Council IIT Kanpur",
-        event_photo: "/card1.svg",
-        event_title: "Event 1",
-      },
-      description: {
-        date: "24/04/2024",
-        time: "6:00 PM",
-        about:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi dolorum ullam neque, rem odio tempore, placeat harum quisquam eos quibusdam deserunt dolores commodi libero magni id voluptas natus ex ipsum. Quasi, inventore cupiditate excepturi ex nostrum voluptatum aspernatur, esse obcaecati veritatis placeat soluta itaque culpa eos doloremque et beatae iusto!",
-        place: "Hockey Ground IITK",
-      },
-      admin: {
-        photo: "/card1.svg",
-        name: "Payal Dangi",
-        email: "abcd@iitk.ac.in",
-        info: "Third Year BTech student at IITK",
-      },
+  const mockEvent = {
+    id: eventId,
+    event: {
+      community_photo: "/logo.png",
+      community_name: "Computing Council",
+      event_photo: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=80",
+      event_title: "Tech Summit 2026",
     },
-    {
-      id: 1,
-      event: {
-        community_photo: "/card1.svg",
-        community_name: "Games and Sports Council IIT Kanpur",
-        event_photo: "/card1.svg",
-        event_title: "Event 2",
-      },
-      description: {
-        date: "24/04/2024",
-        time: "6:00 PM",
-        about:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi dolorum ullam neque, rem odio tempore, placeat harum quisquam eos quibusdam deserunt dolores commodi libero magni id voluptas natus ex ipsum. Quasi, inventore cupiditate excepturi ex nostrum voluptatum aspernatur, esse obcaecati veritatis placeat soluta itaque culpa eos doloremque et beatae iusto!",
-        place: "Hockey Ground IITK",
-      },
-      admin: {
-        photo: "/card1.svg",
-        name: "Payal Dangi",
-        email: "abcd@iitk.ac.in",
-        info: "Third Year BTech student at IITK",
-      },
+    description: {
+      date: "15/09/2026",
+      time: "10:00 AM",
+      about: "Official campus tech conference featuring keynote panels on Agentic AI Systems, distributed infrastructure, and future web frameworks.",
+      place: "Main Auditorium",
     },
-    {
-      id: 2,
-      event: {
-        community_photo: "/card1.svg",
-        community_name: "Games and Sports Council IIT Kanpur",
-        event_photo: "/card1.svg",
-        event_title: "Event 3",
-      },
-      description: {
-        date: "24/04/2024",
-        time: "6:00 PM",
-        about:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi dolorum ullam neque, rem odio tempore, placeat harum quisquam eos quibusdam deserunt dolores commodi libero magni id voluptas natus ex ipsum. Quasi, inventore cupiditate excepturi ex nostrum voluptatum aspernatur, esse obcaecati veritatis placeat soluta itaque culpa eos doloremque et beatae iusto!",
-        place: "Hockey Ground IITK",
-      },
-      admin: {
-        photo: "/card1.svg",
-        name: "Payal Dangi",
-        email: "abcd@iitk.ac.in",
-        info: "Third Year BTech student at IITK",
-      },
+    admin: {
+      photo: "/logo.png",
+      name: "Tech & Computing Society",
+      email: "contact@syncronify.app",
+      info: "IIT Kanpur Campus Council",
     },
-  ];
-  const selectedEvent = eventArray.find((event)=>event.id.toString()===eventId)
+  };
 
   return (
-    <div>
-      <EventDetailPage eventData={selectedEvent} />
-      {/* Add event details */}
+    <div className="p-6 bg-[#F4F4F0] min-h-screen">
+      <EventDetailPage eventData={mockEvent} />
     </div>
   );
 };
 
-export default EventDetailPage1;
+export default EventDetailPageContainer;

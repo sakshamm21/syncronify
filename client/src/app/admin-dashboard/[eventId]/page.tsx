@@ -1,99 +1,20 @@
-// pages/events/[eventId].js
-// import EventDetailPage from "@/components/EventPage/EventDetailPage";
+"use client"
 
+import React from 'react';
 import EventDetail from "@/components/adminEvent/EventDetail";
 
-// import { useRouter } from 'next/router';
+export const dynamic = 'force-dynamic';
 
 interface EventDetailPageProps {
   params: { eventId: string };
 }
 
 const EventDetailPage = ({ params }: EventDetailPageProps) => {
-
-
-const {eventId} = params;
-  interface eventArray {
-    id: number;
-    event: object;
-    description: object;
-    admin: object;
-  }
-
-  // const eventArray : eventArray[] = [
-  //   {
-  //     id: 0,
-  //     event: {
-  //       community_photo: "/card1.svg",
-  //       community_name: "Games and Sports Council IIT Kanpur",
-  //       event_photo: "/card1.svg",
-  //       event_title: "Event 1",
-  //     },
-  //     description: {
-  //       date: "24/04/2024",
-  //       time: "6:00 PM",
-  //       about:
-  //         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi dolorum ullam neque, rem odio tempore, placeat harum quisquam eos quibusdam deserunt dolores commodi libero magni id voluptas natus ex ipsum. Quasi, inventore cupiditate excepturi ex nostrum voluptatum aspernatur, esse obcaecati veritatis placeat soluta itaque culpa eos doloremque et beatae iusto!",
-  //       place: "Hockey Ground IITK",
-  //     },
-  //     admin: {
-  //       photo: "/card1.svg",
-  //       name: "Payal Dangi",
-  //       email: "abcd@iitk.ac.in",
-  //       info: "Third Year BTech student at IITK",
-  //     },
-  //   },
-  //   {
-  //     id: 1,
-  //     event: {
-  //       community_photo: "/card1.svg",
-  //       community_name: "Games and Sports Council IIT Kanpur",
-  //       event_photo: "/card1.svg",
-  //       event_title: "Event 2",
-  //     },
-  //     description: {
-  //       date: "24/04/2024",
-  //       time: "6:00 PM",
-  //       about:
-  //         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi dolorum ullam neque, rem odio tempore, placeat harum quisquam eos quibusdam deserunt dolores commodi libero magni id voluptas natus ex ipsum. Quasi, inventore cupiditate excepturi ex nostrum voluptatum aspernatur, esse obcaecati veritatis placeat soluta itaque culpa eos doloremque et beatae iusto!",
-  //       place: "Hockey Ground IITK",
-  //     },
-  //     admin: {
-  //       photo: "/card1.svg",
-  //       name: "Payal Dangi",
-  //       email: "abcd@iitk.ac.in",
-  //       info: "Third Year BTech student at IITK",
-  //     },
-  //   },
-  //   {
-  //     id: 2,
-  //     event: {
-  //       community_photo: "/card1.svg",
-  //       community_name: "Games and Sports Council IIT Kanpur",
-  //       event_photo: "/card1.svg",
-  //       event_title: "Event 3",
-  //     },
-  //     description: {
-  //       date: "24/04/2024",
-  //       time: "6:00 PM",
-  //       about:
-  //         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi dolorum ullam neque, rem odio tempore, placeat harum quisquam eos quibusdam deserunt dolores commodi libero magni id voluptas natus ex ipsum. Quasi, inventore cupiditate excepturi ex nostrum voluptatum aspernatur, esse obcaecati veritatis placeat soluta itaque culpa eos doloremque et beatae iusto!",
-  //       place: "Hockey Ground IITK",
-  //     },
-  //     admin: {
-  //       photo: "/card1.svg",
-  //       name: "Payal Dangi",
-  //       email: "abcd@iitk.ac.in",
-  //       info: "Third Year BTech student at IITK",
-  //     },
-  //   },
-  // ];
-  // const selectedEvent = eventArray.find((event)=>event.id.toString()===eventId)
+  const { eventId } = params;
 
   return (
-    <div>
-      <EventDetail eventId={eventId} />
-      {/* Add event details */}
+    <div className="p-6 bg-[#F4F4F0] min-h-screen">
+      <EventDetail eventId={eventId || "1"} />
     </div>
   );
 };
