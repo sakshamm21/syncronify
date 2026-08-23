@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd client && npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "client/.next",
+  "version": 2,
   "framework": "nextjs",
-  "cleanUrls": true
+  "buildCommand": "cd client && npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "client/.next"
 }
