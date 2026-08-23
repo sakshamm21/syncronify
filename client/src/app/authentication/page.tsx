@@ -1,27 +1,34 @@
 "use client"
 
-import Login from '@/components/Login/Login'
-import UserRegister from '@/components/UserRegister/UserRegister'
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import Login from '@/components/Login/Login';
+import UserRegister from '@/components/UserRegister/UserRegister';
+import Navbar from '@/components/Navbar/Navbar';
 
 const Authentication = () => {
-  const [newUser, setNewUser] = useState(true);
+  const [newUser, setNewUser] = useState(false);
 
-  const handleClick = () => {
+  const toggleMode = () => {
     setNewUser(!newUser);
-  }
+  };
 
   return (
-    <div className='relative min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-violet-50 px-4 py-10'>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-indigo-200/40 blur-3xl"></div>
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-violet-200/40 blur-3xl"></div>
-      </div>
-      {!newUser ?
-        <Login handleClick={() => handleClick()} /> :
-        <UserRegister handleClick={() => handleClick()} />}
-    </div>
-  )
-}
+    <div className="min-h-screen bg-[#F4F4F0] text-black font-sans flex flex-col justify-between">
+      <Navbar />
 
-export default Authentication
+      <main className="flex-1 flex items-center justify-center p-6 my-8">
+        {!newUser ? (
+          <Login handleClick={toggleMode} />
+        ) : (
+          <UserRegister handleClick={toggleMode} />
+        )}
+      </main>
+
+      <footer className="border-t-4 border-black bg-white py-4 text-center text-xs font-bold text-black">
+        ⚡ Syncronify Authentication Console — Secure JWT Session System
+      </footer>
+    </div>
+  );
+};
+
+export default Authentication;

@@ -1,15 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import ContextWrapper from './contextWrapper'
 
-const inter = Inter({ subsets: ['latin'] })
-
 export const metadata: Metadata = {
-  title: 'Syncronify',
-  description: 'An emerging platform for management of your all Events.',
+  title: 'Syncronify — Modern Event & Team Execution Platform',
+  description: 'Plan, discover, navigate, and collaborate on personal and organization events with a high-contrast Neo-Brutalist interface.',
   icons: {
-    icon: '/icons/sample-icon.svg',
+    icon: '/logo.png',
   },
 }
 
@@ -20,9 +17,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className="min-h-screen bg-[#F4F4F0] text-black selection:bg-[#FFE600] selection:text-black">
         <ContextWrapper>
-        {children}
+          {children}
         </ContextWrapper>
       </body>
     </html>

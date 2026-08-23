@@ -1,17 +1,46 @@
+'use client'
+
 import React from 'react'
 
-const LandingCard = ({ detail }: { detail: { icon: React.ElementType; title: string; description: string } }) => {
+interface LandingCardProps {
+  detail: {
+    icon: React.ElementType;
+    title: string;
+    description: string;
+    badge?: string;
+    bg?: string;
+  }
+}
+
+const LandingCard: React.FC<LandingCardProps> = ({ detail }) => {
+  const cardBg = detail.bg || "bg-white";
+
   return (
-    <div className='group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col'>
-      <div className="flex flex-col gap-4 flex-1">
-        <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-          {React.createElement(detail.icon, { fontSize: '24px' })}
+    <div className={`brutal-card brutal-card-hover p-6 flex flex-col justify-between ${cardBg}`}>
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="w-12 h-12 bg-black text-[#FFE600] border-2 border-black brutal-shadow-sm flex items-center justify-center text-xl font-bold">
+            {React.createElement(detail.icon)}
+          </div>
+          {detail.badge && (
+            <span className="brutal-badge bg-[#00F0FF] text-black">
+              {detail.badge}
+            </span>
+          )}
         </div>
-        <h3 className="text-lg font-bold text-slate-900">{detail.title}</h3>
-        <p className="text-sm text-slate-500 leading-relaxed flex-1">{detail.description}</p>
-        <button className='w-fit text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors'>
-          Read More →
-        </button>
+
+        <h3 className="font-heading font-extrabold text-xl mb-2 uppercase tracking-tight text-black">
+          {detail.title}
+        </h3>
+        
+        <p className="text-xs font-medium text-black leading-relaxed">
+          {detail.description}
+        </p>
+      </div>
+
+      <div className="mt-6 pt-4 border-t-2 border-black flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase tracking-wider text-black">FEATURE MODULE</span>
+        <span className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold">→</span>
       </div>
     </div>
   )

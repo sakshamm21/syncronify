@@ -1,258 +1,245 @@
-// pages/AdminDashboard.tsx
 "use client"
-import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
-// import axios from 'axios';
 
-interface adminData {
+import React, { useState } from 'react';
+import Navbar from '@/components/Navbar/Navbar';
+import SideBar from '@/components/Sidebar/SideBar';
+import { FaShieldAlt, FaUserCheck, FaUserTimes, FaBuilding, FaServer, FaCheckCircle, FaExclamationTriangle, FaSearch } from 'react-icons/fa';
+
+interface AdminAccount {
   id: number;
-  admin_detail: any;
-  community_detail:any;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  community: string;
+  members: number;
+  status: 'ACTIVE' | 'PENDING' | 'SUSPENDED';
 }
 
+const INITIAL_ADMINS: AdminAccount[] = [
+  {
+    id: 1,
+    name: "John Doe",
+    email: "john.doe@iitk.ac.in",
+    phone: "+91-9876543210",
+    role: "Community Leader",
+    community: "Computing & Tech Society",
+    members: 1250,
+    status: 'ACTIVE',
+  },
+  {
+    id: 2,
+    name: "Alice Smith",
+    email: "alice.smith@iitk.ac.in",
+    phone: "+91-9876543211",
+    role: "Community Coordinator",
+    community: "Cultural Affairs Council",
+    members: 1800,
+    status: 'ACTIVE',
+  },
+  {
+    id: 3,
+    name: "Robert Johnson",
+    email: "robert.j@iitk.ac.in",
+    phone: "+91-9876543212",
+    role: "Event Director",
+    community: "Games & Sports Council",
+    members: 950,
+    status: 'PENDING',
+  },
+  {
+    id: 4,
+    name: "Emily Wilson",
+    email: "emily.w@iitk.ac.in",
+    phone: "+91-9876543213",
+    role: "Moderator",
+    community: "Design & Media Club",
+    members: 640,
+    status: 'ACTIVE',
+  },
+];
+
 const AppAdminDashboard: React.FC = () => {
+  const [admins, setAdmins] = useState<AdminAccount[]>(INITIAL_ADMINS);
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<string>("superadmin");
 
-  const adminData = [
-    {
-      id: 1,
-      admin_detail: {
-        name: "John Doe",
-        age: 35,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-8764209876",
-        email: "john@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Leader",
-        description: "This is a leader of the community.",
-        member_count: 1000,
-      }
-    },
-    {
-      id: 2,
-      admin_detail: {
-        name: "Alice Smith",
-        age: 28,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-9876543210",
-        email: "alice@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Manager",
-        description: "This is a manager of the community.",
-        member_count: 1500,
-      }
-    },
-    {
-      id: 3,
-      admin_detail: {
-        name: "Robert Johnson",
-        age: 40,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-7654321098",
-        email: "robert@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Coordinator",
-        description: "This is a coordinator of the community.",
-        member_count: 800,
-      }
-    },
-    {
-      id: 4,
-      admin_detail: {
-        name: "Emily Wilson",
-        age: 32,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-9876543210",
-        email: "emily@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Moderator",
-        description: "This is a moderator of the community.",
-        member_count: 1200,
-      }
-    },
-    {
-      id: 5,
-      admin_detail: {
-        name: "Michael Brown",
-        age: 45,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-8765432109",
-        email: "michael@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Advocate",
-        description: "This is an advocate of the community.",
-        member_count: 2000,
-      }
-    },
-    {
-      id: 6,
-      admin_detail: {
-        name: "Jessica Taylor",
-        age: 33,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-7654321098",
-        email: "jessica@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Ambassador",
-        description: "This is an ambassador of the community.",
-        member_count: 900,
-      }
-    },
-    {
-      id: 7,
-      admin_detail: {
-        name: "David Martinez",
-        age: 38,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-9876543210",
-        email: "david@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Organizer",
-        description: "This is an organizer of the community.",
-        member_count: 1800,
-      }
-    },
-    {
-      id: 8,
-      admin_detail: {
-        name: "Sophia Lee",
-        age: 29,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-8765432109",
-        email: "sophia@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Developer",
-        description: "This is a developer of the community.",
-        member_count: 1100,
-      }
-    },
-    {
-      id: 9,
-      admin_detail: {
-        name: "Daniel Clark",
-        age: 42,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-7654321098",
-        email: "daniel@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Leader",
-        description: "This is a leader of the community.",
-        member_count: 1700,
-      }
-    },
-    {
-      id: 10,
-      admin_detail: {
-        name: "Olivia Rodriguez",
-        age: 31,
-        description: "Lorem ipsum dolor sit amet consectet",
-        profile: '/card1.svg',
-        phone: "+91-9876543210",
-        email: "olivia@gmail.com",
-      },
-      community_detail: {
-        logo: '/card1.svg',
-        name: "Community Moderator",
-        description: "This is a moderator of the community.",
-        member_count: 1300,
-      }
-    },
-  ];  
+  const toggleStatus = (id: number) => {
+    setAdmins((prev) =>
+      prev.map((a) => {
+        if (a.id === id) {
+          const nextStatus = a.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+          return { ...a, status: nextStatus };
+        }
+        return a;
+      })
+    );
+  };
 
-  const [admins, setAdmins] = useState<adminData[]>(adminData);
-
-  // const fetchAdmins = async () => {
-  //   try {
-  //     // const response = await axios.get<{ admins: Admin[] }>('/api/admins');
-  //     // setAdmins(response.data.admins);
-  //   } catch (error) {
-  //     console.error('Error fetching admins:', error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchAdmins();
-  // }, []);
+  const filteredAdmins = admins.filter(
+    (a) =>
+      a.name.toLowerCase().includes(search.toLowerCase()) ||
+      a.community.toLowerCase().includes(search.toLowerCase()) ||
+      a.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">All admins</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {admins.map((admin) => (
-          <div
-            key={admin.id}
-            className="bg-white border-x-2 rounded-lg shadow-lg overflow-hidden"
-          >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <img
-                  src={admin.admin_detail.profile}
-                  alt={admin.admin_detail.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <span className="text-gray-600 font-semibold">{admin.admin_detail.name}</span>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">
-                Age: {admin.admin_detail.age}
-              </p>
-              <p className="text-sm text-gray-500 mb-2">
-                Description: {admin.admin_detail.description}
-              </p>
-              <p className="text-sm text-gray-500 mb-2">
-                Phone: {admin.admin_detail.phone}
-              </p>
-              <p className="text-sm text-gray-500 mb-2">
-                Email: {admin.admin_detail.email}
-              </p>
+    <div className="min-h-screen bg-[#F4F4F0] text-black font-sans selection:bg-[#FFE600] flex flex-col">
+      {/* Top Navbar */}
+      <Navbar activeRole="applicationAdminUser" />
 
-              <div className="mt-4 border-t border-gray-200 pt-4">
-                <div className="flex items-center mb-2">
-                  <img
-                    src={admin.community_detail.logo}
-                    alt={admin.community_detail.name}
-                    className="w-8 h-8 mr-2 object-cover rounded-full"
-                  />
-                  <span className="text-gray-600">
-                    {admin.community_detail.name}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500 mb-2">
-                  Description: {admin.community_detail.description}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Member Count: {admin.community_detail.member_count}
-                </p>
-                <Button className='float-right mb-5 font-semibold text-md'>Manage</Button>
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 md:p-6 gap-6">
+        {/* Sidebar */}
+        <SideBar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          role="applicationAdminUser"
+        />
+
+        {/* Content Workspace */}
+        <main className="flex-1 space-y-6 min-w-0">
+          {/* Header Console */}
+          <div className="brutal-card bg-[#FF007A] text-white border-4 border-black p-6 shadow-[8px_8px_0px_#000] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-8 bg-black text-[#FFE600] flex items-center justify-center font-black">
+                  ⚡
+                </span>
+                <h1 className="font-heading font-black text-2xl uppercase tracking-tight text-white">
+                  Super Admin Governance Console
+                </h1>
               </div>
+              <p className="text-xs font-bold text-white mt-1">
+                System-wide management of organization admins, community access, and infrastructure health metrics.
+              </p>
+            </div>
+
+            <span className="brutal-badge bg-[#FFE600] text-black text-xs font-black">
+              SUPERADMIN PRIVILEGE
+            </span>
+          </div>
+
+          {/* System Health Indicators */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div className="brutal-card bg-white border-2 border-black p-4 text-center">
+              <span className="text-[10px] font-black uppercase text-black bg-[#00FF66] px-1.5 py-0.5 border border-black inline-block mb-1">
+                ONLINE
+              </span>
+              <p className="font-heading font-black text-xl text-black">Express HTTP API</p>
+              <p className="text-[10px] font-bold text-black">Port 8000 / Healthy</p>
+            </div>
+
+            <div className="brutal-card bg-white border-2 border-black p-4 text-center">
+              <span className="text-[10px] font-black uppercase text-black bg-[#00FF66] px-1.5 py-0.5 border border-black inline-block mb-1">
+                ONLINE
+              </span>
+              <p className="font-heading font-black text-xl text-black">Socket.io Service</p>
+              <p className="text-[10px] font-bold text-black">Low-Latency WebSockets</p>
+            </div>
+
+            <div className="brutal-card bg-white border-2 border-black p-4 text-center">
+              <span className="text-[10px] font-black uppercase text-black bg-[#FFE600] px-1.5 py-0.5 border border-black inline-block mb-1">
+                READY
+              </span>
+              <p className="font-heading font-black text-xl text-black">MongoDB / Mongoose</p>
+              <p className="text-[10px] font-bold text-black">Persistent DB Layer</p>
+            </div>
+
+            <div className="brutal-card bg-white border-2 border-black p-4 text-center">
+              <span className="text-[10px] font-black uppercase text-black bg-[#00F0FF] px-1.5 py-0.5 border border-black inline-block mb-1">
+                COMMUNITIES
+              </span>
+              <p className="font-heading font-black text-xl text-black">{admins.length} Managed</p>
+              <p className="text-[10px] font-bold text-black">4,640 Total Members</p>
             </div>
           </div>
-        ))}
+
+          {/* Search & Filter */}
+          <div className="relative">
+            <FaSearch className="absolute left-3.5 top-3.5 text-black text-xs" />
+            <input
+              type="text"
+              placeholder="Search admin name, community, or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white border-2 border-black pl-10 pr-4 py-2.5 font-bold text-xs outline-none brutal-shadow-sm"
+            />
+          </div>
+
+          {/* Admin Directory Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredAdmins.map((admin) => (
+              <div
+                key={admin.id}
+                className="brutal-card brutal-card-hover bg-white border-4 border-black p-5 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between border-b-2 border-black pb-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 bg-[#FFE600] border-2 border-black flex items-center justify-center font-black text-sm">
+                        {admin.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h3 className="font-heading font-black text-lg text-black leading-snug">
+                          {admin.name}
+                        </h3>
+                        <p className="text-[11px] font-bold text-gray-700">{admin.role}</p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`brutal-badge ${
+                        admin.status === 'ACTIVE'
+                          ? 'bg-[#00FF66] text-black'
+                          : admin.status === 'PENDING'
+                          ? 'bg-[#FFE600] text-black'
+                          : 'bg-[#FF007A] text-white'
+                      }`}
+                    >
+                      {admin.status}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#F4F4F0] border-2 border-black p-3 space-y-1 text-xs font-bold text-black mb-4">
+                    <p className="flex items-center justify-between">
+                      <span>🏛️ <strong>Community:</strong></span>
+                      <span>{admin.community}</span>
+                    </p>
+                    <p className="flex items-center justify-between">
+                      <span>👥 <strong>Members:</strong></span>
+                      <span>{admin.members}</span>
+                    </p>
+                    <p className="flex items-center justify-between">
+                      <span>✉️ <strong>Email:</strong></span>
+                      <span className="font-mono text-[11px]">{admin.email}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t-2 border-black flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => alert(`View details for ${admin.name}`)}
+                    className="brutal-btn bg-white text-black px-3.5 py-1.5 text-xs font-bold uppercase"
+                  >
+                    View Logs
+                  </button>
+
+                  <button
+                    onClick={() => toggleStatus(admin.id)}
+                    className={`brutal-btn px-4 py-1.5 text-xs font-black uppercase ${
+                      admin.status === 'ACTIVE'
+                        ? 'bg-[#FF007A] text-white'
+                        : 'bg-[#00FF66] text-black'
+                    }`}
+                  >
+                    {admin.status === 'ACTIVE' ? 'Suspend Admin' : 'Approve Admin'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     </div>
   );

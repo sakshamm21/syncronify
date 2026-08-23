@@ -1,184 +1,152 @@
-// import React from 'react'
 "use client"
+
+import React, { useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-// import listPlugin from '@fullcalendar/list';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { DateClickArg } from '@fullcalendar/interaction';
-import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { FaPlug } from 'react-icons/fa';
-const Calendar = () => {
-  const router = useRouter();
+import { FaCalendarAlt, FaPlus, FaFilter, FaRegClock } from 'react-icons/fa';
 
-  const start = new Date();
-  const end = new Date(new Date().setMinutes(start.getMinutes() + 30));
-
-  const data = [
-    {
-      title: "Event 1",
-      start,
-      end,
-      backgroundColor: "green",
-      extendedProps: { id: 1 },
-    },
-    {
-      title: "Event 2",
-      start: new Date(new Date().setHours(start.getHours() + 1)),
-      end: new Date(new Date().setHours(start.getHours() + 2)),
-      backgroundColor: "purple",
-      extendedProps: { id: 2 },
-    },
-    {
-      title: "Event 3",
-      start: new Date(new Date().setHours(start.getHours() + 2)),
-      end: new Date(new Date().setHours(start.getHours() + 3)),
-      backgroundColor: "#000",
-      extendedProps: { id: 3 },
-    },
-  ];
-  const [allEvents, setAllEvents]=useState(data)
-  const calendarRef = useRef<FullCalendar | null>(null);
-
-  const handleCreateEvent=(startTime: Date)=>{
-    alert(`called create Event ${startTime}`)
-  }
-
-
-  const handleDateClick=(e: DateClickArg)=>{
-    console.log(e)
-  }
-
-  return (
-    <div className="p-10 m-auto w-[90%]">
-    <div className="p-2 border-2 border-gray-500/70 rounded-lg w-[1000px]">
-    <FullCalendar
-        nowIndicator={true}
-
-        // when clicking on an event........
-        eventClick={(info: any) =>
-          alert(`${info.event.title} has been clicked!`)
-        }
-
-
-        editable={true}
-        selectable={true}
-        // views={{
-        //   dayGrid: {
-        //     selectable: true,
-        //   },
-        //   timeGrid: {
-        //     selectable: true,
-        //   },
-        //   dayGridMonth: {
-        //     selectable: true,
-        //   },
-        // }}
-        ref={calendarRef}
-        plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
-        initialView="dayGridMonth"
-
-
-        eventDrop={(info: any) => {
-          const eventFiltered = allEvents.filter(
-            (event) => event.extendedProps.id !== info.event.extendedProps.id
-          ) as any;
-          setAllEvents([
-            ...eventFiltered,
-            {
-              title: info.event.title,
-              start: info.event.startStr,
-              end: info.event.endStr,
-              backgroundColor: info.event.backgroundColor,
-              extendedProps: { id: info.event.extendedProps.id },
-            },
-          ]);
-          alert("Dropped " + info.event.title);
-        }}
-
-
-        eventResize={(info: any) => {
-          const eventFiltered = allEvents.filter(
-            (event) => event.extendedProps.id !== info.event.extendedProps.id
-          ) as any;
-          setAllEvents([
-            ...eventFiltered,
-            {
-              title: info.event.title,
-              start: info.event.startStr,
-              end: info.event.endStr,
-              backgroundColor: info.event.backgroundColor,
-              extendedProps: { id: info.event.extendedProps.id },
-            },
-          ]);
-          alert("Resized " + info.event.title);
-        }}
-
-
-        select={(info: any) => {
-          // @ts-ignore
-          handleCreateEvent(start);
-          // setAllEvents((allEvent) => {
-          //   const newId = allEvents[allEvents.length - 1].extendedProps.id + 1;
-          //   return [
-          //     ...allEvent,
-          //     {
-          //       title: `sala ${newId}`,
-          //       start: info.startStr,
-          //       end: info.endStr,
-          //       backgroundColor: "gray",
-          //       extendedProps: { id: newId },
-          //     },
-          //   ];
-          // });
-          // alert("selected " + info.startStr + " to " + info.endStr);
-        }}
-
-
-        events={allEvents}
-        locale={"eng"}
-        timeZone={"UTF"}
-        titleFormat={{ year: "numeric", month: "long" }}
-        // allDayText={"24h"}
-        allDaySlot={false}
-
-
-        buttonText={{
-          today: "today",
-          month: "month",
-          week: "week",
-          day: "Day",
-          list: "List",
-        }}
-
-
-        customButtons={{
-          custom1: {
-            text: 'Create New Event +',
-            // hint: "Next 2022",
-            click: () => {
-              handleCreateEvent(start)
-            },
-          },
-          custom2: {
-            text: "About page",
-            click: function () {
-              router.push("/about");
-            },
-          },
-        }}
-
-
-        headerToolbar={{
-          left: "dayGridMonth,timeGridWeek,timeGridDay custom1",
-          center: "title",
-          right: "custom2 today prevYear,prev,next,nextYear",
-        }}
-      />
-    </div>
-    </div>
-  )
+interface CalendarProps {
+  onSelectDate?: (date: Date) => void;
+  events?: any[];
 }
 
-export default Calendar
+const Calendar: React.FC<CalendarProps> = ({ onSelectDate, events: externalEvents }) => {
+  const calendarRef = useRef<FullCalendar | null>(null);
+
+  const defaultEvents = [
+    {
+      id: "ev-1",
+      title: "⚡ Tech Summit 2026",
+      start: new Date(new Date().setDate(new Date().getDate() + 1)),
+      end: new Date(new Date().setDate(new Date().getDate() + 1)),
+      backgroundColor: "#FFE600",
+      textColor: "#000000",
+      borderColor: "#000000",
+    },
+    {
+      id: "ev-2",
+      title: "🎨 Neo-Brutalist Design Sprint",
+      start: new Date(new Date().setDate(new Date().getDate() + 3)),
+      end: new Date(new Date().setDate(new Date().getDate() + 4)),
+      backgroundColor: "#00F0FF",
+      textColor: "#000000",
+      borderColor: "#000000",
+    },
+    {
+      id: "ev-3",
+      title: "🚀 Open Source Community Meetup",
+      start: new Date(new Date().setDate(new Date().getDate() + 7)),
+      end: new Date(new Date().setDate(new Date().getDate() + 7)),
+      backgroundColor: "#FF007A",
+      textColor: "#FFFFFF",
+      borderColor: "#000000",
+    },
+  ];
+
+  const [events, setEvents] = useState<any[]>(externalEvents || defaultEvents);
+
+  const handleEventClick = (info: any) => {
+    alert(`📅 Event: ${info.event.title}\nStart: ${info.event.start?.toLocaleString()}`);
+  };
+
+  return (
+    <div className="brutal-card p-6 bg-white border-4 border-black shadow-[8px_8px_0px_#000] space-y-4">
+      {/* Brutalist Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-4 border-black pb-4">
+        <div className="flex items-center gap-3">
+          <span className="w-10 h-10 bg-[#FFE600] border-2 border-black flex items-center justify-center font-black text-xl brutal-shadow-sm">
+            <FaCalendarAlt />
+          </span>
+          <div>
+            <h2 className="font-heading font-black text-2xl uppercase tracking-tight text-black">
+              Event Calendar & Timeline
+            </h2>
+            <p className="text-xs font-bold text-black uppercase">
+              Interactive Schedule Console
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="brutal-badge bg-[#00FF66] text-black flex items-center gap-1">
+            <FaRegClock /> LIVE SYNC
+          </span>
+        </div>
+      </div>
+
+      {/* Calendar Styling Container */}
+      <div className="brutal-calendar-wrap font-bold text-xs">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+          initialView="dayGridMonth"
+          editable={true}
+          selectable={true}
+          events={events}
+          eventClick={handleEventClick}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          }}
+          height="auto"
+        />
+      </div>
+
+      <style jsx global>{`
+        .fc {
+          --fc-border-color: #000000;
+          --fc-button-bg-color: #FFFFFF;
+          --fc-button-border-color: #000000;
+          --fc-button-text-color: #000000;
+          --fc-button-hover-bg-color: #FFE600;
+          --fc-button-hover-border-color: #000000;
+          --fc-button-active-bg-color: #00F0FF;
+          --fc-button-active-border-color: #000000;
+          --fc-page-bg-color: #FFFFFF;
+          --fc-today-bg-color: rgba(255, 230, 0, 0.25);
+        }
+        .fc .fc-toolbar-title {
+          font-family: var(--font-space);
+          font-weight: 900;
+          text-transform: uppercase;
+          font-size: 1.25rem;
+        }
+        .fc .fc-button {
+          border: 2px solid #000000 !important;
+          box-shadow: 2px 2px 0px #000000 !important;
+          font-weight: 800 !important;
+          text-transform: uppercase !important;
+          font-size: 0.75rem !important;
+          border-radius: 0px !important;
+          padding: 0.4rem 0.8rem !important;
+        }
+        .fc .fc-button:active {
+          box-shadow: 0px 0px 0px #000000 !important;
+          transform: translate(2px, 2px);
+        }
+        .fc .fc-event {
+          border: 2px solid #000000 !important;
+          box-shadow: 2px 2px 0px #000000 !important;
+          font-weight: 800 !important;
+          padding: 2px 4px !important;
+          border-radius: 0px !important;
+        }
+        .fc th {
+          background: #F4F4F0;
+          border: 2px solid #000000 !important;
+          padding: 8px 0 !important;
+          font-weight: 900 !important;
+          text-transform: uppercase;
+        }
+        .fc td {
+          border: 2px solid #000000 !important;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default Calendar;
