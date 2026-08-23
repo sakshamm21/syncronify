@@ -13,36 +13,36 @@ const LandingPage = () => {
     {
       icon: FaLayerGroup,
       title: "Event Hub",
-      description: "Discover, filter, and attend top college and organization events. Complete with instant RSVP tracking and attendee lists.",
-      badge: "CORE HUB",
+      description: "Discover and participate in upcoming events. Filter by category, track registrations, and manage schedules.",
+      badge: "EVENTS",
       bg: "bg-[#FFFFFF]",
     },
     {
       icon: FaCalendar,
       title: "Interactive Schedule",
-      description: "Manage personal timelines and team event calendars with FullCalendar drag-and-drop support, conflict checks, and view toggles.",
+      description: "Manage timelines and team calendars with real-time schedule tracking and agenda views.",
       badge: "CALENDAR",
       bg: "bg-[#FFFFFF]",
     },
     {
       icon: FaMapMarkedAlt,
-      title: "Venue & Navigation",
-      description: "Find your way to offline event venues with interactive map markers, coordinate selection, and address search.",
-      badge: "NAVIGATION",
+      title: "Venue & Maps",
+      description: "Navigate to event venues with interactive location mapping and address details.",
+      badge: "MAPS",
       bg: "bg-[#FFFFFF]",
     },
     {
       icon: FaFileAlt,
-      title: "Notes & Plans",
-      description: "Capture meeting summaries, speaker agendas, and event execution notes directly within your personal workspace console.",
-      badge: "NOTES API",
+      title: "Notes & Agenda",
+      description: "Organize meeting summaries, speaker agendas, and event notes in one central console.",
+      badge: "NOTES",
       bg: "bg-[#FFFFFF]",
     },
     {
       icon: FaUsers,
-      title: "Role-Based Hubs",
-      description: "Tailored portals for General Attendees, Organization Admins, and Super Administrators to control permissions and events.",
-      badge: "SECURITY",
+      title: "Role Access",
+      description: "Dedicated interfaces for Attendees, Organizers, and Administrators with custom permissions.",
+      badge: "ACCESS",
       bg: "bg-[#FFFFFF]",
     },
   ];
@@ -64,18 +64,18 @@ const LandingPage = () => {
             <div className="md:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 brutal-badge bg-[#FFE600] text-black text-xs font-black">
                 <FaCheckCircle className="text-black" />
-                <span>SYNCRONIFY EVENT PLATFORM V1.0</span>
+                <span>SYNCRONIFY EVENT PLATFORM</span>
               </div>
 
               <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-black leading-none">
-                Write. Plan. Attend.
+                Plan. Coordinate.
                 <span className="block bg-[#00F0FF] text-black px-2 py-1 border-2 border-black w-fit mt-2 brutal-shadow-sm">
-                  Zero Chaos.
+                  Execute Effortlessly.
                 </span>
               </h1>
 
               <p className="text-sm md:text-base font-bold text-black leading-relaxed max-w-xl">
-                Consolidate event calendars, venue navigation, execution notes, and real-time team chat into one high-contrast Neo-Brutalist operating system.
+                Unify event scheduling, venue mapping, attendee management, and team updates into one clear, reliable workspace.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -83,7 +83,7 @@ const LandingPage = () => {
                   onClick={handleNavigation}
                   className="brutal-btn bg-[#FFE600] text-black px-8 py-3.5 text-sm font-black uppercase flex items-center gap-3 brutal-shadow-lg hover:bg-[#00FF66]"
                 >
-                  <span>Launch App Console</span>
+                  <span>Launch Platform</span>
                   <FaArrowRight />
                 </button>
 
@@ -91,7 +91,7 @@ const LandingPage = () => {
                   href="/authentication"
                   className="brutal-btn bg-white text-black px-6 py-3.5 text-sm font-black uppercase"
                 >
-                  Admin Portal →
+                  Admin Console →
                 </Link>
               </div>
             </div>
@@ -100,19 +100,19 @@ const LandingPage = () => {
             <div className="md:col-span-5 flex justify-center">
               <div className="w-full max-w-md bg-[#FFE600] border-4 border-black p-6 brutal-shadow-xl space-y-4">
                 <div className="bg-black text-white p-3 font-heading font-black text-sm uppercase flex justify-between items-center">
-                  <span>LIVE EVENT BULLETIN</span>
+                  <span>FEATURED EVENTS</span>
                   <span className="w-3 h-3 bg-[#00FF66] rounded-full animate-ping" />
                 </div>
 
                 <div className="bg-white border-2 border-black p-4 space-y-2">
                   <span className="brutal-badge bg-[#FF007A] text-white">UPCOMING</span>
-                  <p className="font-heading font-black text-lg text-black">⚡ TECH SUMMIT 2026</p>
+                  <p className="font-heading font-black text-lg text-black">Global Tech Summit</p>
                   <p className="text-xs font-bold text-black">📍 Main Auditorium • 10:00 AM</p>
                 </div>
 
                 <div className="bg-white border-2 border-black p-4 space-y-2">
                   <span className="brutal-badge bg-[#00F0FF] text-black">WORKSHOP</span>
-                  <p className="font-heading font-black text-lg text-black">🎨 NEO-BRUTALIST DESIGN</p>
+                  <p className="font-heading font-black text-lg text-black">Design & Innovation Hackathon</p>
                   <p className="text-xs font-bold text-black">📍 Innovation Lab • 02:00 PM</p>
                 </div>
               </div>
@@ -121,37 +121,15 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Stats Counter Bar */}
-      <section className="bg-[#00F0FF] border-y-4 border-black py-6">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div className="border-r-2 border-black last:border-r-0">
-            <p className="font-heading font-black text-3xl md:text-4xl text-black">5,000+</p>
-            <p className="text-xs font-black uppercase text-black">Events Scheduled</p>
-          </div>
-          <div className="border-r-2 border-black last:border-r-0">
-            <p className="font-heading font-black text-3xl md:text-4xl text-black">150+</p>
-            <p className="text-xs font-black uppercase text-black">Active Communities</p>
-          </div>
-          <div className="border-r-2 border-black last:border-r-0">
-            <p className="font-heading font-black text-3xl md:text-4xl text-black">99.9%</p>
-            <p className="text-xs font-black uppercase text-black">Real-Time Sync</p>
-          </div>
-          <div>
-            <p className="font-heading font-black text-3xl md:text-4xl text-black">3 ROLES</p>
-            <p className="text-xs font-black uppercase text-black">Permission Security</p>
-          </div>
-        </div>
-      </section>
-
       {/* Feature Showcase Grid */}
       <section className="max-w-7xl mx-auto px-6 py-16 w-full">
         <div className="text-center mb-12 space-y-2">
-          <span className="brutal-badge bg-[#FF007A] text-white">SYSTEM MODULES</span>
+          <span className="brutal-badge bg-[#FF007A] text-white">PLATFORM FEATURES</span>
           <h2 className="font-heading font-black text-3xl md:text-4xl uppercase text-black">
-            Everything Built For Flawless Execution
+            Built For Seamless Event Execution
           </h2>
           <p className="text-xs font-bold uppercase text-black max-w-xl mx-auto">
-            High performance event tools engineered with stark clarity and responsiveness.
+            Essential management tools engineered with clarity and speed.
           </p>
         </div>
 
@@ -166,16 +144,16 @@ const LandingPage = () => {
       <section className="max-w-7xl mx-auto px-6 pb-16 w-full">
         <div className="brutal-card bg-[#FFE600] border-4 border-black p-8 md:p-12 shadow-[10px_10px_0px_#000] text-center space-y-6">
           <h2 className="font-heading font-black text-3xl md:text-4xl uppercase text-black">
-            Ready to streamline your event workflow?
+            Streamline Your Event Management
           </h2>
           <p className="text-xs font-extrabold uppercase text-black max-w-lg mx-auto">
-            Join thousands of student leaders, event organizers, and attendees on Syncronify.
+            Empower organizers, teams, and attendees with a unified event platform.
           </p>
           <button
             onClick={handleNavigation}
             className="brutal-btn bg-black text-white px-10 py-4 text-sm font-black uppercase tracking-wider hover:bg-[#FF007A]"
           >
-            Get Started Now →
+            Get Started →
           </button>
         </div>
       </section>
@@ -184,12 +162,10 @@ const LandingPage = () => {
       <footer className="border-t-4 border-black bg-white py-8">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-black">
           <div className="flex items-center gap-2">
-            <span className="w-6 h-6 bg-[#FFE600] border border-black flex items-center justify-center font-black">
-              ⚡
-            </span>
-            <span className="font-heading font-black text-sm uppercase">SYNCRONIFY OS</span>
+            <img src="/logo.png" alt="Syncronify" className="w-6 h-6 object-contain" />
+            <span className="font-heading font-black text-sm uppercase">SYNCRONIFY</span>
           </div>
-          <p>© {new Date().getFullYear()} Syncronify Event Management. Built with Neo-Brutalism design system.</p>
+          <p>© {new Date().getFullYear()} Syncronify. All rights reserved.</p>
         </div>
       </footer>
     </div>

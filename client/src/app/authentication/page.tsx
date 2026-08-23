@@ -25,7 +25,7 @@ const Authentication = () => {
       </main>
 
       <footer className="border-t-4 border-black bg-white py-4 text-center text-xs font-bold text-black">
-        ⚡ Syncronify Authentication Console — Secure JWT Session System
+        Syncronify Platform — Account Authentication
       </footer>
     </div>
   );

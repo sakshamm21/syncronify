@@ -43,14 +43,14 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenCreateEvent, activeRole }) => {
           <img
             src="/logo.png"
             alt="Syncronify Logo"
-            className="w-10 h-10 border-2 border-black brutal-shadow-sm group-hover:rotate-6 transition-transform object-cover"
+            className="w-10 h-10 border-2 border-black brutal-shadow-sm group-hover:scale-105 transition-transform object-contain bg-white p-1"
           />
           <div className="flex flex-col">
             <span className="font-heading font-black text-xl tracking-tight text-black flex items-center gap-2">
               SYNCRONIFY
             </span>
-            <span className="text-[10px] font-bold tracking-widest uppercase bg-black text-white px-1.5 py-0.5 w-fit">
-              Event Management OS
+            <span className="text-[9px] font-black tracking-widest uppercase bg-black text-white px-1.5 py-0.5 w-fit">
+              Event Management
             </span>
           </div>
         </Link>

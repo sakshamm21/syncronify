@@ -98,11 +98,11 @@ const SideBar: React.FC<SidebarProps> = ({ activeTab = "events", setActiveTab, r
 
       {/* Footer Info Box */}
       <div className="hidden md:block mt-8 p-3 bg-[#FFE600] border-2 border-black brutal-shadow-sm">
-        <p className="text-[11px] font-extrabold uppercase tracking-tight text-black">
-          ⚡ Syncronify v1.0
+        <p className="text-[11px] font-black uppercase tracking-tight text-black">
+          Syncronify Platform
         </p>
-        <p className="text-[10px] font-semibold text-black mt-1">
-          Neo-Brutalist Event OS initialized. System ready.
+        <p className="text-[10px] font-bold text-black mt-1">
+          Unified Event & Team Console
         </p>
       </div>
     </aside>
