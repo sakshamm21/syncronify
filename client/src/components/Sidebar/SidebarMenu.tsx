@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import { FaAngleDown } from "react-icons/fa";
 import Link from "next/link";
-import "./SideBar.css";
+import "./Sidebar.css";
 
 interface SubRoute {
     path: string;
