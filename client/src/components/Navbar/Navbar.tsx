@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenCreateEvent, activeRole }) => {
           <img
             src="/logo.png"
             alt="Syncronify Logo"
-            className="w-10 h-10 border-2 border-black brutal-shadow-sm group-hover:scale-105 transition-transform object-contain bg-white p-1"
+            className="w-10 h-10 border-2 border-black brutal-shadow-sm group-hover:rotate-6 transition-transform object-cover"
           />
           <div className="flex flex-col">
             <span className="font-heading font-black text-xl tracking-tight text-black flex items-center gap-2">
