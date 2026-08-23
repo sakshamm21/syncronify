@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n server,client -c blue,green \"npm --prefix server start\" \"npm --prefix client run dev\"",
-    "build": "cd client && npm install --legacy-peer-deps && npm run build",
-    "start": "cd client && npm run start",
+    "build": "npm --prefix client install --legacy-peer-deps && npm --prefix client run build",
+    "start": "npm --prefix client run start",
     "install:all": "npm --prefix server install && npm --prefix client install --legacy-peer-deps",
     "test": "npm --prefix server test"
   },

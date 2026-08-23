@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar/Navbar';
-import SideBar from '@/components/Sidebar/SideBar';
+import SideBar from '@/components/Sidebar/Sidebar';
 import LocalCarousel from '@/components/Carousel/Carousel';
 import EventPage from '@/components/EventPage/EventPage';
 import Calendar from '@/components/Calendar/Calendar';

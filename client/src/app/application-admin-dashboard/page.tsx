@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar/Navbar';
-import SideBar from '@/components/Sidebar/SideBar';
+import SideBar from '@/components/Sidebar/Sidebar';
 import { FaShieldAlt, FaUserCheck, FaUserTimes, FaBuilding, FaServer, FaCheckCircle, FaExclamationTriangle, FaSearch } from 'react-icons/fa';
 
 interface AdminAccount {
