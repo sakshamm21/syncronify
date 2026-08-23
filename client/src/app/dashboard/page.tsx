@@ -1,18 +1,20 @@
 "use client"
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar/Navbar';
 import SideBar from '@/components/Sidebar/Sidebar';
 import LocalCarousel from '@/components/Carousel/Carousel';
 import EventPage from '@/components/EventPage/EventPage';
 import Calendar from '@/components/Calendar/Calendar';
 import NotesManager from '@/components/Notes/NotesManager';
-import BrowseMap from '@/components/MapBox/BrowseMap';
 import ChatInterface from '@/components/Chat/ChatInterface';
 import ChatButton from '@/components/Chat/ChatButton';
 import CreateEvent from '@/components/CreateEvent/CreateEvent';
 import { LocationProvider } from '@/context/LocationContext';
 import { FaPlus, FaLayerGroup, FaCalendarAlt, FaStickyNote, FaMapMarkedAlt, FaComments } from 'react-icons/fa';
+
+const BrowseMap = dynamic(() => import('@/components/MapBox/BrowseMap'), { ssr: false });
 
 const GeneralDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("events");

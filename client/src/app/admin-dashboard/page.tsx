@@ -1,15 +1,17 @@
 "use client"
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar/Navbar';
 import SideBar from '@/components/Sidebar/Sidebar';
 import CreateEvent from '@/components/CreateEvent/CreateEvent';
 import EventPage, { EventItem } from '@/components/EventPage/EventPage';
 import Calendar from '@/components/Calendar/Calendar';
-import BrowseMap from '@/components/MapBox/BrowseMap';
 import NotesManager from '@/components/Notes/NotesManager';
 import { LocationProvider } from '@/context/LocationContext';
 import { FaCalendarPlus, FaUsers, FaBullhorn, FaCheckCircle, FaTrash, FaEdit, FaShieldAlt, FaPlus } from 'react-icons/fa';
+
+const BrowseMap = dynamic(() => import('@/components/MapBox/BrowseMap'), { ssr: false });
 
 const ADMIN_MANAGED_EVENTS: EventItem[] = [
   {
