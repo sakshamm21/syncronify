@@ -1,11 +1,12 @@
 "use client"
 
+import './Calendar.css';
 import React, { useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { FaCalendarAlt, FaPlus, FaFilter, FaRegClock } from 'react-icons/fa';
+import { FaCalendarAlt, FaRegClock } from 'react-icons/fa';
 
 interface CalendarProps {
   onSelectDate?: (date: Date) => void;
@@ -94,57 +95,6 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, events: externalEvent
           height="auto"
         />
       </div>
-
-      <style jsx global>{`
-        .fc {
-          --fc-border-color: #000000;
-          --fc-button-bg-color: #FFFFFF;
-          --fc-button-border-color: #000000;
-          --fc-button-text-color: #000000;
-          --fc-button-hover-bg-color: #FFE600;
-          --fc-button-hover-border-color: #000000;
-          --fc-button-active-bg-color: #00F0FF;
-          --fc-button-active-border-color: #000000;
-          --fc-page-bg-color: #FFFFFF;
-          --fc-today-bg-color: rgba(255, 230, 0, 0.25);
-        }
-        .fc .fc-toolbar-title {
-          font-family: var(--font-space);
-          font-weight: 900;
-          text-transform: uppercase;
-          font-size: 1.25rem;
-        }
-        .fc .fc-button {
-          border: 2px solid #000000 !important;
-          box-shadow: 2px 2px 0px #000000 !important;
-          font-weight: 800 !important;
-          text-transform: uppercase !important;
-          font-size: 0.75rem !important;
-          border-radius: 0px !important;
-          padding: 0.4rem 0.8rem !important;
-        }
-        .fc .fc-button:active {
-          box-shadow: 0px 0px 0px #000000 !important;
-          transform: translate(2px, 2px);
-        }
-        .fc .fc-event {
-          border: 2px solid #000000 !important;
-          box-shadow: 2px 2px 0px #000000 !important;
-          font-weight: 800 !important;
-          padding: 2px 4px !important;
-          border-radius: 0px !important;
-        }
-        .fc th {
-          background: #F4F4F0;
-          border: 2px solid #000000 !important;
-          padding: 8px 0 !important;
-          font-weight: 900 !important;
-          text-transform: uppercase;
-        }
-        .fc td {
-          border: 2px solid #000000 !important;
-        }
-      `}</style>
     </div>
   );
 };
