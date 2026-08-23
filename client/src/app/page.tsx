@@ -68,9 +68,9 @@ const LandingPage = () => {
               </div>
 
               <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-black leading-none">
-                Plan. Coordinate.
+                Write. Plan. Attend.
                 <span className="block bg-[#00F0FF] text-black px-2 py-1 border-2 border-black w-fit mt-2 brutal-shadow-sm">
-                  Execute Effortlessly.
+                  Zero Chaos.
                 </span>
               </h1>
 
