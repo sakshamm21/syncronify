@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+/server/node_modules
+/client/node_modules
+
+# Build outputs
+/server/dist
+/client/.next
+.next/
+/dist/
+
+# Environment files (keep the .example files)
+.env
+.env.local
+.env.*.local
+/server/.env
+/client/.env
+!/server/.env.example
+!/client/.env.example
+
+# Logs
+*.log
+/error.log
+/server/error.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archives / backups
+*.zip
+*.tsbuildinfo
+
+.vercel

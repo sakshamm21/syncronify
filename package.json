@@ -1,0 +1,19 @@
+{
+  "name": "syncronify",
+  "version": "1.0.0",
+  "description": "Syncronify — Event Management Software OS",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm --prefix server start\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client install --legacy-peer-deps && npm --prefix client run build",
+    "start": "npm --prefix client run start",
+    "install:all": "npm --prefix server install && npm --prefix client install --legacy-peer-deps",
+    "test": "npm --prefix server test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "next": "^14.2.24",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
