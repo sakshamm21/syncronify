@@ -22,13 +22,13 @@ async function main() {
   const { default: mongoose } = await import('mongoose');
   const { connectDatabase, disconnectDatabase } = await import('../src/config/db.js');
   const { User } = await import('../src/models/index.js');
-  const { seed, DEMO_PASSWORD } = await import('./seed.js');
+  const { seed, printSummary } = await import('./seed.js');
 
   await connectDatabase(process.env.DB_URI);
   await mongoose.connection.syncIndexes();
   if (!(await User.exists({}))) {
     await seed();
-    console.log(`Seeded demo data. Sign in as member@, organizer@ or admin@syncronify.dev with "${DEMO_PASSWORD}".`);
+    printSummary();
   }
   await disconnectDatabase();
 

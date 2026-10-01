@@ -11,9 +11,9 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com)
 [![Socket.io](https://img.shields.io/badge/Socket.io-4-010101?logo=socketdotio&logoColor=white)](https://socket.io)
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://syncronify-self.vercel.app)
-[![Tests](https://img.shields.io/badge/API%20tests-87%20passing-2ea44f)](#testing)
+[![Tests](https://img.shields.io/badge/API%20tests-95%20passing-2ea44f)](#testing)
 
-**[Live app](https://syncronify-self.vercel.app)** · **[API health](https://syncronify-api.vercel.app/api/health)** · Built for CS253, IIT Kanpur
+**[Live app](https://syncronify-self.vercel.app)** · **[Test accounts](TEST_ACCOUNTS.md)** · **[API health](https://syncronify-api.vercel.app/api/health)** · Built for CS253, IIT Kanpur
 
 </div>
 
@@ -131,7 +131,7 @@ Everything is TypeScript: the web app and the API.
 
 | Technology | What it does here |
 | --- | --- |
-| Node's built-in test runner + [Supertest](https://github.com/ladjs/supertest) + [mongodb-memory-server](https://github.com/typegoose/mongodb-memory-server) | 87 API tests against a real, throwaway MongoDB. |
+| Node's built-in test runner + [Supertest](https://github.com/ladjs/supertest) + [mongodb-memory-server](https://github.com/typegoose/mongodb-memory-server) | 95 API tests against a real, throwaway MongoDB. |
 | [Vercel](https://vercel.com) | Hosts the web app and runs the API as a serverless function, plus a daily cron job for reminders. |
 | [OpenStreetMap](https://www.openstreetmap.org) / Nominatim | Maps and venue search, free and keyless. |
 
@@ -229,7 +229,7 @@ Syncronify/
     │   ├── lib/              # errors, tokens, mailer, email templates, ics, logger, ai client, realtime
     │   └── types/            # Express type extensions (req.user)
     ├── api/index.ts          # Vercel serverless entry
-    ├── scripts/              # dev-memory (local DB), seed (demo data), create-admin
+    ├── scripts/              # dev-memory (local DB), seed + demo-data (test data), create-admin
     ├── test/                 # API test suite
     ├── vercel.json           # Rewrites everything to api/index.ts; daily cron
     ├── tsconfig.json         # Strict type-checking (app, scripts, Vercel entry)
@@ -288,20 +288,22 @@ The API starts on **http://localhost:4000** and the web app on **http://localhos
 
 The first `dev:memory` run downloads a MongoDB binary (about 780 MB) once. Delete `server/.data` to start over with fresh demo data.
 
-### Demo accounts
+### Test accounts and demo data
 
-Every seeded account uses the password **`syncronify123`**:
+No email service is needed to try Syncronify. The demo data includes 15 accounts (every role, plus clean tester accounts) and 19 events covering every state: full with a waitlist, nearly full, online, draft, cancelled, past with check-ins, and private plans.
+
+**Every account uses the password `syncronify123`.** The main ones:
 
 | Email | Role |
 | --- | --- |
-| `member@syncronify.dev` | Member |
+| `member@syncronify.dev` | Member with tickets, plans, notes and notifications already set up |
 | `organizer@syncronify.dev` | Organizer (Tech & Computing Society) |
-| `cultural@syncronify.dev` | Organizer (Cultural Affairs Council) |
 | `admin@syncronify.dev` | Admin |
-| `asha@syncronify.dev` | Member with a pending organizer application |
-| `rahul@syncronify.dev` | Member |
+| `tester1@` … `tester5@syncronify.dev` | Clean member accounts |
 
-Set `NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS=true` in `client/.env` for one-click sign-in buttons.
+**[TEST_ACCOUNTS.md](TEST_ACCOUNTS.md)** lists every account and event, what each one demonstrates, things to try, and how to sign up or reset a password without email (the code or link is shown on screen). The data itself is in [`server/scripts/demo-data.ts`](server/scripts/demo-data.ts).
+
+Set `NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS=true` in `client/.env` for one-click sign-in buttons (on in the live app).
 
 ### Creating the first real admin
 
@@ -366,9 +368,9 @@ From `server/` (`npm run <script>`):
 | `dev` | API with auto-restart on save (`tsx watch`). |
 | `dev:memory` | API with the built-in database. |
 | `typecheck` | Strict type-check of the app, scripts and tests. |
-| `test` | 87 tests against an in-memory MongoDB. |
+| `test` | 95 tests against an in-memory MongoDB. |
 | `build` / `start` | Compile to `dist/` and run it (for Render, Docker, a VM). |
-| `seed` | Load demo data (`-- --reset` wipes the database first). Refuses to run in production. |
+| `seed` | Load the demo data from `scripts/demo-data.ts` (`-- --reset` wipes the database first and refreshes the dates). Refuses to run in production. |
 | `create-admin` | Create or promote an admin account. |
 
 From `client/`: `dev`, `build`, `start`.
@@ -540,12 +542,12 @@ Private (personal) events are visible only to their owner. That includes admins 
 ## Testing
 
 ```bash
-npm --prefix server test          # 87 API tests (in-memory MongoDB, no setup needed)
+npm --prefix server test          # 95 API tests (in-memory MongoDB, no setup needed)
 npm --prefix server run typecheck # strict TypeScript check of the API, scripts and tests
 npm --prefix client run build     # type-checks and builds the web app
 ```
 
-The API tests cover: sign-up, verification, lockout and password reset; visibility rules (private and draft events); concurrent registration (no overselling); waitlist promotion; notifications and reminders; chat permissions; organizer and admin workflows; real-time delivery over Socket.io; serverless mode (polling, cron, preview-URL CORS); place search; and the AI assistant (tool calls, permission boundaries, error handling) against a fake AI provider.
+The API tests cover: sign-up, verification, lockout and password reset; visibility rules (private and draft events); concurrent registration (no overselling); waitlist promotion; notifications and reminders; chat permissions; organizer and admin workflows; real-time delivery over Socket.io; serverless mode (polling, cron, preview-URL CORS); place search; the AI assistant (tool calls, permission boundaries, error handling) against a fake AI provider; and the demo dataset, which must load cleanly and set up every scenario in TEST_ACCOUNTS.md.
 
 ---
 
