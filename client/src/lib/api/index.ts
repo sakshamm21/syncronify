@@ -1,0 +1,185 @@
+import { http } from './client';
+import type {
+  AppNotification,
+  AttendeeList,
+  Category,
+  CategoryValue,
+  ChatMessage,
+  EventInput,
+  Note,
+  NoteTag,
+  OrganizerApplication,
+  OrganizerOverview,
+  Page,
+  PageMeta,
+  PlatformStats,
+  RegistrationStatus,
+  Role,
+  Session,
+  SyncEvent,
+  User,
+  UserStatus,
+} from './types';
+
+export * from './client';
+export * from './types';
+
+type Data<T> = { data: T };
+type Listed<T> = { data: T[]; meta: PageMeta };
+
+const data = <T>(p: Promise<{ data: Data<T> }>) => p.then((r) => r.data.data);
+const page = <T>(p: Promise<{ data: Listed<T> }>): Promise<Page<T>> =>
+  p.then((r) => ({ items: r.data.data, meta: r.data.meta }));
+
+// --- Server capabilities ------------------------------------------------------
+
+export interface ServerMeta {
+  /** 'socket' on long-running hosts; 'polling' on serverless hosts like Vercel. */
+  realtime: 'socket' | 'polling';
+  emailDelivery: boolean;
+}
+
+export const metaApi = {
+  get: () => data<ServerMeta>(http.get('/meta')),
+};
+
+// --- Auth ---------------------------------------------------------------------
+
+export interface RegisterResult {
+  email: string;
+  emailDelivered?: boolean;
+  /** Only in development when email isn't configured. */
+  devCode?: string;
+}
+
+export const authApi = {
+  register: (body: { name: string; email: string; password: string }) =>
+    data<RegisterResult>(http.post('/auth/register', body)),
+  verifyEmail: (body: { email: string; code: string }) => data<Session>(http.post('/auth/verify-email', body)),
+  resendVerification: (email: string) => data<RegisterResult>(http.post('/auth/resend-verification', { email })),
+  login: (body: { email: string; password: string }) => data<Session>(http.post('/auth/login', body)),
+  forgotPassword: (email: string) => data<{ devResetUrl?: string }>(http.post('/auth/forgot-password', { email })),
+  resetPassword: (body: { token: string; password: string }) => data<Session>(http.post('/auth/reset-password', body)),
+};
+
+// --- Current user ---------------------------------------------------------------
+
+export interface ProfileUpdate {
+  name?: string;
+  bio?: string;
+  avatarUrl?: string;
+  interests?: CategoryValue[];
+  preferences?: { emailNotifications?: boolean };
+}
+
+export const meApi = {
+  get: () => data<User>(http.get('/me')),
+  update: (body: ProfileUpdate) => data<User>(http.patch('/me', body)),
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
+    data<Session>(http.post('/me/password', body)),
+  calendar: (range: { from: string; to: string }) => data<SyncEvent[]>(http.get('/me/calendar', { params: range })),
+  registrations: (upcoming = true) => data<SyncEvent[]>(http.get('/me/registrations', { params: { upcoming } })),
+};
+
+// --- Events ---------------------------------------------------------------------
+
+export interface EventQuery {
+  q?: string;
+  category?: CategoryValue;
+  organizer?: string;
+  from?: string;
+  to?: string;
+  sort?: 'soonest' | 'popular' | 'newest';
+  includePast?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export const eventsApi = {
+  categories: () => data<Category[]>(http.get('/events/categories')),
+  list: (query: EventQuery = {}) => page<SyncEvent>(http.get('/events', { params: query })),
+  recommended: () => data<SyncEvent[]>(http.get('/events/recommended')),
+  get: (id: string) => data<SyncEvent>(http.get(`/events/${id}`)),
+  create: (body: EventInput) => data<SyncEvent>(http.post('/events', body)),
+  update: (id: string, body: Partial<EventInput>) => data<SyncEvent>(http.patch(`/events/${id}`, body)),
+  cancel: (id: string, reason = '') => data<SyncEvent>(http.post(`/events/${id}/cancel`, { reason })),
+  remove: (id: string) => http.delete(`/events/${id}`).then(() => undefined),
+  register: (id: string) => data<SyncEvent>(http.post(`/events/${id}/registration`)),
+  unregister: (id: string) => data<SyncEvent>(http.delete(`/events/${id}/registration`)),
+  attendees: (id: string, status?: RegistrationStatus) =>
+    data<AttendeeList>(http.get(`/events/${id}/attendees`, { params: { status } })),
+  setCheckIn: (id: string, userId: string, checkedIn: boolean) =>
+    data<{ checkedInAt: string | null }>(http.put(`/events/${id}/attendees/${userId}/check-in`, { checkedIn })),
+  messages: (id: string, params: { before?: string; after?: string; limit?: number } = {}) =>
+    http
+      .get<{ data: ChatMessage[]; meta: { hasMore: boolean } }>(`/events/${id}/messages`, { params })
+      .then((r) => ({ items: r.data.data, hasMore: r.data.meta.hasMore })),
+  sendMessage: (id: string, body: { text: string; announcement?: boolean }) =>
+    data<ChatMessage>(http.post(`/events/${id}/messages`, body)),
+
+  /** Downloads the event as an .ics file ("Add to calendar"). */
+  async downloadCalendarFile(event: Pick<SyncEvent, 'id' | 'title'>) {
+    const response = await http.get<Blob>(`/events/${event.id}/calendar.ics`, { responseType: 'blob' });
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'event'}.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+  },
+};
+
+// --- Notes ----------------------------------------------------------------------
+
+export interface NoteInput {
+  title: string;
+  content?: string;
+  tag?: NoteTag;
+  pinned?: boolean;
+  event?: string | null;
+}
+
+export const notesApi = {
+  list: (query: { q?: string; tag?: NoteTag; event?: string; page?: number; limit?: number } = {}) =>
+    page<Note>(http.get('/notes', { params: query })),
+  create: (body: NoteInput) => data<Note>(http.post('/notes', body)),
+  update: (id: string, body: Partial<NoteInput>) => data<Note>(http.patch(`/notes/${id}`, body)),
+  remove: (id: string) => http.delete(`/notes/${id}`).then(() => undefined),
+};
+
+// --- Notifications --------------------------------------------------------------
+
+export const notificationsApi = {
+  list: (query: { unreadOnly?: boolean; page?: number; limit?: number } = {}) =>
+    http
+      .get<{ data: AppNotification[]; meta: PageMeta & { unread: number } }>('/notifications', { params: query })
+      .then((r) => ({ items: r.data.data, meta: r.data.meta })),
+  unreadCount: () => data<{ count: number }>(http.get('/notifications/unread-count')).then((d) => d.count),
+  markRead: (id: string) => data<AppNotification>(http.post(`/notifications/${id}/read`)),
+  markAllRead: () => data<{ updated: number }>(http.post('/notifications/read-all')),
+};
+
+// --- Organisers -----------------------------------------------------------------
+
+export const organizerApi = {
+  apply: (body: { organization: string; reason?: string }) =>
+    data<OrganizerApplication>(http.post('/organizer/applications', body)),
+  latestApplication: () => data<OrganizerApplication | null>(http.get('/organizer/applications/latest')),
+  overview: () => data<OrganizerOverview>(http.get('/organizer/overview')),
+};
+
+// --- Platform admin -------------------------------------------------------------
+
+export const adminApi = {
+  stats: () => data<PlatformStats>(http.get('/admin/stats')),
+  users: (query: { q?: string; role?: Role; status?: UserStatus; page?: number; limit?: number } = {}) =>
+    page<User>(http.get('/admin/users', { params: query })),
+  updateUser: (id: string, body: { role?: Role; status?: UserStatus }) => data<User>(http.patch(`/admin/users/${id}`, body)),
+  applications: (query: { status?: OrganizerApplication['status']; page?: number; limit?: number } = {}) =>
+    page<OrganizerApplication>(http.get('/admin/organizer-applications', { params: query })),
+  approve: (id: string, note = '') =>
+    data<OrganizerApplication>(http.post(`/admin/organizer-applications/${id}/approve`, { note })),
+  reject: (id: string, note = '') =>
+    data<OrganizerApplication>(http.post(`/admin/organizer-applications/${id}/reject`, { note })),
+};
+

@@ -4,10 +4,14 @@ import Link from 'next/link';
 import LandingCard from '@/components/LandingCard/LandingCard';
 import Navbar from '@/components/Navbar/Navbar';
 import { useRouter } from 'next/navigation';
+import FeaturedEvents from '@/components/LandingCard/FeaturedEvents';
+import { useAuth } from '@/context/AuthContext';
+import { ROLE_HOME } from '@/lib/format';
 import { FaCalendar, FaFileAlt, FaMapMarkedAlt, FaUsers, FaLayerGroup, FaArrowRight, FaCheckCircle, FaShieldAlt } from 'react-icons/fa';
 
 const LandingPage = () => {
   const router = useRouter();
+  const { user } = useAuth();
 
   const cardDetails = [
     {
@@ -48,7 +52,7 @@ const LandingPage = () => {
   ];
 
   const handleNavigation = () => {
-    router.push('/authentication');
+    router.push(user ? ROLE_HOME[user.role] : '/authentication');
   };
 
   return (
@@ -87,12 +91,14 @@ const LandingPage = () => {
                   <FaArrowRight />
                 </button>
 
-                <Link
-                  href="/authentication"
-                  className="brutal-btn bg-white text-black px-6 py-3.5 text-sm font-black uppercase"
-                >
-                  Admin Console →
-                </Link>
+                {!user && (
+                  <Link
+                    href="/authentication?mode=register"
+                    className="brutal-btn bg-white text-black px-6 py-3.5 text-sm font-black uppercase"
+                  >
+                    Create free account →
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -104,17 +110,7 @@ const LandingPage = () => {
                   <span className="w-3 h-3 bg-[#00FF66] rounded-full animate-ping" />
                 </div>
 
-                <div className="bg-white border-2 border-black p-4 space-y-2">
-                  <span className="brutal-badge bg-[#FF007A] text-white">UPCOMING</span>
-                  <p className="font-heading font-black text-lg text-black">Global Tech Summit</p>
-                  <p className="text-xs font-bold text-black">📍 Main Auditorium • 10:00 AM</p>
-                </div>
-
-                <div className="bg-white border-2 border-black p-4 space-y-2">
-                  <span className="brutal-badge bg-[#00F0FF] text-black">WORKSHOP</span>
-                  <p className="font-heading font-black text-lg text-black">Design & Innovation Hackathon</p>
-                  <p className="text-xs font-bold text-black">📍 Innovation Lab • 02:00 PM</p>
-                </div>
+                <FeaturedEvents />
               </div>
             </div>
           </div>

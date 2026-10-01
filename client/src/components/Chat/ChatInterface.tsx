@@ -1,196 +1,101 @@
-"use client"
+'use client';
 
 import React, { useEffect, useState } from 'react';
-import { FaPaperPlane, FaTimes, FaCircle, FaUserShield, FaComments, FaUsers } from 'react-icons/fa';
+import Link from 'next/link';
+import { FaTimes, FaComments } from 'react-icons/fa';
+import { useAuth } from '@/context/AuthContext';
+import { useEventsSync } from '@/context/EventContext';
+import { meApi, organizerApi, type SyncEvent } from '@/lib/api';
+import { formatDay } from '@/lib/format';
+import EventChat from './EventChat';
 
 interface ChatInterfaceProps {
   onClose?: () => void;
   inline?: boolean;
 }
 
-interface MessageItem {
-  id: string;
-  sender: string;
-  role: 'user' | 'admin' | 'system';
-  text: string;
-  timestamp: string;
-}
+/** Channel list (one per upcoming event you're part of) plus the selected discussion. */
+export default function ChatInterface({ onClose, inline = false }: ChatInterfaceProps) {
+  const { user } = useAuth();
+  const { version } = useEventsSync();
+  const [channels, setChannels] = useState<SyncEvent[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-const INITIAL_MESSAGES: MessageItem[] = [
-  {
-    id: 'm1',
-    sender: 'System Bot',
-    role: 'system',
-    text: '⚡ Welcome to Syncronify Live Event Channel! Feel free to ask questions about venues, schedules, or registrations.',
-    timestamp: '10:00 AM',
-  },
-  {
-    id: 'm2',
-    sender: 'Sarah (Admin)',
-    role: 'admin',
-    text: 'Hi everyone! The main keynote for Tech Summit starts at 11:00 AM sharp in Hall A.',
-    timestamp: '10:05 AM',
-  },
-  {
-    id: 'm3',
-    sender: 'You',
-    role: 'user',
-    text: 'Is there parking available near the innovation lab building?',
-    timestamp: '10:12 AM',
-  },
-  {
-    id: 'm4',
-    sender: 'Sarah (Admin)',
-    role: 'admin',
-    text: 'Yes! Parking Lot B is open right opposite the Innovation Lab.',
-    timestamp: '10:14 AM',
-  },
-];
+  useEffect(() => {
+    const isOrganizer = user?.role === 'organizer' || user?.role === 'admin';
+    Promise.all([
+      meApi.registrations(true),
+      isOrganizer ? organizerApi.overview().then((o) => o.events.filter((e) => !e.isPast)) : Promise.resolve([]),
+    ])
+      .then(([joined, organized]) => {
+        const all = [...organized, ...joined].filter((e) => e.viewer.canChat);
+        const unique = all.filter((e, i) => all.findIndex((x) => x.id === e.id) === i);
+        unique.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+        setChannels(unique);
+        setActiveId((current) => current ?? unique[0]?.id ?? null);
+      })
+      .finally(() => setLoading(false));
+  }, [user?.role, version]);
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, inline = false }) => {
-  const [messages, setMessages] = useState<MessageItem[]>(INITIAL_MESSAGES);
-  const [input, setInput] = useState('');
-  const [activeChannel, setActiveChannel] = useState<'general' | 'organizer'>('general');
-
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMsg: MessageItem = {
-      id: `msg-${Date.now()}`,
-      sender: 'You',
-      role: 'user',
-      text: input,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-
-    // Simulate auto-response from organizer bot after 1s
-    setTimeout(() => {
-      const botReply: MessageItem = {
-        id: `msg-bot-${Date.now()}`,
-        sender: 'Event Desk',
-        role: 'admin',
-        text: 'Received! Our team has logged your inquiry and will update the event bulletin.',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, botReply]);
-    }, 1000);
-  };
+  const active = channels.find((c) => c.id === activeId);
 
   return (
     <div
-      className={`brutal-card bg-white border-4 border-black shadow-[8px_8px_0px_#000] flex flex-col justify-between overflow-hidden ${
-        inline ? 'w-full h-[600px]' : 'fixed bottom-4 right-4 z-50 w-full max-w-md h-[550px]'
+      className={`brutal-card bg-white border-4 border-black shadow-[8px_8px_0px_#000] flex flex-col overflow-hidden ${
+        inline ? 'w-full h-[640px]' : 'fixed bottom-4 right-4 z-50 w-[calc(100%-2rem)] max-w-lg h-[600px]'
       }`}
     >
-      {/* Header Bar */}
       <div className="bg-[#FFE600] border-b-4 border-black p-3.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-black text-white flex items-center justify-center font-black text-sm">
+          <div className="w-8 h-8 bg-black text-white flex items-center justify-center">
             <FaComments />
           </div>
           <div>
-            <h3 className="font-heading font-black text-base uppercase tracking-tight text-black flex items-center gap-1.5">
-              Live Event Chat
-              <span className="w-2 h-2 rounded-full bg-[#00FF66] inline-block animate-pulse" />
-            </h3>
-            <p className="text-[10px] font-bold text-black uppercase">
-              {activeChannel === 'general' ? 'Public Community Lobby' : 'Direct Organizer Support'}
-            </p>
+            <h3 className="font-heading font-black text-base uppercase tracking-tight">Event Chat</h3>
+            <p className="text-[10px] font-bold uppercase">{active ? active.title : 'Talk with organizers and attendees'}</p>
           </div>
         </div>
-
         {onClose && !inline && (
-          <button
-            onClick={onClose}
-            className="brutal-btn bg-[#FF007A] text-white p-1 text-xs font-black"
-          >
+          <button onClick={onClose} aria-label="Close chat" className="brutal-btn bg-[#FF007A] text-white p-1 text-xs">
             <FaTimes />
           </button>
         )}
       </div>
 
-      {/* Channel Switcher */}
-      <div className="bg-[#F4F4F0] border-b-2 border-black p-2 flex gap-2">
-        <button
-          onClick={() => setActiveChannel('general')}
-          className={`flex-1 brutal-btn text-[11px] py-1 uppercase flex items-center justify-center gap-1.5 ${
-            activeChannel === 'general' ? 'bg-[#00F0FF] text-black' : 'bg-white text-black'
-          }`}
-        >
-          <FaUsers /> General Chat
-        </button>
-        <button
-          onClick={() => setActiveChannel('organizer')}
-          className={`flex-1 brutal-btn text-[11px] py-1 uppercase flex items-center justify-center gap-1.5 ${
-            activeChannel === 'organizer' ? 'bg-[#FF007A] text-white' : 'bg-white text-black'
-          }`}
-        >
-          <FaUserShield /> Organizer Desk
-        </button>
-      </div>
-
-      {/* Message Feed */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#F4F4F0]">
-        {messages.map((msg) => {
-          const isMe = msg.role === 'user';
-          const isSystem = msg.role === 'system';
-
-          if (isSystem) {
-            return (
-              <div
-                key={msg.id}
-                className="brutal-card bg-[#FFE600] p-2.5 text-center text-xs font-bold border-2 border-black"
-              >
-                {msg.text}
-              </div>
-            );
-          }
-
-          return (
-            <div
-              key={msg.id}
-              className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
-            >
-              <div className="flex items-center gap-1.5 text-[10px] font-black uppercase mb-1">
-                <span>{msg.sender}</span>
-                <span className="text-gray-500 font-mono">{msg.timestamp}</span>
-              </div>
-              <div
-                className={`brutal-card p-3 max-w-[85%] text-xs font-bold leading-relaxed border-2 border-black ${
-                  isMe
-                    ? 'bg-[#00F0FF] text-black shadow-[3px_3px_0px_#000]'
-                    : 'bg-white text-black shadow-[3px_3px_0px_#000]'
+      {loading ? (
+        <p className="p-4 text-xs font-bold">Loading your events…</p>
+      ) : channels.length === 0 ? (
+        <div className="p-6 text-center space-y-2">
+          <p className="font-heading font-black text-lg uppercase">No chats yet</p>
+          <p className="text-xs font-bold">RSVP to an event to join its discussion with the organizer and other attendees.</p>
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col sm:flex-row min-h-0">
+          <nav className="sm:w-48 border-b-2 sm:border-b-0 sm:border-r-2 border-black bg-[#F4F4F0] flex sm:flex-col overflow-x-auto sm:overflow-y-auto">
+            {channels.map((channel) => (
+              <button
+                key={channel.id}
+                onClick={() => setActiveId(channel.id)}
+                className={`text-left p-3 border-b border-black text-xs font-bold shrink-0 w-44 sm:w-auto ${
+                  channel.id === activeId ? 'bg-[#00F0FF]' : 'hover:bg-white'
                 }`}
               >
-                {msg.text}
-              </div>
+                <span className="block truncate font-black">{channel.title}</span>
+                <span className="text-[10px] text-gray-600">{formatDay(channel.startsAt)}</span>
+              </button>
+            ))}
+          </nav>
+          {active && (
+            <div className="flex-1 flex flex-col min-h-0">
+              <EventChat key={active.id} eventId={active.id} canAnnounce={active.viewer.canManage} className="flex-1 min-h-0 border-0" />
+              <Link href={`/events/${active.id}`} className="text-[11px] font-bold underline p-2 border-t-2 border-black bg-white">
+                View event details →
+              </Link>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Input Form */}
-      <form onSubmit={handleSend} className="bg-white border-t-4 border-black p-3 flex gap-2">
-        <input
-          type="text"
-          placeholder="Type message to event attendees..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 bg-[#F4F4F0] border-2 border-black p-2.5 font-bold text-xs outline-none"
-        />
-        <button
-          type="submit"
-          className="brutal-btn bg-[#00FF66] text-black px-4 py-2 text-xs font-black uppercase flex items-center justify-center"
-        >
-          <FaPaperPlane />
-        </button>
-      </form>
+          )}
+        </div>
+      )}
     </div>
   );
-};
-
-export default ChatInterface;
+}

@@ -1,22 +1,20 @@
-'use client'
-// import { useRef } from 'react'
-// import { Provider } from 'react-redux'
-// import { makeStore, AppStore } from '../lib/store'
-import { AuthProvider } from '@/context/AuthContext'
-import { EventProvider } from '@/context/EventContext'
-import { LocationProvider } from '@/context/LocationContext'
+'use client';
 
-export default function ContextWrapper({
-  children
-}: {
-  children: React.ReactNode
-}) {
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from '@/context/AuthContext';
+import { EventProvider } from '@/context/EventContext';
+import { LocationProvider } from '@/context/LocationContext';
+
+export default function ContextWrapper({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <EventProvider>
         <LocationProvider>
           {children}
+          <ToastContainer position="top-right" autoClose={3500} />
         </LocationProvider>
       </EventProvider>
     </AuthProvider>
-)}
+  );
+}

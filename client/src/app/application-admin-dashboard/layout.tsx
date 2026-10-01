@@ -1,9 +1,6 @@
 import React from 'react';
+import RequireAuth from '@/components/Auth/RequireAuth';
 
-export default function AppAdminDashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function PlatformAdminLayout({ children }: { children: React.ReactNode }) {
+  return <RequireAuth roles={['admin']}>{children}</RequireAuth>;
 }

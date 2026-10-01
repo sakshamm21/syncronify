@@ -5,9 +5,9 @@
 **Production-Grade Event Management & Team Execution Operating System**  
 Developed for **CS253: Software Development and Operations**, Indian Institute of Technology Kanpur (IIT Kanpur).
 
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
-[![Next.js](https://img.shields.io/badge/Next.js-13-black?logo=nextdotjs&logoColor=white)](https://nextjs.org)
-[![Express](https://img.shields.io/badge/Express-4.18-blue?logo=express)](https://expressjs.com)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Express](https://img.shields.io/badge/Express-5-blue?logo=express)](https://expressjs.com)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8-green?logo=mongodb&logoColor=white)](https://www.mongodb.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![IIT Kanpur](https://img.shields.io/badge/IIT%20Kanpur-CS253%20Course-00F0FF?style=flat&logoColor=black)](https://www.iitk.ac.in)
@@ -27,11 +27,11 @@ Developed for **CS253: Software Development and Operations**, Indian Institute o
 - [🛠️ Tech Stack](#️-tech-stack)
 - [📁 Directory Structure](#-directory-structure)
 - [🚀 Local Development Setup](#-local-development-setup)
-- [☁️ Vercel Deployment Guide](#️-vercel-deployment-guide)
+- [☁️ Deployment](#️-deployment)
 - [📡 API Specification](#-api-specification)
-- [🔐 Role-Based Access Control](#-role-based-access-control)
+- [🔐 Roles](#-roles)
 - [🧪 Testing & Quality Assurance](#-testing--quality-assurance)
-- [🤝 Author & Acknowledgments](#-author--acknowledgments)
+- [🤝 Acknowledgments & Credits](#-acknowledgments--credits)
 - [📄 License](#-license)
 
 ---
@@ -60,30 +60,36 @@ Syncronify employs a custom **Neo-Brutalist UI** engineered for optimal contrast
 
 ## ✨ Key Features
 
-### 1. ⚡ Unified Event Discovery Hub
-- Browse public and campus organization events filtered by categories (*Tech & Code*, *Cultural*, *Workshop*, *Sports*, *Meetup*).
-- Real-time **RSVP Toggle** with live attendee counters and confirmed attendance badges.
-- Detailed modal popups containing venue maps, organizer info, schedule timings, and share options.
+### 1. ⚡ Event Discovery & RSVP
+- Search and filter upcoming public events by category, and sort by soonest, most popular or newest.
+- One-click **RSVP** with capacity limits and an automatic **waitlist**. When someone leaves, the next person moves up and is notified.
+- **Picked for you** recommendations based on the interests in your profile, plus an **Up next** strip of your own upcoming events.
+- Shareable event pages (`/events/:id`) with **Add to calendar** (`.ics`), directions and share.
 
-### 2. 📅 Interactive Schedule & Calendar
-- Powered by **FullCalendar** with custom Neo-Brutalist event pill styles and day grid borders.
-- Multi-view support: Month, Week, and Day grid displays with drag-and-drop event resizing.
-- Quick date click trigger to draft and publish personal or organization events.
+### 2. 📅 My Schedule
+- FullCalendar view of everything you're attending, organizing, waitlisted for or planning privately, colour-coded.
+- Click a day to plan a personal event on it.
 
-### 3. 🗺️ Interactive Venue & Map Navigation
-- OpenStreetMap and Mapbox GL integrated venue finder.
-- Place search auto-complete with latitude/longitude coordinate binding.
-- Quick selectors for popular IIT Kanpur campus venues (Auditorium, Innovation Lab, Open Air Amphitheatre, Sports Arena).
+### 3. 💬 Event Discussions & Announcements
+- Every public event has a real-time chat (Socket.io) for the organizer and registered attendees, with a typing indicator and message history.
+- Organizers can post **announcements**, which also notify every attendee in-app and by email.
 
-### 4. 📝 Notes & Execution Workspace
-- Full personal and team note-taking module.
-- Create, edit, tag, pin, and search notes (*Event Plans*, *Speaker Agendas*, *Logistics Checklists*).
-- Local storage persistence layer for offline resiliency.
+### 4. 🔔 Notifications & Reminders
+- Live notification bell for event changes, cancellations, waitlist promotions, announcements and organizer approvals.
+- Automatic **reminder** to confirmed attendees within 24 hours of an event, in-app and by email (respecting each user's email preference).
 
-### 5. 💬 Real-Time Event Chat
-- Socket.io low-latency real-time chat interface.
-- Multi-channel support switching between *General Community Lobby* and *Organizer Support Desk*.
-- Custom speech bubbles, timestamps, and online status indicators.
+### 5. 🎟️ Organizer Console
+- Publish, edit, save as draft, cancel (attendees are notified with your message) or delete events.
+- Dashboard stats: upcoming events, registrations, waitlists and attendance rate.
+- Attendee list per event with one-click **check-in** and **CSV export**.
+
+### 6. 🛡️ Super Admin Console
+- Platform stats, user directory (search, filter, change role, suspend/reinstate).
+- Review queue for **organizer applications**: members apply from their profile and admins approve or decline with a note.
+
+### 7. 📝 Notes & 🗺️ Venue Map
+- Notes stored on the server (search, tags, pinning), optionally linked to an event.
+- Venue picker map with optional Mapbox place search.
 
 ---
 
@@ -91,28 +97,23 @@ Syncronify employs a custom **Neo-Brutalist UI** engineered for optimal contrast
 
 ```mermaid
 flowchart LR
-    subgraph Frontend["Frontend — Next.js 13 (App Router / Vercel)"]
-        UI[Neo-Brutalist Pages]
-        UI --> CTX[Auth, Event & Location Contexts]
-        UI --> HUB[Unified Event Discovery Hub]
-        UI --> CAL[FullCalendar Component]
-        UI --> MAP[Venue Explorer & Mapbox/OSM Embed]
-        UI --> NOTES[Notes & Execution Manager]
-        UI --> CHAT[Socket.io Real-Time Chat]
+    subgraph Frontend["client/ — Next.js 16 (Vercel)"]
+        UI[Pages & Components] --> APIC[lib/api typed client]
+        UI --> RT[Socket.io client or polling]
     end
 
-    subgraph Backend["Backend — Node.js & Express (Port 8000)"]
-        API[Express App Controller]
-        WS[Socket.io Server]
-        API --> AUTH[JWT & OTP Controller]
-        API --> EVT[Event Controller]
-        API --> MOD[Mongoose Models]
+    subgraph Backend["server/ — Express 5 API (Vercel functions)"]
+        R[Routes + zod validation] --> S[Services]
+        S --> M[Mongoose models]
+        S --> N[Notifications + Mailer]
+        WS[Socket.io: user & event rooms]
+        J[Reminder job]
     end
 
-    UI -->|HTTP REST /api| API
-    UI -->|WebSocket| WS
-    API --> MONGO[(MongoDB Database)]
-    WS --> MONGO
+    APIC -->|REST /api, Bearer JWT| R
+    RT -->|WebSocket, JWT handshake| WS
+    M --> DB[(MongoDB)]
+    N --> WS
 ```
 
 ---
@@ -120,20 +121,20 @@ flowchart LR
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 13 (React 18, TypeScript)
-- **Styling**: Tailwind CSS & Neo-Brutalist Utility System (`globals.css`)
-- **Calendar**: FullCalendar (daygrid, timegrid, interaction)
-- **Maps & Geo**: Mapbox GL JS / OpenStreetMap Leaflet Embed
-- **Icons & Animation**: React Icons, Lucide React, Framer Motion
-- **Toast Notifications**: React Toastify
-- **Deployment Platform**: Vercel
+- **Framework**: Next.js 16 (App Router, React 19, TypeScript)
+- **Styling**: Tailwind CSS & Neo-Brutalist component classes (`globals.css`)
+- **Data**: typed API client in `src/lib/api` (axios), realtime via `socket.io-client`
+- **Calendar**: FullCalendar · **Maps**: Mapbox / OpenStreetMap · **Toasts**: React Toastify
 
 ### Backend
-- **Runtime**: Node.js 18+ & Express.js
-- **Database**: MongoDB & Mongoose ODM
-- **Real-Time Communication**: Socket.io
-- **Security & Authentication**: JSON Web Tokens (JWT), bcryptjs password hashing, OTP verification
-- **Testing**: Mocha, Chai, Supertest
+- **Runtime**: Node.js 20+ & Express 5
+- **Database**: MongoDB with Mongoose 8
+- **Validation**: zod (friendly field-level errors)
+- **Auth**: JWT bearer tokens, bcrypt, email verification codes, password reset links
+- **Realtime**: Socket.io (JWT-authenticated)
+- **Security**: helmet, CORS allow-list, rate limiting on auth endpoints
+- **Email**: Nodemailer over any SMTP provider (e.g. Brevo)
+- **Testing**: Node's built-in test runner, Supertest and an in-memory MongoDB
 
 ---
 
@@ -141,46 +142,33 @@ flowchart LR
 
 ```bash
 Syncronify/
-├── vercel.json                      # Vercel deployment configuration
-├── client/                          # Next.js Frontend App
-│   ├── public/                      # Static assets & generated logo
-│   ├── vercel.json                  # Client Vercel override spec
+├── client/                      # Next.js web app
 │   └── src/
-│       ├── app/                     # App Router Pages
-│       │   ├── page.tsx             # Neo-Brutalist Landing Page
-│       │   ├── globals.css          # Design tokens & utility classes
-│       │   ├── authentication/      # Login & Signup Console
-│       │   ├── dashboard/           # Member Dashboard Console
-│       │   ├── admin-dashboard/     # Event Organizer Console
-│       │   └── application-admin-dashboard/ # Super Admin Console
-│       ├── components/              # Modular UI Components
-│       │   ├── Navbar/              # Top Navbar with logo & role badges
-│       │   ├── Sidebar/             # Neo-Brutalist Navigation Console
-│       │   ├── Calendar/            # FullCalendar Component
-│       │   ├── CreateEvent/         # Event Publishing Modal
-│       │   ├── EventPage/           # Unified Event Discovery Hub
-│       │   ├── Notes/               # Notes & Execution Manager
-│       │   ├── MapBox/              # Interactive Venue Map
-│       │   ├── Chat/                # Socket.io Real-Time Chat
-│       │   ├── Carousel/            # Spotlight Event Showcase
-│       │   └── Login/ & UserRegister/ # Authentication Forms
-│       └── context/                 # Auth, Event, Location Context Providers
+│       ├── app/                 # Routes: /, /authentication, /reset-password, /events/[id],
+│       │                        #   /dashboard (members), /admin-dashboard (organizers),
+│       │                        #   /application-admin-dashboard (super admins)
+│       ├── components/          # UI components (Auth, EventPage, Chat, Calendar, Profile, ...)
+│       ├── context/             # AuthContext (session + socket), EventContext, LocationContext
+│       └── lib/
+│           ├── api/             # Typed API client and response types
+│           ├── format.ts        # Dates, labels, role routing
+│           └── realtime.ts      # Socket connection
 │
-├── server/                          # Express + Socket.io Backend App
+├── server/                      # Express API
 │   ├── src/
-│   │   ├── appMain.js               # Express Application Core
-│   │   ├── controllers/             # Auth & Event API Controllers
-│   │   ├── models/                  # User, Event, Message Schemas
-│   │   ├── routes/                  # API Route Definitions
-│   │   └── middleware/              # JWT Protection & Error Handlers
-│   ├── websockets-service/          # Socket.io Server logic
-│   ├── test/                        # Mocha & Supertest API Test Suite
-│   └── serverMain.js                # Server entry point
-│
-├── docker-compose.yml               # Local Infrastructure stack
-├── Dockerfile                       # Backend containerization spec
-├── Dockerfile.client                # Frontend containerization spec
-└── package.json                     # Monorepo root scripts
+│   │   ├── app.js               # Express app (middleware + routes)
+│   │   ├── server.js            # Entry point: DB, HTTP, sockets, jobs, graceful shutdown
+│   │   ├── config/              # Validated env + DB connection
+│   │   ├── models/              # User, Event, Registration, Note, Message, Notification, OrganizerApplication
+│   │   ├── modules/             # Feature modules: auth, me, events, chat, notes, notifications, organizer, admin
+│   │   │                        #   each with *.routes.js (HTTP) and *.service.js (logic)
+│   │   ├── middleware/          # auth, validate, rate limits, error handler
+│   │   ├── sockets/             # Socket.io server
+│   │   ├── jobs/                # Event reminders
+│   │   └── lib/                 # errors, tokens, mailer, email templates, ics, logger
+│   ├── scripts/                 # seed, create-admin, dev-memory
+│   ├── api/index.js             # Vercel serverless entry
+│   └── test/                    # API test suite
 ```
 
 ---
@@ -188,123 +176,113 @@ Syncronify/
 ## 🚀 Local Development Setup
 
 ### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **npm**: v8.0.0 or higher
-- **MongoDB**: Local MongoDB server or Atlas connection string
+- **Node.js** 20.19 or newer (tested on 22 and 26)
+- **MongoDB** is optional locally: `npm run dev:memory` runs a built-in database. Production uses MongoDB Atlas.
 
-### 1. Clone Repository & Install Dependencies
+### 1. Install
 ```bash
-git clone https://github.com/sakshamm21/syncronify.git
+git clone https://github.com/its-adityajohri/Syncronify.git
 cd Syncronify
-
-# Install root, client, and server dependencies
 npm run install:all
 ```
 
-### 2. Environment Configuration
-Create `.env` in `server/`:
-```env
-PORT=8000
-DB_URI=mongodb://127.0.0.1:27017/syncronify
-JWT_SECRET=super_secret_jwt_key_2026
-CLIENT_URL=http://localhost:3000
-```
-
-Create `.env.local` in `client/`:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_MAPBOX_TOKEN=your_optional_mapbox_token
-```
-
-### 3. Launch Development Servers
+### 2. Configure
 ```bash
-# Starts Express server (port 8000) and Next.js frontend (port 3000) concurrently
-npm run dev
+cp server/.env.example server/.env        # set DB_URI, JWT_SECRET, CLIENT_URL
+cp client/.env.example client/.env         # set NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+Without SMTP settings, development still works: verification codes are shown in the app and emails are printed in the server log.
+
+### 3. Run
+```bash
+# Option A: you have MongoDB
+npm --prefix server run seed      # demo data (optional)
+npm run dev                       # API on :4000, web app on :3000
+
+# Option B: no MongoDB installed (persistent local DB in server/.data, auto-seeded)
+npm run dev:memory
 ```
 
-Navigate to `http://localhost:3000` in your web browser.
+### Demo accounts (from the seed script)
+All use the password `syncronify123`: `member@syncronify.dev`, `organizer@syncronify.dev`, `admin@syncronify.dev`, plus `asha@` (has a pending organizer application) and `rahul@`. Set `NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS=true` to show one-click buttons on the sign-in page.
+
+### First real admin
+Nobody can sign up as an admin. Create or promote one with:
+```bash
+npm --prefix server run create-admin -- --email you@example.com --name "Your Name" --password "a-strong-password"
+```
 
 ---
 
-## ☁️ Vercel Deployment Guide
+## ☁️ Deployment
 
-Syncronify is pre-configured with `vercel.json` for one-click deployment directly from your GitHub repository.
+Both apps run on **Vercel** (team `sak-16a5`) with **MongoDB Atlas** as the database.
 
-### Steps to Deploy:
-1. Push your latest code changes to your GitHub repository:
-   ```bash
-   git add .
-   git commit -m "feat: complete Neo-Brutalist UI revamp & Vercel readiness"
-   git push origin master
-   ```
-2. Log in to [Vercel](https://vercel.com) and click **Add New...** → **Project**.
-3. Import your **Syncronify** GitHub repository.
-4. Vercel will automatically detect Next.js settings from `vercel.json`.
-5. Add Environment Variable:
-   - `NEXT_PUBLIC_API_URL`: Backend API URL (e.g. `https://your-backend-api.onrender.com`)
-6. Click **Deploy**!
+| Piece | Vercel project | Root | URL |
+|-------|----------------|------|-----|
+| Web app | `syncronify` | `client/` | https://syncronify-self.vercel.app |
+| API | `syncronify-api` | `server/` | https://syncronify-api.vercel.app |
+
+How the API runs on Vercel:
+- `server/api/index.js` is the serverless entry; `server/vercel.json` routes every path to it.
+- Vercel functions can't hold WebSockets, so the API reports `realtime: "polling"` at `/api/meta` and the web app polls for chat (every 4 s) and notifications (every 30 s). Locally it uses Socket.io for instant updates.
+- Event reminders run daily via **Vercel Cron** (`/api/jobs/event-reminders`, authenticated with `CRON_SECRET`).
+
+**API environment variables:** `DB_URI`, `JWT_SECRET`, `CRON_SECRET`, `CLIENT_URL` (comma-separated; `*` wildcards allow preview deployments, e.g. `https://syncronify-*-sak-16a5.vercel.app`), `TRUST_PROXY=1`, plus SMTP settings for email.
+**Web app environment variables:** `NEXT_PUBLIC_API_URL`, optionally `NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS`.
+
+Deploy manually with `vercel deploy --prod` from `server/` or `client/`; the web app also deploys on every push to `master`.
 
 ---
 
 ## 📡 API Specification
 
-### Auth Routes (`/api/auth`)
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| `POST` | `/api/auth/register` | Register user and generate verification OTP | Public |
-| `POST` | `/api/auth/verify-otp` | Verify OTP code and issue JWT token | Public |
-| `POST` | `/api/auth/login` | Authenticate credentials and return role token | Public |
+All endpoints are under `/api`. Successful responses are `{ "data": ... }` (lists add `"meta"` for pagination). Errors are `{ "error": { "code", "message", "details"? } }`. Authenticated endpoints need `Authorization: Bearer <token>`.
 
-### Event Routes (`/api/events`)
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| `GET` | `/api/events/all-posted-events` | Fetch all public organization events | Member |
-| `POST` | `/api/events/create-personal-event` | Create personal member event | Member |
-| `POST` | `/api/events/create-event` | Publish official organization event | Organizer |
-| `GET` | `/api/events/user-events` | Fetch user events | Member |
-| `GET` | `/api/events/event-details` | Fetch event details by ID | Member |
+| Area | Endpoints |
+|------|-----------|
+| Health | `GET /health` |
+| Auth | `POST /auth/register`, `/auth/verify-email`, `/auth/resend-verification`, `/auth/login`, `/auth/forgot-password`, `/auth/reset-password` |
+| Me | `GET/PATCH /me`, `POST /me/password`, `GET /me/calendar?from&to`, `GET /me/registrations` |
+| Events | `GET /events` (`q, category, sort, page, limit, ...`), `GET /events/categories`, `GET /events/recommended`, `GET /events/:id`, `GET /events/:id/calendar.ics`, `POST /events`, `PATCH /events/:id`, `POST /events/:id/cancel`, `DELETE /events/:id` |
+| Registration | `POST/DELETE /events/:id/registration`, `GET /events/:id/attendees`, `PUT /events/:id/attendees/:userId/check-in` |
+| Chat | `GET/POST /events/:id/messages` |
+| Notes | `GET/POST /notes`, `PATCH/DELETE /notes/:id` |
+| Notifications | `GET /notifications`, `GET /notifications/unread-count`, `POST /notifications/:id/read`, `POST /notifications/read-all` |
+| Organizer | `POST /organizer/applications`, `GET /organizer/applications/latest`, `GET /organizer/overview` |
+| Admin | `GET /admin/stats`, `GET /admin/users`, `PATCH /admin/users/:id`, `GET /admin/organizer-applications`, `POST /admin/organizer-applications/:id/approve` \| `/reject` |
+
+**Socket.io** (connect with `auth: { token }`): the server pushes `notification:new` and `message:new`/`event:typing` for rooms joined with `event:join`.
 
 ---
 
-## 🔐 Role-Based Access Control
+## 🔐 Roles
 
-The platform enforces three distinct user roles with tailored interfaces:
+| Role | How you get it | Can do |
+|------|----------------|--------|
+| **Member** | Sign up | Discover and RSVP to events, personal calendar entries, notes, event chats, apply to become an organizer |
+| **Organizer** | Application approved by an admin | Everything a member can, plus publish/manage public events, attendees, check-in and announcements |
+| **Super Admin** | `create-admin` script or promoted by another admin | Everything above, plus user management, organizer approvals and moderation of public events |
 
-1. **General Member (`genUser`)**:
-   - Access to `/dashboard`
-   - Permissions: Discover public events, RSVP, manage personal schedule, edit personal notes, browse venue maps, and participate in event chat.
-
-2. **Event Admin (`adminUser`)**:
-   - Access to `/admin-dashboard`
-   - Permissions: Publish official organization events, view RSVP analytics, and manage event listings.
-
-3. **Super Admin (`applicationAdminUser`)**:
-   - Access to `/application-admin-dashboard`
-   - Permissions: System health monitoring, admin directory management, and community approval workflows.
+Private (personal) events are visible only to their owner, including to admins.
 
 ---
 
 ## 🧪 Testing & Quality Assurance
 
-### Automated Backend Tests
-Run the Mocha & Supertest test suite to verify HTTP endpoints, error handlers, and middleware:
 ```bash
-npm --prefix server test
+npm --prefix server test            # 73 API tests against an in-memory MongoDB
+npm --prefix client run build       # type-checks and builds the web app
 ```
-
-### Frontend Production Build Check
-Verify clean TypeScript compilation and static bundle generation:
-```bash
-npm --prefix client run build
-```
+The API tests cover auth flows (verification, lockout, reset, suspension), visibility rules, concurrent registration (no overselling), waitlist promotion, notifications, reminders, chat permissions, admin workflows and realtime delivery.
 
 ---
 
-## 🤝 Author & Acknowledgments
+## 🤝 Acknowledgments & Credits
 
-- **Creator & Developer**: Saksham Malhotra ([@sakshamm21](https://github.com/sakshamm21))
-- **Course & Institution**: CS253 (Software Development and Operations), Department of Computer Science & Engineering, **Indian Institute of Technology Kanpur (IIT Kanpur)**
-- **Mentors**: CS253 Teaching Team & Course Instructors
+- Developed for **CS253: Software Development and Operations**, Department of Computer Science & Engineering, **Indian Institute of Technology Kanpur (IIT Kanpur)**.
+- **Instructors & Mentors**: CS253 Teaching Team & Course Instructors.
+- **Lead Contributors & Authors**: Aditya Johri & Team.
 
 ---
 

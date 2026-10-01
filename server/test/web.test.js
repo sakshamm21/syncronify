@@ -1,28 +1,49 @@
-const { expect } = require('chai');
-const request = require('supertest');
-const app = require('../src/appMain.js');
+const { describe, it, before, after } = require('node:test');
+const assert = require('node:assert/strict');
+const { startDatabase, stopDatabase, api } = require('./helpers');
 
-describe('Syncronify Express App & API Routes', () => {
-    it('GET /health should return 200 with service status', async () => {
-        const response = await request(app).get('/health');
-        expect(response.status).to.equal(200);
-        expect(response.body.message).to.include('Synchronify');
-    });
+before(startDatabase);
+after(stopDatabase);
 
-    it('POST /api/auth/login without body should return 400 or handle error gracefully', async () => {
-        const response = await request(app).post('/api/auth/login').send({});
-        expect(response.status).to.be.oneOf([400, 401, 500]);
-    });
+describe('HTTP basics', () => {
+  it('reports health including the database connection', async () => {
+    const res = await api().get('/api/health').expect(200);
+    assert.equal(res.body.data.status, 'ok');
+    assert.equal(res.body.data.database, 'up');
+  });
 
-    it('GET /api/events/all-posted-events without auth should return 401 or 403', async () => {
-        const response = await request(app).get('/api/events/all-posted-events');
-        expect(response.status).to.be.oneOf([401, 403, 500]);
-    });
+  it('returns JSON 404s for unknown routes', async () => {
+    const res = await api().get('/api/does-not-exist').expect(404);
+    assert.equal(res.body.error.code, 'ROUTE_NOT_FOUND');
+  });
 
-    it('Unknown routes should return a JSON 404', async () => {
-        const response = await request(app).get('/api/does-not-exist');
-        expect(response.status).to.equal(404);
-        expect(response.body.status).to.equal('error');
-    });
+  it('returns a clear error for malformed JSON bodies', async () => {
+    const res = await api().post('/api/auth/login').set('Content-Type', 'application/json').send('{"email":').expect(400);
+    assert.equal(res.body.error.code, 'INVALID_JSON');
+  });
+
+  it('sets security headers and allows the configured client origin', async () => {
+    const res = await api().get('/api/events/categories').set('Origin', 'http://localhost:3000').expect(200);
+    assert.equal(res.headers['x-content-type-options'], 'nosniff');
+    assert.equal(res.headers['access-control-allow-origin'], 'http://localhost:3000');
+    assert.equal(res.headers['x-powered-by'], undefined);
+  });
+
+  it('does not allow other origins', async () => {
+    const res = await api().get('/api/events/categories').set('Origin', 'https://evil.example').expect(200);
+    assert.equal(res.headers['access-control-allow-origin'], undefined);
+  });
 });
 
+describe('database connection', () => {
+  it('reconnects after the connection was closed elsewhere', async () => {
+    const mongoose = require('mongoose');
+    const { connectDatabase } = require('../src/config/db');
+    const { databaseUri } = require('./helpers');
+
+    await mongoose.disconnect();
+    await connectDatabase(databaseUri());
+    assert.equal(mongoose.connection.readyState, 1);
+    await api().get('/api/health').expect(200);
+  });
+});

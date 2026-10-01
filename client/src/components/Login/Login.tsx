@@ -1,201 +1,127 @@
-"use client"
+'use client';
 
 import React, { useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useRouter } from 'next/navigation';
+import { FaSignInAlt, FaBolt } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
-import { FaSignInAlt, FaBolt, FaShieldAlt } from 'react-icons/fa';
+import { ApiError, errorMessage, type User } from '@/lib/api';
+import AuthCard, { FormError, inputClass, labelClass, linkButtonClass, primaryButtonClass } from '@/components/Auth/AuthCard';
 
 interface LoginProps {
-  handleClick: () => void;
+  onSwitchToRegister: () => void;
+  onForgotPassword: (email: string) => void;
+  onNeedsVerification: (email: string) => void;
+  onSignedIn: (user: User) => void;
 }
 
-const roleRedirect: Record<string, string> = {
-  genUser: '/dashboard',
-  adminUser: '/admin-dashboard',
-  applicationAdminUser: '/application-admin-dashboard',
-};
+// Accounts created by `npm run seed` on the server. Shown only when enabled.
+const DEMO_ACCOUNTS = [
+  { label: 'Member', email: 'member@syncronify.dev' },
+  { label: 'Organizer', email: 'organizer@syncronify.dev' },
+  { label: 'Super Admin', email: 'admin@syncronify.dev' },
+];
+const DEMO_PASSWORD = 'syncronify123';
+const showDemoAccounts = process.env.NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS === 'true';
 
-function Login({ handleClick }: LoginProps) {
+export default function Login({ onSwitchToRegister, onForgotPassword, onNeedsVerification, onSignedIn }: LoginProps) {
   const { login } = useAuth();
-  const router = useRouter();
-
-  const [user, setUser] = useState({
-    email: '',
-    password: '',
-    role: 'genUser',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setUser({
-      ...user,
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  const handleDemoLogin = (selectedRole: string) => {
-    setUser({
-      email: `${selectedRole}@syncronify.app`,
-      password: 'demopassword123',
-      role: selectedRole,
-    });
-    toast.info(`Pre-filled Demo Login for ${selectedRole}`, { position: 'top-right' });
-  };
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const { email, password, role } = user;
-
-    if (!email || !password || !role) {
-      toast.error('Please fill in all fields and select a role', { position: 'top-right' });
-      return;
-    }
-
+    setError(null);
     setLoading(true);
     try {
-      // Execute authentication or mock authentication
-      const response = await login({ email, password, userType: role }).catch(() => ({
-        status: 'success',
-        token: 'mock-jwt-token-xyz',
-        user_id: 'user-demo-1',
-        userType: role,
-      }));
-
-      toast.success('Authentication success! Opening console...', { position: 'top-right' });
-      setTimeout(() => {
-        router.push(roleRedirect[role] || '/dashboard');
-      }, 800);
-    } catch (error: any) {
-      toast.error('Login error. Proceeding with fallback demo session.', { position: 'top-right' });
-      setTimeout(() => {
-        router.push(roleRedirect[role] || '/dashboard');
-      }, 800);
+      onSignedIn(await login(email, password));
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'EMAIL_NOT_VERIFIED') {
+        onNeedsVerification(email);
+        return;
+      }
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <>
-      <div className="w-full max-w-md mx-auto">
-        <div className="brutal-card bg-white border-4 border-black p-8 shadow-[10px_10px_0px_#000] relative">
-          {/* Header */}
-          <div className="flex flex-col items-center mb-6">
-            <img
-              src="/logo.png"
-              alt="Syncronify Logo"
-              className="w-16 h-16 border-4 border-black brutal-shadow mb-3 object-cover"
-            />
-            <h2 className="font-heading font-black text-3xl uppercase tracking-tight text-black">
-              System Sign In
-            </h2>
-            <p className="text-xs font-bold text-black mt-1">
-              New to Syncronify?{' '}
-              <button
-                type="button"
-                onClick={handleClick}
-                className="underline font-black text-[#FF007A] hover:text-black"
-              >
-                Create Account →
-              </button>
-            </p>
-          </div>
+    <AuthCard
+      title="Sign In"
+      subtitle={
+        <>
+          New to Syncronify?{' '}
+          <button type="button" onClick={onSwitchToRegister} className={linkButtonClass}>
+            Create an account →
+          </button>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <div>
+          <label htmlFor="email" className={labelClass}>Email</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={inputClass}
+            placeholder="you@college.edu"
+            required
+          />
+        </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-xs font-black uppercase mb-1 text-black">
-                Account Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={user.email}
-                onChange={handleChange}
-                className="w-full bg-[#F4F4F0] border-2 border-black p-3 font-bold text-xs outline-none"
-                placeholder="user@syncronify.app"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-xs font-black uppercase mb-1 text-black">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={user.password}
-                onChange={handleChange}
-                className="w-full bg-[#F4F4F0] border-2 border-black p-3 font-bold text-xs outline-none"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="role" className="block text-xs font-black uppercase mb-1 text-black flex items-center gap-1">
-                <FaShieldAlt /> Select Portal Role
-              </label>
-              <select
-                id="role"
-                value={user.role}
-                onChange={handleChange}
-                className="w-full bg-[#FFE600] border-2 border-black p-3 font-black text-xs uppercase outline-none"
-                required
-              >
-                <option value="genUser">Member (General User)</option>
-                <option value="adminUser">Event Organizer (Admin)</option>
-                <option value="applicationAdminUser">Platform Super Admin</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="brutal-btn bg-[#00FF66] text-black w-full py-3.5 text-xs uppercase font-black tracking-wider flex items-center justify-center gap-2 mt-2"
-            >
-              <FaSignInAlt />
-              {loading ? 'Authenticating...' : 'Sign In To Console'}
+        <div>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className={labelClass}>Password</label>
+            <button type="button" onClick={() => onForgotPassword(email)} className="text-[11px] font-bold underline mb-1">
+              Forgot password?
             </button>
-          </form>
+          </div>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputClass}
+            placeholder="••••••••"
+            required
+          />
+        </div>
 
-          {/* Quick Demo Pre-fill */}
-          <div className="mt-6 pt-4 border-t-2 border-black space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-wider text-black flex items-center gap-1">
-              <FaBolt className="text-[#FF007A]" /> Fast Demo Preset Access
-            </p>
-            <div className="grid grid-cols-3 gap-2">
+        <FormError message={error} />
+
+        <button type="submit" disabled={loading} className={primaryButtonClass}>
+          <FaSignInAlt />
+          {loading ? 'Signing in…' : 'Sign In'}
+        </button>
+      </form>
+
+      {showDemoAccounts && (
+        <div className="mt-6 pt-4 border-t-2 border-black space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-wider text-black flex items-center gap-1">
+            <FaBolt className="text-[#FF007A]" /> Demo accounts
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {DEMO_ACCOUNTS.map((account) => (
               <button
+                key={account.email}
                 type="button"
-                onClick={() => handleDemoLogin('genUser')}
+                onClick={() => {
+                  setEmail(account.email);
+                  setPassword(DEMO_PASSWORD);
+                }}
                 className="brutal-btn text-[10px] py-1.5 uppercase bg-[#F4F4F0] text-black hover:bg-[#FFE600]"
               >
-                General User
+                {account.label}
               </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('adminUser')}
-                className="brutal-btn text-[10px] py-1.5 uppercase bg-[#F4F4F0] text-black hover:bg-[#00F0FF]"
-              >
-                Organizer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('applicationAdminUser')}
-                className="brutal-btn text-[10px] py-1.5 uppercase bg-[#F4F4F0] text-black hover:bg-[#FF007A] hover:text-white"
-              >
-                Super Admin
-              </button>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
-      <ToastContainer />
-    </>
+      )}
+    </AuthCard>
   );
 }
-
-export default Login;
