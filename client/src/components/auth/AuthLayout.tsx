@@ -2,60 +2,63 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { CalendarCheck, MapPin, Users } from 'lucide-react';
 import { Logo } from '@/components/shell/Logo';
 import ThemeToggle from '@/components/shell/ThemeToggle';
 
-const FLOATING = [
-  { title: 'Design & Build Hackathon', meta: 'Innovation Lab · Sat 9:00', icon: Users, tag: '24 going', x: '8%', y: '12%', delay: 0 },
-  { title: 'Live Band Night', meta: 'Open Air Theatre · Fri 18:00', icon: MapPin, tag: 'Waitlist open', x: '40%', y: '33%', delay: 0.15 },
-  { title: 'Tech Summit 2026', meta: 'Main Auditorium · Sun 10:00', icon: CalendarCheck, tag: "You're going", x: '14%', y: '54%', delay: 0.3 },
+const STICKERS = [
+  { text: "you're in ✓", className: 'bg-[#d4ff3a] text-black', style: { left: '8%', top: '14%' }, rotate: -9 },
+  { text: '🔥 24 going', className: 'bg-[#ff4fd8] text-white', style: { right: '10%', top: '24%' }, rotate: 7 },
+  { text: 'waitlist → in 🎉', className: 'bg-[#3df5ff] text-black', style: { left: '14%', top: '40%' }, rotate: 4 },
+  { text: 'tmrw · 10am', className: 'bg-white text-black', style: { right: '16%', top: '50%' }, rotate: -5 },
 ];
 
-/** Split screen: form on the left, an animated brand panel on the right (large screens). */
+/** Split screen: form on the left, a poster-style brand panel on the right (large screens). */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="flex flex-col px-6 py-6 sm:px-10">
+    <div className="grid min-h-screen lg:grid-cols-[1fr_1.05fr]">
+      <div className="flex flex-col px-6 py-6 sm:px-12">
         <div className="flex items-center justify-between">
           <Logo />
           <ThemeToggle />
         </div>
         <div className="flex flex-1 items-center justify-center py-12">{children}</div>
-        <p className="text-xs text-subtle">© {new Date().getFullYear()} Syncronify</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-subtle">© {new Date().getFullYear()} syncronify</p>
       </div>
 
-      <div className="relative hidden overflow-hidden bg-[#0d0b1f] lg:block">
-        <div className="absolute -left-24 top-10 size-[28rem] rounded-full bg-indigo-600/40 blur-3xl" />
-        <div className="absolute right-[-6rem] top-1/3 size-[26rem] rounded-full bg-fuchsia-600/30 blur-3xl" />
-        <div className="absolute bottom-[-8rem] left-1/4 size-[24rem] rounded-full bg-violet-500/30 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.08)_1px,transparent_0)] bg-[size:24px_24px]" />
+      <div className="relative m-3 hidden overflow-hidden rounded-[40px] bg-[#09090d] text-white lg:block">
+        <div className="absolute -left-24 top-0 size-[30rem] rounded-full bg-[#d4ff3a]/25 blur-[110px]" />
+        <div className="absolute -right-24 top-1/3 size-[28rem] rounded-full bg-[#ff4fd8]/25 blur-[110px]" />
+        <div className="absolute bottom-0 left-1/4 size-[24rem] rounded-full bg-[#3df5ff]/20 blur-[110px]" />
 
-        {FLOATING.map(({ title, meta, icon: Icon, tag, x, y, delay }) => (
-          <motion.div
-            key={title}
-            className="absolute w-72 rounded-2xl border border-white/10 bg-white/10 p-4 text-white shadow-2xl backdrop-blur-md"
-            style={{ left: x, top: y }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: [0, -10, 0] }}
-            transition={{ opacity: { duration: 0.6, delay }, y: { duration: 6, delay, repeat: Infinity, ease: 'easeInOut' } }}
+        <svg viewBox="0 0 24 24" className="absolute right-12 top-10 size-16 animate-spin-slow text-[#d4ff3a]" aria-hidden="true">
+          <path fill="currentColor" d="M12 1.5c.6 4.9 3.6 9.9 10.5 10.5-6.9.6-9.9 5.6-10.5 10.5C11.4 17.6 8.4 12.6 1.5 12 8.4 11.4 11.4 6.4 12 1.5Z" />
+        </svg>
+
+        {STICKERS.map((s, i) => (
+          <motion.span
+            key={s.text}
+            className={`absolute rounded-full px-4 py-2 font-display text-base font-extrabold shadow-[0_14px_30px_-10px_rgb(0_0_0/0.7)] ${s.className}`}
+            style={s.style}
+            initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
+            animate={{ opacity: 1, scale: 1, rotate: s.rotate, y: [0, -8, 0] }}
+            transition={{
+              opacity: { delay: 0.2 + i * 0.12 },
+              scale: { type: 'spring', bounce: 0.5, delay: 0.2 + i * 0.12 },
+              rotate: { type: 'spring', bounce: 0.5, delay: 0.2 + i * 0.12 },
+              y: { duration: 5 + i, repeat: Infinity, ease: 'easeInOut' },
+            }}
           >
-            <div className="flex items-start gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/15">
-                <Icon className="size-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{title}</p>
-                <p className="truncate text-xs text-white/60">{meta}</p>
-              </div>
-            </div>
-            <span className="mt-3 inline-block rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium">{tag}</span>
-          </motion.div>
+            {s.text}
+          </motion.span>
         ))}
 
-        <div className="absolute inset-x-12 bottom-12 text-white">
-          <p className="max-w-md text-3xl font-semibold leading-tight tracking-tight">Everything happening on campus, in one calm place.</p>
-          <p className="mt-3 max-w-md text-white/60">RSVP in a tap, get reminded, chat with organizers, and never miss the good stuff.</p>
+        <div className="absolute inset-x-12 bottom-12">
+          <p className="font-display text-[clamp(4rem,7.5vw,7rem)] font-extrabold leading-[0.85] tracking-[-0.05em]">
+            no more
+            <br />
+            <span className="font-serif font-normal italic text-[#d4ff3a]">fomo.</span>
+          </p>
+          <p className="mt-5 max-w-sm text-white/60">Everything happening on campus, one tap away. Your plans, reminders and group chats in one place.</p>
         </div>
       </div>
     </div>

@@ -154,19 +154,19 @@ export default function EventChat({ eventId, canAnnounce = false, className }: E
         {!loading && messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center py-12 text-center text-muted">
             <MessagesSquare className="mb-3 size-8 text-subtle" />
-            <p className="text-sm font-medium text-foreground">No messages yet</p>
-            <p className="mt-1 text-sm">Ask a question or say hi to everyone going.</p>
+            <p className="font-display text-lg font-bold text-foreground">It&apos;s quiet in here 👀</p>
+            <p className="mt-1 text-sm">Say hi, ask the organizer something, find your crew.</p>
           </div>
         )}
         <AnimatePresence initial={false}>
           {messages.map((msg) => {
             if (msg.isAnnouncement) {
               return (
-                <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-primary/20 bg-primary-soft p-4">
-                  <p className="flex items-center gap-1.5 text-xs font-medium text-primary-soft-foreground">
+                <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} style={{ rotate: '-0.6deg' }} className="rounded-3xl bg-pink p-4 text-white">
+                  <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/80">
                     <Megaphone className="size-3.5" /> Announcement · {msg.sender.name} · {formatTime(msg.createdAt)}
                   </p>
-                  <p className="mt-1.5 whitespace-pre-wrap text-sm text-foreground">{msg.text}</p>
+                  <p className="mt-1.5 whitespace-pre-wrap font-display text-lg font-bold leading-snug">{msg.text}</p>
                 </motion.div>
               );
             }
@@ -189,8 +189,8 @@ export default function EventChat({ eventId, canAnnounce = false, className }: E
                   )}
                   <div
                     className={cn(
-                      'inline-block whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-left text-sm leading-relaxed',
-                      isMe ? 'rounded-br-md bg-primary text-primary-foreground' : 'rounded-bl-md border border-border bg-surface-muted'
+                      'inline-block whitespace-pre-wrap break-words rounded-3xl px-4 py-2.5 text-left text-[15px] leading-relaxed',
+                      isMe ? 'rounded-br-lg bg-primary font-medium text-primary-foreground' : 'rounded-bl-lg bg-surface-muted'
                     )}
                   >
                     {msg.text}
@@ -231,9 +231,9 @@ export default function EventChat({ eventId, canAnnounce = false, className }: E
             maxLength={2000}
             onChange={(e) => handleTyping(e.target.value)}
             aria-label="Message"
-            className="h-11 flex-1 rounded-xl border border-border bg-surface-muted px-4 text-sm outline-none transition focus:border-primary focus:bg-surface focus:ring-4 focus:ring-ring/20"
+            className="h-12 flex-1 rounded-full border border-border bg-surface-muted px-5 text-[15px] outline-none transition focus:border-primary focus:bg-surface focus:ring-4 focus:ring-ring/25"
           />
-          <Button type="submit" size="icon" loading={sending} disabled={!text.trim()} aria-label="Send" className="size-11">
+          <Button type="submit" size="icon" loading={sending} disabled={!text.trim()} aria-label="Send" className="size-12">
             {!sending && <SendHorizontal />}
           </Button>
         </div>

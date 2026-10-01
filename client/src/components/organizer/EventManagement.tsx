@@ -83,7 +83,7 @@ export default function EventManagement({ eventId }: { eventId: string }) {
   }
 
   if (error) {
-    return <EmptyState icon={<CalendarCheck />} title="Event not available" description={error} action={<ButtonLink href="/organizer" variant="secondary">Back to organizer</ButtonLink>} />;
+    return <EmptyState emoji="🫠" title="Event not available" description={error} action={<ButtonLink href="/organizer" variant="secondary">Back to organizer</ButtonLink>} />;
   }
   if (!event || !list) return <div className="h-96 animate-pulse rounded-3xl bg-surface-muted" />;
 
@@ -94,7 +94,7 @@ export default function EventManagement({ eventId }: { eventId: string }) {
       </Link>
 
       <Card className="flex flex-col gap-5 p-4 sm:flex-row sm:items-center sm:p-5">
-        <EventCover event={event} showDate={false} className="aspect-[16/10] w-full shrink-0 rounded-xl sm:w-52" />
+        <EventCover event={event} stickers={false} className="aspect-[16/10] w-full shrink-0 rounded-3xl sm:w-56" />
         <div className="min-w-0 flex-1">
           {event.status === 'cancelled' && <Badge tone="danger" className="mb-2">Cancelled</Badge>}
           <h1 className="text-2xl font-semibold">{event.title}</h1>

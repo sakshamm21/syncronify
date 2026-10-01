@@ -6,11 +6,11 @@ import { toast } from 'sonner';
 import { AnimatePresence, motion } from 'motion/react';
 import { CalendarDays, Pencil, Pin, Plus, Search, StickyNote, Trash2 } from 'lucide-react';
 import { errorMessage, meApi, notesApi, type Note, type NoteTag, type SyncEvent } from '@/lib/api';
-import { NOTE_TAGS, NOTE_TAG_LABELS, formatRelative } from '@/lib/format';
+import { NOTE_TAGS, NOTE_TAG_EMOJI, NOTE_TAG_LABELS, formatRelative } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
 import { Dialog } from '@/components/ui/overlay';
-import { Badge, EmptyState, PageHeader } from '@/components/ui/surface';
+import { EmptyState, PageHeader } from '@/components/ui/surface';
 import { FilterChips } from '@/components/ui/tabs';
 import { cn } from '@/lib/cn';
 
@@ -24,6 +24,16 @@ interface Draft {
 
 const EMPTY_DRAFT: Draft = { title: '', content: '', tag: 'plan', event: null };
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Sticky-note paper colours, one per tag; text is always ink black.
+const STICKY_COLORS: Record<NoteTag, string> = {
+  plan: 'bg-[#d4ff3a]',
+  speaker: 'bg-[#ff9be6]',
+  logistics: 'bg-[#8ff3ff]',
+  ideas: 'bg-[#ffd23d]',
+  personal: 'bg-[#c8b5ff]',
+};
+const STICKY_TILT = [-2.5, 1.8, -1.2, 2.4, -1.8, 1.2];
 
 const sortNotes = (list: Note[]) =>
   [...list].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt.localeCompare(a.updatedAt));
@@ -97,8 +107,9 @@ export default function NotesBoard() {
   return (
     <>
       <PageHeader
-        title="Notes"
-        description="Agendas, checklists and ideas, optionally linked to an event."
+        kicker="Agendas, checklists, 3am ideas"
+        title={<>Notes &amp; <em>ideas</em></>}
+        description="Stick them to an event so they’re there when you need them."
         actions={
           <Button onClick={() => setDraft(EMPTY_DRAFT)}>
             <Plus /> New note
@@ -108,79 +119,74 @@ export default function NotesBoard() {
 
       <div className="mb-6 space-y-4">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-subtle" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary" />
           <input
             type="search"
             placeholder="Search notes"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search notes"
-            className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-3 text-sm shadow-soft outline-none transition focus:border-primary focus:ring-4 focus:ring-ring/20"
+            className="h-12 w-full rounded-full border border-border bg-surface pl-11 pr-4 text-[15px] outline-none transition hover:border-border-strong focus:border-primary focus:ring-4 focus:ring-ring/25"
           />
         </div>
-        <FilterChips<NoteTag> value={tag} onChange={setTag} options={NOTE_TAGS.map((t) => ({ value: t, label: NOTE_TAG_LABELS[t] }))} />
+        <FilterChips<NoteTag> value={tag} onChange={setTag} allLabel="All notes" options={NOTE_TAGS.map((t) => ({ value: t, label: NOTE_TAG_LABELS[t], emoji: NOTE_TAG_EMOJI[t] }))} />
       </div>
 
       {notes === null ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-44 animate-pulse rounded-2xl bg-surface-muted" />
+            <div key={i} className="h-56 animate-pulse rounded-md bg-surface-muted" />
           ))}
         </div>
       ) : notes.length === 0 ? (
         <EmptyState
-          icon={<StickyNote />}
+          emoji="📝"
           title={search || tag ? 'No matching notes' : 'No notes yet'}
           description="Keep agendas, logistics and ideas next to the events they're for."
           action={!search && !tag && <Button onClick={() => setDraft(EMPTY_DRAFT)}><Plus /> Write your first note</Button>}
         />
       ) : (
-        <motion.div layout className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <motion.div layout className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           <AnimatePresence initial={false}>
-            {notes.map((note) => (
+            {notes.map((note, i) => (
               <motion.article
                 key={note.id}
                 layout
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.25 }}
-                className={cn(
-                  'group flex flex-col rounded-2xl border bg-surface p-5 shadow-soft transition hover:shadow-lifted',
-                  note.pinned ? 'border-primary/30 ring-1 ring-primary/10' : 'border-border'
-                )}
+                initial={{ opacity: 0, scale: 0.9, rotate: 0 }}
+                animate={{ opacity: 1, scale: 1, rotate: STICKY_TILT[i % STICKY_TILT.length] }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                whileHover={{ rotate: 0, y: -6, scale: 1.02 }}
+                transition={{ type: 'spring', bounce: 0.3, duration: 0.45 }}
+                className={cn('group relative flex min-h-56 flex-col rounded-[6px] p-6 text-black shadow-[0_18px_30px_-14px_rgb(0_0_0/0.55)]', STICKY_COLORS[note.tag])}
               >
+                {note.pinned && <span aria-hidden="true" className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 rotate-[-3deg] bg-white/55 backdrop-blur-sm" />}
                 <div className="flex items-start justify-between gap-2">
-                  <Badge tone={note.pinned ? 'primary' : 'neutral'}>{NOTE_TAG_LABELS[note.tag]}</Badge>
-                  <div className="flex gap-0.5 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-                    <Button variant="ghost" size="icon-sm" onClick={() => togglePin(note)} aria-label={note.pinned ? 'Unpin' : 'Pin'}>
-                      <Pin className={cn(note.pinned && 'fill-current text-primary')} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Edit"
-                      onClick={() => setDraft({ id: note.id, title: note.title, content: note.content, tag: note.tag, event: note.event?.id ?? null })}
-                    >
-                      <Pencil />
-                    </Button>
-                    <Button variant="ghost" size="icon-sm" aria-label="Delete" onClick={() => remove(note)} className="hover:text-danger">
-                      <Trash2 />
-                    </Button>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-black/60">
+                    {NOTE_TAG_EMOJI[note.tag]} {NOTE_TAG_LABELS[note.tag]}
+                  </span>
+                  <div className="-mr-2 -mt-2 flex opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                    {[
+                      { label: note.pinned ? 'Unpin' : 'Pin', icon: <Pin className={cn(note.pinned && 'fill-current')} />, onClick: () => togglePin(note) },
+                      { label: 'Edit', icon: <Pencil />, onClick: () => setDraft({ id: note.id, title: note.title, content: note.content, tag: note.tag, event: note.event?.id ?? null }) },
+                      { label: 'Delete', icon: <Trash2 />, onClick: () => remove(note) },
+                    ].map((a) => (
+                      <button key={a.label} aria-label={a.label} onClick={a.onClick} className="flex size-8 items-center justify-center rounded-full text-black/60 transition hover:bg-black/10 hover:text-black [&_svg]:size-4">
+                        {a.icon}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <h3 className="mt-3 font-semibold leading-snug">{note.title}</h3>
-                {note.content && <p className="mt-1.5 line-clamp-6 whitespace-pre-wrap text-sm leading-relaxed text-muted">{note.content}</p>}
-                <div className="mt-auto flex items-center justify-between gap-2 pt-4 text-xs text-subtle">
+                <h3 className="mt-3 text-2xl font-extrabold leading-tight">{note.title}</h3>
+                {note.content && <p className="mt-2 line-clamp-6 whitespace-pre-wrap font-serif text-lg leading-snug text-black/75">{note.content}</p>}
+                <div className="mt-auto flex items-center justify-between gap-2 pt-5 text-xs text-black/60">
                   {note.event ? (
-                    <Link href={`/events/${note.event.id}`} className="flex min-w-0 items-center gap-1.5 font-medium text-primary hover:underline">
+                    <Link href={`/events/${note.event.id}`} className="flex min-w-0 items-center gap-1.5 font-semibold text-black underline-offset-4 hover:underline">
                       <CalendarDays className="size-3.5 shrink-0" />
                       <span className="truncate">{note.event.title}</span>
                     </Link>
                   ) : (
-                    <span>Edited {formatRelative(note.updatedAt)}</span>
+                    <span className="font-mono uppercase tracking-wider">edited {formatRelative(note.updatedAt)}</span>
                   )}
-                  {note.pinned && <Pin className="size-3.5 fill-current text-primary" />}
                 </div>
               </motion.article>
             ))}

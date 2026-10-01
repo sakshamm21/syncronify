@@ -78,8 +78,9 @@ export default function OrganizerConsole() {
   return (
     <>
       <PageHeader
-        title="Organizer"
-        description="Publish events, manage RSVPs and waitlists, check people in and keep attendees updated."
+        kicker="Organizer console"
+        title={<>Run the <em>show</em></>}
+        description="Publish events, watch RSVPs roll in, check people in at the door."
         actions={
           <Button onClick={() => openCreateEvent()}>
             <Plus /> New event
@@ -89,7 +90,7 @@ export default function OrganizerConsole() {
 
       <Stagger className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { label: 'Upcoming events', value: stats?.upcomingEvents, icon: <CalendarDays /> },
+          { label: 'Upcoming events', value: stats?.upcomingEvents, icon: <CalendarDays />, accent: true },
           { label: 'Registrations', value: stats?.totalRegistrations, icon: <Users /> },
           { label: 'On waitlists', value: stats?.waitlisted, icon: <Hourglass /> },
           {
@@ -100,7 +101,7 @@ export default function OrganizerConsole() {
           },
         ].map((s) => (
           <StaggerItem key={s.label} className="h-full">
-            <StatCard label={s.label} value={s.value ?? <span className="inline-block h-8 w-12 animate-pulse rounded bg-surface-muted" />} icon={s.icon} hint={s.hint} />
+            <StatCard label={s.label} value={s.value ?? <span className="inline-block h-10 w-14 animate-pulse rounded-xl bg-surface-muted" />} icon={s.icon} hint={s.hint} accent={s.accent} />
           </StaggerItem>
         ))}
       </Stagger>
@@ -126,7 +127,7 @@ export default function OrganizerConsole() {
         </div>
       ) : visible.length === 0 ? (
         <EmptyState
-          icon={<Megaphone />}
+          emoji="📣"
           title={filter === 'upcoming' ? 'No upcoming events' : `No ${filter} events`}
           description={filter === 'upcoming' ? 'Publish your first event and start collecting RSVPs.' : undefined}
           action={filter === 'upcoming' && <Button onClick={() => openCreateEvent()}><Plus /> New event</Button>}
@@ -135,16 +136,16 @@ export default function OrganizerConsole() {
         <Stagger key={filter} className="space-y-3">
           {visible.map((event) => (
             <StaggerItem key={event.id}>
-              <article className="group flex flex-col gap-4 rounded-2xl border border-border bg-surface p-3 shadow-soft transition hover:shadow-lifted sm:flex-row sm:items-center">
+              <article className="group flex flex-col gap-4 rounded-[28px] border border-border bg-surface p-3 transition hover:border-border-strong sm:flex-row sm:items-center">
                 <Link href={`/events/${event.id}`} className="block shrink-0">
-                  <EventCover event={event} showDate={false} className="aspect-[16/10] w-full rounded-xl sm:w-40 [&>span]:hidden" />
+                  <EventCover event={event} stickers={false} className="aspect-[16/10] w-full rounded-3xl sm:w-44" />
                 </Link>
                 <div className="min-w-0 flex-1 px-1">
                   <div className="flex items-center gap-2">
                     <StatusBadge event={event} />
                     {event.capacity && event.attendeeCount >= event.capacity && <Badge tone="warning">Full</Badge>}
                   </div>
-                  <Link href={`/events/${event.id}`} className="mt-1.5 block truncate font-semibold hover:text-primary">
+                  <Link href={`/events/${event.id}`} className="mt-1.5 block truncate font-display text-xl font-bold hover:text-primary">
                     {event.title}
                   </Link>
                   <p className="truncate text-sm text-muted">

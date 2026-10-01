@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { motionEase } from './motion';
+import { Button } from './button';
 
 interface DialogProps {
   open: boolean;
@@ -21,7 +21,7 @@ interface DialogProps {
 
 const widths = { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-2xl', xl: 'max-w-5xl' };
 
-/** Accessible modal with a fade/scale entrance, Escape to close, and body scroll lock. */
+/** Bottom sheet on phones, centred card on larger screens. Escape closes; body scroll is locked. */
 export function Dialog({ open, onClose, title, description, children, footer, size = 'md', tall }: DialogProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -45,7 +45,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
           <motion.div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -56,32 +56,32 @@ export function Dialog({ open, onClose, title, description, children, footer, si
             role="dialog"
             aria-modal="true"
             className={cn(
-              'relative flex w-full flex-col overflow-hidden rounded-t-3xl border border-border bg-surface shadow-overlay sm:rounded-3xl',
+              'relative flex w-full flex-col overflow-hidden rounded-t-[32px] border border-border bg-surface shadow-overlay sm:rounded-[32px]',
               widths[size],
               tall ? 'h-[92vh]' : 'max-h-[92vh]'
             )}
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            initial={{ opacity: 0, y: 60, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ duration: 0.3, ease: motionEase }}
+            exit={{ opacity: 0, y: 40, scale: 0.97 }}
+            transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
           >
             {(title || description) && (
-              <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+              <div className="flex items-start justify-between gap-4 px-6 pb-4 pt-6 sm:px-8">
                 <div>
-                  {title && <h2 className="text-lg font-semibold">{title}</h2>}
-                  {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
+                  {title && <h2 className="text-2xl font-extrabold [&_em]:font-serif [&_em]:font-normal [&_em]:italic [&_em]:text-primary">{title}</h2>}
+                  {description && <p className="mt-1 text-sm text-muted">{description}</p>}
                 </div>
                 <button
                   onClick={onClose}
                   aria-label="Close"
-                  className="-mr-2 -mt-1 flex size-9 items-center justify-center rounded-xl text-muted transition hover:bg-surface-muted hover:text-foreground"
+                  className="-mr-2 flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-muted text-muted transition hover:rotate-90 hover:text-foreground"
                 >
                   <X className="size-5" />
                 </button>
               </div>
             )}
             <div className="flex-1 overflow-y-auto">{children}</div>
-            {footer && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-surface-muted/50 px-6 py-4">{footer}</div>}
+            {footer && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-6 py-4 sm:px-8">{footer}</div>}
           </motion.div>
         </div>
       )}
@@ -94,11 +94,12 @@ interface PopoverProps {
   trigger: (props: { open: boolean; toggle: () => void }) => React.ReactNode;
   children: (close: () => void) => React.ReactNode;
   align?: 'left' | 'right';
+  side?: 'bottom' | 'top';
   className?: string;
 }
 
 /** Small anchored panel (menus, notification list). Closes on outside click and Escape. */
-export function Popover({ trigger, children, align = 'right', className }: PopoverProps) {
+export function Popover({ trigger, children, align = 'right', side = 'bottom', className }: PopoverProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -120,12 +121,13 @@ export function Popover({ trigger, children, align = 'right', className }: Popov
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            initial={{ opacity: 0, y: side === 'bottom' ? -8 : 8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.16, ease: motionEase }}
+            exit={{ opacity: 0, y: side === 'bottom' ? -8 : 8, scale: 0.95 }}
+            transition={{ type: 'spring', bounce: 0.25, duration: 0.35 }}
             className={cn(
-              'absolute top-full z-50 mt-2 origin-top rounded-2xl border border-border bg-surface-raised shadow-lifted',
+              'absolute z-50 rounded-3xl border border-border bg-surface-raised/95 shadow-overlay backdrop-blur-xl',
+              side === 'bottom' ? 'top-full mt-2 origin-top' : 'bottom-full mb-3 origin-bottom',
               align === 'right' ? 'right-0' : 'left-0',
               className
             )}
@@ -142,7 +144,7 @@ export function MenuItem({ icon, children, className, ...props }: React.ButtonHT
   return (
     <button
       type="button"
-      className={cn('flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm text-foreground transition hover:bg-surface-muted [&_svg]:size-4 [&_svg]:text-muted', className)}
+      className={cn('flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-medium transition hover:bg-surface-muted [&_svg]:size-4 [&_svg]:text-muted', className)}
       {...props}
     >
       {icon}
@@ -184,23 +186,16 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, description, co
       description={description}
       footer={
         <>
-          <button onClick={onClose} className="h-10 rounded-xl px-4 text-sm font-medium text-muted transition hover:bg-surface-muted hover:text-foreground">
-            Keep it
-          </button>
-          <button
-            onClick={confirm}
-            disabled={busy}
-            className={cn(
-              'h-10 rounded-xl px-4 text-sm font-medium text-white shadow-soft transition disabled:opacity-60',
-              tone === 'danger' ? 'bg-danger hover:brightness-95' : 'bg-primary hover:bg-primary-hover'
-            )}
-          >
-            {busy ? 'Working…' : confirmLabel}
-          </button>
+          <Button variant="ghost" onClick={onClose}>
+            Never mind
+          </Button>
+          <Button variant={tone === 'danger' ? 'danger' : 'primary'} loading={busy} onClick={confirm}>
+            {confirmLabel}
+          </Button>
         </>
       }
     >
-      {children && <div className="p-6">{children}</div>}
+      {children && <div className="px-6 pb-6 sm:px-8">{children}</div>}
     </Dialog>
   );
 }

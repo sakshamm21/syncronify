@@ -1,106 +1,80 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { AnimatePresence, motion } from 'motion/react';
-import { Menu, Plus, Search, X } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useCreateEvent } from '@/components/events/CreateEventDialog';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { usePathname } from 'next/navigation';
+import { motion } from 'motion/react';
+import { Search } from 'lucide-react';
 import { motionEase } from '@/components/ui/motion';
-import Sidebar from './Sidebar';
+import { Logo } from './Logo';
+import Dock from './Dock';
 import NotificationBell from './NotificationBell';
 import ThemeToggle from './ThemeToggle';
 import UserMenu from './UserMenu';
+import { CommandPaletteProvider, usePalette } from './CommandPalette';
 
-function SearchBox() {
-  const router = useRouter();
-  const [query, setQuery] = useState('');
+/** Soft colour fields behind everything; the grain overlay sits on top of them. */
+export function AmbientGlow() {
   return (
-    <form
-      role="search"
-      onSubmit={(e) => {
-        e.preventDefault();
-        router.push(`/explore${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''}`);
-      }}
-      className="relative w-full max-w-md"
-    >
-      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-subtle" />
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search events, venues, tags…"
-        aria-label="Search events"
-        className="h-10 w-full rounded-xl border border-transparent bg-surface-muted pl-10 pr-3 text-sm outline-none transition placeholder:text-subtle focus:border-border focus:bg-surface focus:shadow-soft"
-      />
-    </form>
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div className="absolute -left-40 -top-48 size-[34rem] rounded-full bg-primary/[0.09] blur-[120px]" />
+      <div className="absolute -right-40 top-1/4 size-[30rem] rounded-full bg-pink/[0.08] blur-[120px]" />
+      <div className="absolute -bottom-40 left-1/3 size-[30rem] rounded-full bg-cyan/[0.06] blur-[120px]" />
+    </div>
   );
 }
 
-/** Signed-in layout: sidebar, top bar and an animated content area. */
+function SearchTrigger() {
+  const { openPalette } = usePalette();
+  return (
+    <button
+      onClick={openPalette}
+      className="group flex h-11 w-full max-w-sm items-center gap-3 rounded-full border border-border bg-surface/70 px-4 text-sm text-subtle backdrop-blur transition hover:border-border-strong hover:text-muted"
+    >
+      <Search className="size-4 transition group-hover:text-primary" />
+      <span className="flex-1 text-left">Search or jump to…</span>
+      <kbd className="hidden rounded-md border border-border bg-surface-muted px-1.5 font-mono text-[11px] sm:block">⌘K</kbd>
+    </button>
+  );
+}
+
+function MobileSearchButton() {
+  const { openPalette } = usePalette();
+  return (
+    <button onClick={openPalette} aria-label="Search" className="flex size-10 items-center justify-center rounded-full text-muted hover:bg-surface-muted hover:text-foreground sm:hidden">
+      <Search className="size-5" />
+    </button>
+  );
+}
+
+/** Signed-in layout: top bar, animated content, floating dock. */
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user } = useAuth();
-  const { openCreateEvent } = useCreateEvent();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  useEffect(() => setDrawerOpen(false), [pathname]);
 
   return (
-    <div className="min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border bg-background lg:block">
-        <Sidebar />
-      </aside>
-
-      <AnimatePresence>
-        {drawerOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <motion.div className="absolute inset-0 bg-black/40 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} />
-            <motion.aside
-              className="absolute inset-y-0 left-0 w-72 border-r border-border bg-background shadow-overlay"
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ duration: 0.3, ease: motionEase }}
-            >
-              <Button variant="ghost" size="icon" onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="absolute right-3 top-4">
-                <X />
-              </Button>
-              <Sidebar layoutGroup="mobile" onNavigate={() => setDrawerOpen(false)} />
-            </motion.aside>
+    <CommandPaletteProvider>
+      <AmbientGlow />
+      <header className="sticky top-0 z-30 bg-background/60 backdrop-blur-xl">
+        <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+          <Logo href="/dashboard" />
+          <div className="hidden flex-1 justify-center sm:flex">
+            <SearchTrigger />
           </div>
-        )}
-      </AnimatePresence>
-
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-xl">
-          <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
-            <Button variant="ghost" size="icon" onClick={() => setDrawerOpen(true)} aria-label="Open menu" className="lg:hidden">
-              <Menu />
-            </Button>
-            <div className="hidden flex-1 sm:block">
-              <SearchBox />
-            </div>
-            <div className="ml-auto flex items-center gap-1.5">
-              <Button onClick={() => openCreateEvent()} size="md" className="hidden sm:inline-flex">
-                <Plus /> {user?.role === 'member' ? 'Add event' : 'New event'}
-              </Button>
-              <Button onClick={() => openCreateEvent()} size="icon" aria-label="New event" className="sm:hidden">
-                <Plus />
-              </Button>
-              <ThemeToggle />
-              <NotificationBell />
-              <UserMenu />
-            </div>
+          <div className="ml-auto flex items-center gap-1 sm:ml-0">
+            <MobileSearchButton />
+            <ThemeToggle />
+            <NotificationBell />
+            <UserMenu />
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <motion.div key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: motionEase }}>
-            {children}
-          </motion.div>
-        </main>
-      </div>
-    </div>
+      <main className="mx-auto max-w-7xl px-4 pb-40 pt-6 sm:px-6 lg:px-8">
+        <motion.div key={pathname} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: motionEase }}>
+          {children}
+        </motion.div>
+      </main>
+
+      <Dock />
+    </CommandPaletteProvider>
   );
 }

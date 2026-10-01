@@ -30,16 +30,35 @@ export const ROLE_LABELS: Record<Role, string> = {
 /** Where people land after signing in; role-specific tools are reachable from there. */
 export const APP_HOME = '/dashboard';
 
-/** Cover art for events without a photo: a gradient per category. */
+/** Cover art for events without a photo: a loud gradient per category. */
 export const CATEGORY_GRADIENTS: Record<CategoryValue, string> = {
-  tech: 'from-indigo-500 via-violet-500 to-fuchsia-500',
-  workshop: 'from-sky-500 via-cyan-500 to-teal-400',
-  cultural: 'from-rose-500 via-pink-500 to-orange-400',
-  sports: 'from-emerald-500 via-green-500 to-lime-400',
-  meetup: 'from-amber-500 via-orange-500 to-rose-500',
-  conference: 'from-blue-600 via-indigo-500 to-violet-500',
-  social: 'from-fuchsia-500 via-purple-500 to-indigo-500',
-  other: 'from-slate-500 via-slate-600 to-zinc-700',
+  tech: 'from-[#3df5ff] via-[#6a3dff] to-[#ff4fd8]',
+  workshop: 'from-[#d4ff3a] via-[#3dffa0] to-[#3df5ff]',
+  cultural: 'from-[#ff4fd8] via-[#ff7a1a] to-[#ffd23d]',
+  sports: 'from-[#3dffa0] via-[#d4ff3a] to-[#ffd23d]',
+  meetup: 'from-[#ff7a1a] via-[#ff4f8b] to-[#8b5cff]',
+  conference: 'from-[#6a3dff] via-[#3d7bff] to-[#3df5ff]',
+  social: 'from-[#ff4fd8] via-[#8b5cff] to-[#3df5ff]',
+  other: 'from-[#9aa0b4] via-[#5d6478] to-[#2b2f3d]',
+};
+
+export const CATEGORY_EMOJI: Record<CategoryValue, string> = {
+  tech: '💻',
+  workshop: '🛠️',
+  cultural: '🎭',
+  sports: '⚽',
+  meetup: '☕',
+  conference: '🎤',
+  social: '🎉',
+  other: '✨',
+};
+
+export const NOTE_TAG_EMOJI: Record<NoteTag, string> = {
+  plan: '🗺️',
+  speaker: '🎙️',
+  logistics: '📦',
+  ideas: '💡',
+  personal: '🫶',
 };
 
 const dayFormat = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' });

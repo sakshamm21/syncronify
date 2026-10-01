@@ -6,7 +6,7 @@ import { Check, Globe, Lock, MapPin } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEventsSync } from '@/context/EventContext';
 import { ApiError, errorMessage, eventsApi, type CategoryValue, type EventInput, type SyncEvent } from '@/lib/api';
-import { CATEGORIES, CATEGORY_LABELS, fromDateTimeInput, toDateTimeInput } from '@/lib/format';
+import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_LABELS, fromDateTimeInput, toDateTimeInput } from '@/lib/format';
 import { Dialog } from '@/components/ui/overlay';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/field';
@@ -118,7 +118,7 @@ function CreateEventDialog({ open, event, date, onClose }: { open: boolean; even
       open={open}
       onClose={onClose}
       size="lg"
-      title={event ? 'Edit event' : 'Create an event'}
+      title={event ? <>Edit <em>event</em></> : <>Drop an <em>event</em></>}
       description={event ? 'Attendees are notified if the time or place changes.' : 'Share it with campus, or keep it on your own calendar.'}
     >
       {/* Remounting resets the form every time the dialog opens. */}
@@ -228,7 +228,7 @@ function EventForm({ event, date, onDone }: { event?: SyncEvent; date?: Date; on
                 type="button"
                 onClick={() => set('isPublic', option.value)}
                 className={cn(
-                  'flex items-start gap-3 rounded-2xl border p-3.5 text-left transition',
+                  'flex items-start gap-3 rounded-3xl border p-4 text-left transition',
                   form.isPublic === option.value ? 'border-primary bg-primary-soft ring-4 ring-ring/15' : 'border-border hover:border-border-strong'
                 )}
               >
@@ -247,7 +247,7 @@ function EventForm({ event, date, onDone }: { event?: SyncEvent; date?: Date; on
         </Field>
 
         <div>
-          <p className="mb-2 text-sm font-medium">Category</p>
+          <p className="mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Category</p>
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((cat) => (
               <button
@@ -260,7 +260,7 @@ function EventForm({ event, date, onDone }: { event?: SyncEvent; date?: Date; on
                   form.category === cat ? 'border-transparent bg-foreground text-background' : 'border-border text-muted hover:border-border-strong hover:text-foreground'
                 )}
               >
-                {CATEGORY_LABELS[cat]}
+                {CATEGORY_EMOJI[cat]} {CATEGORY_LABELS[cat]}
               </button>
             ))}
           </div>
@@ -280,7 +280,7 @@ function EventForm({ event, date, onDone }: { event?: SyncEvent; date?: Date; on
         </div>
 
         <div>
-          <label htmlFor="event-venue" className="mb-1.5 block text-sm font-medium">Venue</label>
+          <label htmlFor="event-venue" className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Venue</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <MapPin className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-subtle" />

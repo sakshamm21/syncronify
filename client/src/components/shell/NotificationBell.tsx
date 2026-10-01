@@ -90,7 +90,7 @@ export default function NotificationBell() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
-                className="absolute right-1.5 top-1.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground ring-2 ring-background"
+                className="absolute right-1.5 top-1.5 flex min-w-4 items-center justify-center rounded-full bg-pink px-1 text-[10px] font-bold leading-4 text-white ring-2 ring-background"
               >
                 {unread > 9 ? '9+' : unread}
               </motion.span>
@@ -102,7 +102,7 @@ export default function NotificationBell() {
       {(close) => (
         <div>
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <p className="text-sm font-semibold">Notifications</p>
+            <p className="font-display text-lg font-extrabold">Notifications</p>
             {unread > 0 && (
               <button onClick={markAllRead} className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover">
                 <CheckCheck className="size-3.5" /> Mark all read
@@ -113,14 +113,14 @@ export default function NotificationBell() {
             {items.length === 0 && (
               <li className="px-4 py-10 text-center text-sm text-muted">
                 <Bell className="mx-auto mb-2 size-6 text-subtle" />
-                You&apos;re all caught up.
+                All caught up ✌️
               </li>
             )}
             {items.map((n) => {
               const Icon = ICONS[n.type] ?? Bell;
               const content = (
                 <div className="flex gap-3">
-                  <span className={cn('mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl', n.readAt ? 'bg-surface-muted text-muted' : 'bg-primary-soft text-primary-soft-foreground')}>
+                  <span className={cn('mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full', n.readAt ? 'bg-surface-muted text-muted' : 'bg-primary-soft text-primary-soft-foreground')}>
                     <Icon className="size-4" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -128,10 +128,10 @@ export default function NotificationBell() {
                     {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p>}
                     <p className="mt-1 text-[11px] text-subtle">{formatRelative(n.createdAt)}</p>
                   </div>
-                  {!n.readAt && <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />}
+                  {!n.readAt && <span className="mt-2 size-2 shrink-0 rounded-full bg-pink" />}
                 </div>
               );
-              const className = 'block w-full rounded-xl px-3 py-2.5 text-left transition hover:bg-surface-muted';
+              const className = 'block w-full rounded-2xl px-3 py-2.5 text-left transition hover:bg-surface-muted';
               return (
                 <li key={n.id}>
                   {n.event ? (

@@ -2,10 +2,10 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SearchX, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useEventsSync } from '@/context/EventContext';
 import { errorMessage, eventsApi, type CategoryValue, type EventQuery, type SyncEvent } from '@/lib/api';
-import { CATEGORIES, CATEGORY_LABELS } from '@/lib/format';
+import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_LABELS } from '@/lib/format';
 import EventCard, { EventCardSkeleton } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/button';
 import { EmptyState, PageHeader } from '@/components/ui/surface';
@@ -77,19 +77,19 @@ function Explore() {
 
   return (
     <>
-      <PageHeader title="Explore" description="Everything coming up on campus. Search, filter, and RSVP in one tap." />
+      <PageHeader kicker="Everything coming up on campus" title={<>Explore the <em>good stuff</em></>} description="Search it, filter it, tap I’m in. That’s it." />
 
       <div className="mb-6 space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-subtle" />
+            <Search className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-primary" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by title, venue or tag"
+              placeholder="hackathon, open mic, football…"
               aria-label="Search events"
-              className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-3 text-sm shadow-soft outline-none transition focus:border-primary focus:ring-4 focus:ring-ring/20"
+              className="h-14 w-full rounded-full border border-border bg-surface pl-12 pr-4 font-display text-lg font-semibold outline-none transition placeholder:font-sans placeholder:text-base placeholder:font-normal placeholder:text-subtle hover:border-border-strong focus:border-primary focus:ring-4 focus:ring-ring/25"
             />
           </div>
           <Segmented<Sort>
@@ -97,7 +97,7 @@ function Explore() {
             onChange={setSort}
             options={[
               { value: 'soonest', label: 'Soonest' },
-              { value: 'popular', label: 'Popular' },
+              { value: 'popular', label: 'Trending 🔥' },
               { value: 'newest', label: 'New' },
             ]}
           />
@@ -105,22 +105,22 @@ function Explore() {
         <FilterChips<CategoryValue>
           value={category}
           onChange={setCategory}
-          options={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABELS[c] }))}
+          options={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABELS[c], emoji: CATEGORY_EMOJI[c] }))}
         />
       </div>
 
       <FormAlert message={error} />
 
       {events === null ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
             <EventCardSkeleton key={i} />
           ))}
         </div>
       ) : events.length === 0 ? (
         <EmptyState
-          icon={<SearchX />}
-          title="No events match"
+          emoji="🔍"
+          title="Nothing matches… yet"
           description={q || category ? 'Try a different search or category.' : 'Nothing is scheduled yet. Check back soon.'}
           action={
             (q || category) && (
@@ -139,10 +139,10 @@ function Explore() {
         />
       ) : (
         <>
-          <p className="mb-4 text-sm text-muted">
+          <p className="mb-6 font-mono text-xs uppercase tracking-[0.16em] text-muted">
             {total} event{total === 1 ? '' : 's'}
           </p>
-          <Stagger key={`${q}-${category}-${sort}`} className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <Stagger key={`${q}-${category}-${sort}`} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
               <StaggerItem key={event.id}>
                 <EventCard event={event} onChange={replace} />

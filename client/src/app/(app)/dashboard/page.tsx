@@ -2,50 +2,35 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, CalendarCheck, Compass, Megaphone, ShieldCheck, Sparkles, Ticket } from 'lucide-react';
+import { ArrowUpRight, Compass, Megaphone, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEventsSync } from '@/context/EventContext';
 import { adminApi, eventsApi, meApi, organizerApi, type OrganizerOverview, type PlatformStats, type SyncEvent } from '@/lib/api';
-import { formatEventWhen, formatVenue, greeting } from '@/lib/format';
+import { CATEGORY_EMOJI, formatDay, formatTime } from '@/lib/format';
 import EventCard, { EventCardSkeleton } from '@/components/events/EventCard';
-import EventCover from '@/components/events/EventCover';
+import MiniTicket from '@/components/events/MiniTicket';
 import { ButtonLink } from '@/components/ui/button';
-import { Card, EmptyState } from '@/components/ui/surface';
-import { Stagger, StaggerItem } from '@/components/ui/motion';
+import { EmptyState, Kicker, SectionTitle } from '@/components/ui/surface';
+import { FadeIn, Marquee, Stagger, StaggerItem } from '@/components/ui/motion';
+import { cn } from '@/lib/cn';
 
-function SectionTitle({ icon, title, href, linkLabel }: { icon: React.ReactNode; title: string; href?: string; linkLabel?: string }) {
+function Ticker({ events }: { events: SyncEvent[] }) {
+  if (!events.length) return null;
   return (
-    <div className="mb-4 flex items-center justify-between">
-      <h2 className="flex items-center gap-2 text-lg font-semibold [&_svg]:size-5 [&_svg]:text-primary">
-        {icon}
-        {title}
-      </h2>
-      {href && (
-        <Link href={href} className="flex items-center gap-1 text-sm font-medium text-muted transition hover:text-foreground">
-          {linkLabel} <ArrowRight className="size-4" />
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function UpNext({ events }: { events: SyncEvent[] }) {
-  return (
-    <Stagger className="grid gap-4 md:grid-cols-3">
-      {events.map((event) => (
-        <StaggerItem key={event.id}>
-          <Link href={`/events/${event.id}`} className="group flex items-center gap-4 rounded-2xl border border-border bg-surface p-3 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lifted">
-            <EventCover event={event} showDate={false} className="size-20 shrink-0 rounded-xl [&>span]:hidden" />
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-primary">{formatEventWhen(event)}</p>
-              <p className="mt-0.5 truncate font-semibold">{event.title}</p>
-              <p className="truncate text-sm text-muted">{formatVenue(event)}</p>
-              {event.viewer.registration === 'waitlisted' && <p className="mt-1 text-xs font-medium text-warning">On the waitlist</p>}
-            </div>
+    <div className="-mx-4 rotate-[-1.5deg] bg-primary py-3 text-primary-foreground sm:mx-0 sm:rounded-full">
+      <Marquee duration={40}>
+        {events.map((e) => (
+          <Link key={e.id} href={`/events/${e.id}`} className="mx-6 flex items-center gap-3 whitespace-nowrap font-display text-lg font-extrabold uppercase tracking-tight hover:underline">
+            <span aria-hidden="true">{CATEGORY_EMOJI[e.category]}</span>
+            {e.title}
+            <span className="font-mono text-xs font-medium normal-case opacity-70">
+              {formatDay(e.startsAt)} · {formatTime(e.startsAt)}
+            </span>
+            <span aria-hidden="true" className="ml-3">✦</span>
           </Link>
-        </StaggerItem>
-      ))}
-    </Stagger>
+        ))}
+      </Marquee>
+    </div>
   );
 }
 
@@ -61,40 +46,40 @@ function RoleShortcuts() {
 
   if (!organizer && !platform) return null;
 
+  const cards = [
+    organizer && {
+      href: '/organizer',
+      icon: <Megaphone />,
+      title: 'Your events',
+      line: `${organizer.upcomingEvents} live · ${organizer.totalRegistrations} RSVPs · ${organizer.waitlisted} waiting`,
+      className: 'bg-cyan text-black',
+    },
+    platform && {
+      href: '/admin?tab=applications',
+      icon: <ShieldCheck />,
+      title: 'Admin',
+      line: `${platform.pendingApplications} organizer request${platform.pendingApplications === 1 ? '' : 's'} · ${platform.users.total} people`,
+      className: 'bg-pink text-white',
+    },
+  ].filter(Boolean) as { href: string; icon: React.ReactNode; title: string; line: string; className: string }[];
+
   return (
-    <div className={`grid gap-4 ${organizer && platform ? 'md:grid-cols-2' : ''}`}>
-      {organizer && (
-        <Link href="/organizer" className="group">
-          <Card className="flex items-center gap-4 p-5 transition group-hover:-translate-y-0.5 group-hover:shadow-lifted">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground">
-              <Megaphone className="size-5" />
-            </span>
-            <div className="flex-1">
-              <p className="font-semibold">Organizer console</p>
-              <p className="text-sm text-muted">
-                {organizer.upcomingEvents} upcoming · {organizer.totalRegistrations} registrations · {organizer.waitlisted} waitlisted
-              </p>
-            </div>
-            <ArrowRight className="size-5 text-subtle transition group-hover:translate-x-1 group-hover:text-foreground" />
-          </Card>
+    <div className={cn('grid gap-4', cards.length > 1 && 'md:grid-cols-2')}>
+      {cards.map((c, i) => (
+        <Link
+          key={c.href}
+          href={c.href}
+          style={{ rotate: `${i % 2 ? 0.8 : -0.8}deg` }}
+          className={cn('group flex items-center gap-4 rounded-[28px] p-5 transition hover:rotate-0 hover:scale-[1.01]', c.className)}
+        >
+          <span className="flex size-12 items-center justify-center rounded-full bg-black/10 [&_svg]:size-5">{c.icon}</span>
+          <div className="flex-1">
+            <p className="font-display text-xl font-extrabold">{c.title}</p>
+            <p className="text-sm opacity-75">{c.line}</p>
+          </div>
+          <ArrowUpRight className="size-6 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </Link>
-      )}
-      {platform && (
-        <Link href="/admin?tab=applications" className="group">
-          <Card className="flex items-center gap-4 p-5 transition group-hover:-translate-y-0.5 group-hover:shadow-lifted">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-warning-soft text-warning">
-              <ShieldCheck className="size-5" />
-            </span>
-            <div className="flex-1">
-              <p className="font-semibold">Admin</p>
-              <p className="text-sm text-muted">
-                {platform.pendingApplications} organizer request{platform.pendingApplications === 1 ? '' : 's'} to review · {platform.users.total} people
-              </p>
-            </div>
-            <ArrowRight className="size-5 text-subtle transition group-hover:translate-x-1 group-hover:text-foreground" />
-          </Card>
-        </Link>
-      )}
+      ))}
     </div>
   );
 }
@@ -104,76 +89,79 @@ export default function HomePage() {
   const { version } = useEventsSync();
   const [upNext, setUpNext] = useState<SyncEvent[] | null>(null);
   const [picked, setPicked] = useState<SyncEvent[] | null>(null);
+  const [ticker, setTicker] = useState<SyncEvent[]>([]);
 
   useEffect(() => {
     meApi
       .registrations(true)
-      .then((items) => setUpNext(items.filter((e) => e.status !== 'cancelled').slice(0, 3)))
+      .then((items) => setUpNext(items.filter((e) => e.status !== 'cancelled')))
       .catch(() => setUpNext([]));
+    eventsApi.recommended().then(setPicked).catch(() => setPicked([]));
     eventsApi
-      .recommended()
-      .then(setPicked)
-      .catch(() => setPicked([]));
+      .list({ sort: 'soonest', limit: 10 })
+      .then(({ items }) => setTicker(items))
+      .catch(() => {});
   }, [version]);
 
   const replace = (updated: SyncEvent) => setPicked((prev) => prev?.map((e) => (e.id === updated.id ? updated : e)) ?? prev);
+  const today = new Date().toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' });
+  const thisWeek = upNext?.filter((e) => new Date(e.startsAt).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000).length ?? 0;
 
   return (
-    <div className="space-y-12">
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-8 shadow-soft sm:p-10">
-        <div className="absolute -right-20 -top-24 size-72 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-28 right-32 size-64 rounded-full bg-fuchsia-500/15 blur-3xl" />
-        <div className="relative">
-          <p className="text-sm font-medium text-primary">{greeting()}</p>
-          <h1 className="mt-1 text-3xl font-semibold sm:text-4xl">{user?.name.split(' ')[0]}, here&apos;s what&apos;s on.</h1>
-          <p className="mt-2 max-w-xl text-muted">
-            {upNext && upNext.length > 0
-              ? `You have ${upNext.length === 1 ? 'one event' : `${upNext.length} events`} coming up. Find something new, or plan your own.`
-              : 'Find something worth going to, or plan your own.'}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <ButtonLink href="/explore">
-              <Compass /> Explore events
-            </ButtonLink>
-            <ButtonLink href="/schedule" variant="secondary">
-              <CalendarCheck /> My schedule
-            </ButtonLink>
-          </div>
+    <div className="space-y-14">
+      <FadeIn>
+        <Kicker>
+          {today} · {upNext ? `${thisWeek} plan${thisWeek === 1 ? '' : 's'} this week` : '…'}
+        </Kicker>
+        <h1 className="mt-3 text-[clamp(3rem,9vw,7rem)] font-extrabold leading-[0.9] tracking-[-0.04em]">
+          What&apos;s the <em className="font-serif font-normal italic text-primary">move</em>,
+          <br />
+          {user?.name.split(' ')[0]}?
+        </h1>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <ButtonLink href="/explore" size="lg">
+            <Compass /> Find something to do
+          </ButtonLink>
+          <ButtonLink href="/schedule" variant="secondary" size="lg">
+            My week
+          </ButtonLink>
         </div>
-      </div>
+      </FadeIn>
+
+      <Ticker events={ticker} />
 
       <RoleShortcuts />
 
       <section>
-        <SectionTitle icon={<Ticket />} title="Up next" href="/schedule" linkLabel="Schedule" />
+        <SectionTitle
+          emoji="🎟️"
+          title={<>Your <em>tickets</em></>}
+          action={<Link href="/schedule" className="font-mono text-xs uppercase tracking-wider text-muted hover:text-foreground">See all →</Link>}
+        />
         {upNext === null ? (
-          <div className="grid gap-4 md:grid-cols-3">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-[104px] animate-pulse rounded-2xl bg-surface-muted" />
+          <div className="flex gap-4 overflow-hidden">{[0, 1, 2].map((i) => <div key={i} className="h-32 w-[22rem] shrink-0 animate-pulse rounded-[24px] bg-surface-muted" />)}</div>
+        ) : upNext.length ? (
+          <div className="no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+            {upNext.map((event) => (
+              <MiniTicket key={event.id} event={event} />
             ))}
           </div>
-        ) : upNext.length ? (
-          <UpNext events={upNext} />
         ) : (
           <EmptyState
-            icon={<Ticket />}
-            title="Nothing booked yet"
-            description="RSVP to an event and it'll show up here, with reminders before it starts."
-            action={<ButtonLink href="/explore" variant="secondary">Browse events</ButtonLink>}
+            emoji="🎫"
+            title="No plans yet. Fixable."
+            description="RSVP to something and your ticket lands here, with a reminder before it starts."
+            action={<ButtonLink href="/explore" variant="secondary">Browse what&apos;s on</ButtonLink>}
           />
         )}
       </section>
 
       <section>
-        <SectionTitle icon={<Sparkles />} title="Picked for you" href="/explore" linkLabel="See all" />
+        <SectionTitle emoji="✨" title={<>Picked for <em>you</em></>} action={<Link href="/explore" className="font-mono text-xs uppercase tracking-wider text-muted hover:text-foreground">Explore →</Link>} />
         {picked === null ? (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {[0, 1, 2].map((i) => (
-              <EventCardSkeleton key={i} />
-            ))}
-          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <EventCardSkeleton key={i} />)}</div>
         ) : picked.length ? (
-          <Stagger className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {picked.map((event) => (
               <StaggerItem key={event.id}>
                 <EventCard event={event} onChange={replace} />
@@ -181,15 +169,15 @@ export default function HomePage() {
             ))}
           </Stagger>
         ) : (
-          <EmptyState icon={<Sparkles />} title="You're all caught up" description="You've joined everything coming up. New events will appear here." />
+          <EmptyState emoji="🫡" title="You've joined everything." description="Overachiever. New events will pop up here." />
         )}
         {picked && picked.length > 0 && !user?.interests.length && (
-          <p className="mt-4 text-sm text-muted">
-            Tip: pick your interests in{' '}
-            <Link href="/settings" className="font-medium text-primary hover:underline">
+          <p className="mt-6 text-sm text-muted">
+            Psst, pick your vibes in{' '}
+            <Link href="/settings" className="font-semibold text-primary hover:underline">
               Settings
             </Link>{' '}
-            to get better suggestions.
+            and these get way better.
           </p>
         )}
       </section>

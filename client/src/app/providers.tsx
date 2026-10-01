@@ -10,18 +10,24 @@ function ThemedToaster() {
   const { resolvedTheme } = useTheme();
   return (
     <Toaster
-      position="top-right"
-      theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
-      richColors
-      closeButton
-      toastOptions={{ classNames: { toast: 'rounded-2xl! font-sans!' } }}
+      position="top-center"
+      theme={resolvedTheme === 'light' ? 'light' : 'dark'}
+      toastOptions={{
+        classNames: {
+          toast: 'rounded-2xl! border! border-border! bg-surface-raised! text-foreground! shadow-overlay! font-sans!',
+          title: 'font-semibold!',
+          description: 'text-muted!',
+          success: '[&_[data-icon]]:text-primary!',
+        },
+      }}
     />
   );
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    // Dark ("after dark") is the brand default; day mode and system are in Settings.
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       <AuthProvider>
         <EventProvider>
           <CreateEventProvider>

@@ -42,7 +42,7 @@ export default function ChatWorkspace() {
   if (channels.length === 0) {
     return (
       <EmptyState
-        icon={<MessagesSquare />}
+        emoji="💬"
         title="No conversations yet"
         description="Every event has a group chat with the organizer and everyone going. RSVP to an event to join its chat."
         action={<ButtonLink href="/explore" variant="secondary">Find an event</ButtonLink>}
@@ -53,9 +53,9 @@ export default function ChatWorkspace() {
   const active = channels.find((c) => c.id === activeId);
 
   return (
-    <div className="grid h-[calc(100vh-12rem)] min-h-[520px] overflow-hidden rounded-2xl border border-border bg-surface shadow-soft md:grid-cols-[18rem_1fr]">
+    <div className="grid h-[calc(100dvh-23rem)] min-h-[460px] overflow-hidden rounded-[32px] border border-border bg-surface md:grid-cols-[19rem_1fr]">
       <nav className={cn('flex min-h-0 flex-col border-r border-border', showThread && 'hidden md:flex')}>
-        <p className="border-b border-border px-4 py-3.5 text-sm font-semibold">Event chats</p>
+        <p className="border-b border-border px-5 py-4 font-display text-lg font-extrabold">Event chats</p>
         <ul className="flex-1 space-y-0.5 overflow-y-auto p-2">
           {channels.map((channel) => (
             <li key={channel.id}>
@@ -64,12 +64,12 @@ export default function ChatWorkspace() {
                   setActiveId(channel.id);
                   setShowThread(true);
                 }}
-                className={cn('flex w-full items-center gap-3 rounded-xl p-2 text-left transition', channel.id === activeId ? 'bg-primary-soft' : 'hover:bg-surface-muted')}
+                className={cn('flex w-full items-center gap-3 rounded-2xl p-2 text-left transition', channel.id === activeId ? 'bg-primary text-primary-foreground' : 'hover:bg-surface-muted')}
               >
-                <EventCover event={channel} showDate={false} className="size-11 shrink-0 rounded-xl [&>span]:hidden" />
+                <EventCover event={channel} stickers={false} className="size-12 shrink-0 rounded-2xl" />
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium">{channel.title}</span>
-                  <span className="text-xs text-muted">{formatDay(channel.startsAt)}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-wider opacity-70">{formatDay(channel.startsAt)}</span>
                 </span>
               </button>
             </li>
@@ -84,7 +84,7 @@ export default function ChatWorkspace() {
               <ArrowLeft className="size-5" />
             </button>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{active.title}</p>
+              <p className="truncate font-display text-lg font-bold">{active.title}</p>
               <p className="text-xs text-muted">{formatDay(active.startsAt)} · {active.attendeeCount} going</p>
             </div>
             <Link href={`/events/${active.id}`} className="flex items-center gap-1 text-xs font-medium text-muted hover:text-foreground">

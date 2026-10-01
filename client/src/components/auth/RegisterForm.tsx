@@ -46,8 +46,8 @@ export default function RegisterForm({ onSwitchToLogin, onRegistered }: Register
 
   return (
     <AuthCard
-      title="Create your account"
-      subtitle="It takes a minute. We'll email you a code to confirm it's you."
+      title={<>get <em>in</em>.</>}
+      subtitle="Takes a minute. We’ll send a 6-digit code to check it’s really you."
       footer={
         <>
           Already have an account?{' '}
@@ -77,7 +77,7 @@ export default function RegisterForm({ onSwitchToLogin, onRegistered }: Register
         ))}
         <FormAlert message={error} />
         <Button type="submit" size="lg" loading={loading} className="w-full">
-          Create account
+          Create my account
         </Button>
         <p className="text-center text-xs text-muted">Want to host events? Apply to become an organizer from Settings once you're in.</p>
       </form>

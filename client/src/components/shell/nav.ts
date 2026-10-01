@@ -1,4 +1,4 @@
-import { CalendarDays, Compass, Home, Map, Megaphone, MessagesSquare, Settings, ShieldCheck, StickyNote, type LucideIcon } from 'lucide-react';
+import { CalendarDays, Compass, Home, Map, Megaphone, MessagesSquare, ShieldCheck, StickyNote, type LucideIcon } from 'lucide-react';
 import type { Role } from '@/lib/api';
 
 export interface NavItem {
@@ -9,33 +9,23 @@ export interface NavItem {
   roles?: Role[];
 }
 
-export const NAV_SECTIONS: { title?: string; items: NavItem[] }[] = [
-  {
-    items: [
-      { href: '/dashboard', label: 'Home', icon: Home },
-      { href: '/explore', label: 'Explore', icon: Compass },
-      { href: '/schedule', label: 'Schedule', icon: CalendarDays },
-      { href: '/chat', label: 'Chats', icon: MessagesSquare },
-      { href: '/notes', label: 'Notes', icon: StickyNote },
-      { href: '/map', label: 'Venue map', icon: Map },
-    ],
-  },
-  {
-    title: 'Manage',
-    items: [
-      { href: '/organizer', label: 'Organizer', icon: Megaphone, roles: ['organizer', 'admin'] },
-      { href: '/admin', label: 'Admin', icon: ShieldCheck, roles: ['admin'] },
-    ],
-  },
+/** Always visible in the dock. */
+export const PRIMARY_NAV: NavItem[] = [
+  { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/explore', label: 'Explore', icon: Compass },
+  { href: '/schedule', label: 'Schedule', icon: CalendarDays },
+  { href: '/chat', label: 'Chats', icon: MessagesSquare },
 ];
 
-export const SETTINGS_ITEM: NavItem = { href: '/settings', label: 'Settings', icon: Settings };
+/** Inline on larger screens, inside "More" on phones. */
+export const SECONDARY_NAV: NavItem[] = [
+  { href: '/notes', label: 'Notes', icon: StickyNote },
+  { href: '/map', label: 'Map', icon: Map },
+  { href: '/organizer', label: 'Organizer', icon: Megaphone, roles: ['organizer', 'admin'] },
+  { href: '/admin', label: 'Admin', icon: ShieldCheck, roles: ['admin'] },
+];
 
-export function visibleSections(role: Role | undefined) {
-  return NAV_SECTIONS.map((section) => ({
-    ...section,
-    items: section.items.filter((item) => !item.roles || (role && item.roles.includes(role))),
-  })).filter((section) => section.items.length > 0);
-}
+export const visibleFor = (items: NavItem[], role: Role | undefined) =>
+  items.filter((item) => !item.roles || (role && item.roles.includes(role)));
 
 export const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);

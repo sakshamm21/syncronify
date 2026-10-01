@@ -4,17 +4,18 @@ import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowLeft, CalendarPlus, Clock, Hourglass, Link2, MapPin, MessagesSquare, Navigation, Share2, Users } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, Hourglass, Link2, MapPin, Navigation, Share2 } from 'lucide-react';
 import PublicHeader from '@/components/shell/PublicHeader';
+import { AmbientGlow } from '@/components/shell/AppShell';
 import RsvpButton from '@/components/events/RsvpButton';
-import EventCover from '@/components/events/EventCover';
-import { CapacityBar } from '@/components/events/EventCard';
+import EventCover, { statusOf } from '@/components/events/EventCover';
+import { CapacityBar, DateStamp } from '@/components/events/EventCard';
 import EventChat from '@/components/chat/EventChat';
 import { useAuth } from '@/context/AuthContext';
 import { errorMessage, eventsApi, type SyncEvent } from '@/lib/api';
-import { CATEGORY_LABELS, formatEventWhen, formatVenue } from '@/lib/format';
-import { Button, ButtonLink } from '@/components/ui/button';
-import { Avatar, Badge, Card, EmptyState } from '@/components/ui/surface';
+import { CATEGORY_EMOJI, CATEGORY_LABELS, formatEventWhen, formatVenue } from '@/lib/format';
+import { ButtonLink } from '@/components/ui/button';
+import { Avatar, Card, EmptyState, Kicker, Sticker } from '@/components/ui/surface';
 import { FadeIn } from '@/components/ui/motion';
 
 function directionsUrl(event: SyncEvent): string | null {
@@ -31,12 +32,22 @@ function mapEmbed(event: SyncEvent): string | null {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d}%2C${lat - d}%2C${lng + d}%2C${lat + d}&layer=mapnik&marker=${lat}%2C${lng}`;
 }
 
-function Detail({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+function RoundAction({ label, onClick, href, children }: { label: string; onClick?: () => void; href?: string | null; children: React.ReactNode }) {
+  const className =
+    'flex flex-col items-center gap-1.5 text-xs font-semibold text-muted transition hover:text-foreground disabled:opacity-40 [&_span:first-child]:flex [&_span:first-child]:size-12 [&_span:first-child]:items-center [&_span:first-child]:justify-center [&_span:first-child]:rounded-full [&_span:first-child]:border [&_span:first-child]:border-border [&_span:first-child]:bg-surface-muted [&_span:first-child]:transition hover:[&_span:first-child]:border-primary hover:[&_span:first-child]:text-primary [&_svg]:size-5';
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={className}>
+        <span>{children}</span>
+        <span>{label}</span>
+      </a>
+    );
+  }
   return (
-    <div className="flex gap-3 text-sm">
-      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-muted [&_svg]:size-4">{icon}</span>
-      <div className="min-w-0 flex-1 pt-1.5">{children}</div>
-    </div>
+    <button onClick={onClick} disabled={!onClick} className={className}>
+      <span>{children}</span>
+      <span>{label}</span>
+    </button>
   );
 }
 
@@ -59,7 +70,7 @@ export default function EventDetailsPage({ params }: { params: Promise<{ id: str
       if (navigator.share) await navigator.share({ title: event.title, url });
       else {
         await navigator.clipboard.writeText(url);
-        toast.success('Link copied');
+        toast.success('Link copied. Send it to the group chat 📲');
       }
     } catch {
       // The share sheet was closed.
@@ -75,147 +86,161 @@ export default function EventDetailsPage({ params }: { params: Promise<{ id: str
     }
   }
 
-  const directions = event && directionsUrl(event);
   const embed = event && mapEmbed(event);
+  const badge = event && statusOf(event);
   const host = event ? event.owner.organization || event.owner.name : '';
 
   return (
     <div className="min-h-screen">
+      <AmbientGlow />
       <PublicHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <button onClick={() => (window.history.length > 1 ? router.back() : router.push(user ? '/explore' : '/'))} className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground">
-          <ArrowLeft className="size-4" /> Back
-        </button>
 
-        {error && <EmptyState icon={<Clock />} title="This event isn't available" description={error} action={<ButtonLink href="/explore" variant="secondary">Explore events</ButtonLink>} />}
+      {error && (
+        <main className="mx-auto max-w-3xl px-4 py-20">
+          <EmptyState emoji="🫠" title="This event isn't available" description={error} action={<ButtonLink href="/explore" variant="secondary">Explore events</ButtonLink>} />
+        </main>
+      )}
 
-        {!event && !error && (
-          <div className="space-y-6">
-            <div className="aspect-[21/9] animate-pulse rounded-3xl bg-surface-muted" />
-            <div className="h-10 w-2/3 animate-pulse rounded-xl bg-surface-muted" />
-          </div>
-        )}
+      {!event && !error && <div className="mx-auto mt-6 h-[55vh] max-w-7xl animate-pulse rounded-[40px] bg-surface-muted" />}
 
-        {event && (
-          <FadeIn>
-            <EventCover event={event} showDate={false} className="aspect-[16/9] rounded-3xl sm:aspect-[3/1]" />
-
-            <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_22rem]">
-              <div className="min-w-0 space-y-8">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge tone="primary">{CATEGORY_LABELS[event.category]}</Badge>
-                    {event.visibility === 'private' && <Badge>Personal</Badge>}
-                    {event.status === 'cancelled' && <Badge tone="danger">Cancelled</Badge>}
-                    {event.status === 'draft' && <Badge>Draft</Badge>}
-                  </div>
-                  <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{event.title}</h1>
-                  {event.visibility === 'public' && (
-                    <div className="mt-4 flex items-center gap-2.5 text-sm text-muted">
-                      <Avatar name={host} src={event.owner.avatarUrl} size={28} />
-                      Hosted by <span className="font-medium text-foreground">{host}</span>
-                    </div>
+      {event && (
+        <>
+          {/* Hero */}
+          <section className="relative mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden rounded-[40px]">
+              <EventCover event={event} stickers={false} className="h-[52vh] min-h-[360px] w-full" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+              <button
+                onClick={() => (window.history.length > 1 ? router.back() : router.push(user ? '/explore' : '/'))}
+                aria-label="Back"
+                className="absolute left-5 top-16 flex size-11 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition hover:bg-black/60 sm:top-5"
+              >
+                <ArrowLeft className="size-5" />
+              </button>
+              <FadeIn className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <Sticker rotate={-4}>
+                    <span aria-hidden="true">{CATEGORY_EMOJI[event.category]}</span>
+                    {CATEGORY_LABELS[event.category]}
+                  </Sticker>
+                  {badge && (
+                    <Sticker rotate={3} className={`border-transparent ${badge.className}`}>
+                      {badge.icon}
+                      {badge.label}
+                    </Sticker>
                   )}
                 </div>
-
-                {event.description && (
-                  <section>
-                    <h2 className="mb-2 text-lg font-semibold">About</h2>
-                    <p className="whitespace-pre-wrap leading-relaxed text-muted">{event.description}</p>
-                  </section>
-                )}
-
-                {event.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {event.tags.map((tag) => (
-                      <Link key={tag} href={`/explore?q=${encodeURIComponent(tag)}`} className="rounded-full border border-border px-3 py-1 text-sm text-muted transition hover:border-border-strong hover:text-foreground">
-                        #{tag}
-                      </Link>
-                    ))}
+                <Kicker className="text-foreground/80">{formatEventWhen(event)}</Kicker>
+                <h1 className="mt-3 max-w-4xl text-[clamp(2.4rem,6vw,5.5rem)] font-extrabold leading-[0.92] tracking-[-0.04em]">{event.title}</h1>
+                {event.visibility === 'public' && (
+                  <div className="mt-5 flex items-center gap-2.5 text-sm">
+                    <Avatar name={host} src={event.owner.avatarUrl} size={30} />
+                    <span className="text-muted">hosted by</span>
+                    <span className="font-semibold">{host}</span>
                   </div>
                 )}
+              </FadeIn>
+            </div>
+          </section>
 
-                {embed && (
-                  <section>
-                    <h2 className="mb-3 text-lg font-semibold">Location</h2>
-                    <div className="overflow-hidden rounded-2xl border border-border">
-                      <iframe title="Venue map" src={embed} className="h-64 w-full border-0" />
+          <main className="mx-auto mt-10 grid max-w-7xl gap-10 px-4 pb-24 sm:px-6 lg:grid-cols-[1fr_24rem] lg:px-8">
+            <div className="min-w-0 space-y-12">
+              {event.description && (
+                <section>
+                  <Kicker className="mb-3">The plan</Kicker>
+                  <p className="whitespace-pre-wrap text-lg leading-relaxed text-foreground/85">{event.description}</p>
+                </section>
+              )}
+
+              {event.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {event.tags.map((tag, i) => (
+                    <Link
+                      key={tag}
+                      href={`/explore?q=${encodeURIComponent(tag)}`}
+                      style={{ rotate: `${(i % 3) - 1}deg` }}
+                      className="rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-semibold transition hover:rotate-0 hover:border-primary hover:text-primary"
+                    >
+                      #{tag}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {embed && (
+                <section>
+                  <Kicker className="mb-3">Where</Kicker>
+                  <div className="overflow-hidden rounded-[28px] border border-border">
+                    <iframe title="Venue map" src={embed} className="map-frame h-72 w-full border-0" />
+                  </div>
+                </section>
+              )}
+
+              {event.visibility === 'public' && (
+                <section>
+                  <Kicker className="mb-3">The group chat</Kicker>
+                  {event.viewer.canChat ? (
+                    <Card className="flex h-[540px] flex-col overflow-hidden">
+                      <EventChat eventId={event.id} canAnnounce={event.viewer.canManage} className="flex-1" />
+                    </Card>
+                  ) : (
+                    <Card className="p-8 text-center">
+                      <p className="text-3xl">💬</p>
+                      <p className="mt-2 font-display text-lg font-bold">The chat is for people who are going</p>
+                      <p className="mt-1 text-sm text-muted">{user ? 'Tap I’m in to join the conversation.' : 'Sign in and tap I’m in to join.'}</p>
+                    </Card>
+                  )}
+                </section>
+              )}
+            </div>
+
+            {/* Ticket panel */}
+            <aside className="lg:sticky lg:top-24 lg:self-start">
+              <div className="[filter:drop-shadow(0_24px_40px_rgb(0_0_0/0.3))]">
+                <div className="ticket-top rounded-t-[28px] bg-surface p-6">
+                  <div className="flex items-center gap-5">
+                    <DateStamp iso={event.startsAt} className="w-16 [&>span:nth-child(2)]:text-6xl" />
+                    <div className="min-w-0 space-y-2 border-l border-border pl-5 text-sm">
+                      <p className="font-semibold">{formatEventWhen(event)}</p>
+                      <p className="flex items-center gap-1.5 text-muted">
+                        <MapPin className="size-4 shrink-0 text-primary" />
+                        <span className="truncate">{formatVenue(event)}</span>
+                      </p>
+                      {event.onlineUrl && (
+                        <a href={event.onlineUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 font-semibold text-primary hover:underline">
+                          <Link2 className="size-4" /> Join online
+                        </a>
+                      )}
                     </div>
-                  </section>
-                )}
-
-                {event.visibility === 'public' && (
-                  <section>
-                    <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-                      <MessagesSquare className="size-5 text-primary" /> Discussion
-                    </h2>
-                    {event.viewer.canChat ? (
-                      <Card className="flex h-[520px] flex-col overflow-hidden">
-                        <EventChat eventId={event.id} canAnnounce={event.viewer.canManage} className="flex-1" />
-                      </Card>
-                    ) : (
-                      <Card className="p-6 text-center text-sm text-muted">
-                        {user ? 'RSVP to join the conversation with the organizer and everyone going.' : 'Sign in and RSVP to join the conversation.'}
-                      </Card>
-                    )}
-                  </section>
-                )}
-              </div>
-
-              <aside className="lg:sticky lg:top-24 lg:self-start">
-                <Card className="space-y-5 p-5">
-                  <Detail icon={<Clock />}>
-                    <p className="font-medium">{formatEventWhen(event)}</p>
-                  </Detail>
-                  <Detail icon={<MapPin />}>
-                    <p className="font-medium">{formatVenue(event)}</p>
-                    {event.venue?.address && event.venue?.name && <p className="truncate text-muted">{event.venue.address}</p>}
-                  </Detail>
-                  {event.onlineUrl && (
-                    <Detail icon={<Link2 />}>
-                      <a href={event.onlineUrl} target="_blank" rel="noreferrer" className="break-all font-medium text-primary hover:underline">
-                        Join online
-                      </a>
-                    </Detail>
-                  )}
-                  {event.visibility === 'public' && (
-                    <Detail icon={<Users />}>
-                      <CapacityBar event={event} />
-                    </Detail>
-                  )}
-
+                  </div>
+                </div>
+                <div className="ticket-bottom relative space-y-5 rounded-b-[28px] bg-surface p-6 pt-7">
+                  <div aria-hidden="true" className="absolute inset-x-6 top-0 border-t-2 border-dashed border-border" />
+                  {event.visibility === 'public' && <CapacityBar event={event} />}
                   {event.viewer.registration === 'waitlisted' && (
-                    <p className="flex gap-2 rounded-xl bg-warning-soft p-3 text-sm text-warning">
+                    <p className="flex gap-2 rounded-2xl bg-warning-soft p-3 text-sm text-warning">
                       <Hourglass className="mt-0.5 size-4 shrink-0" />
-                      You&apos;re on the waitlist. If a spot opens you&apos;ll be moved in and notified.
+                      You&apos;re on the waitlist. If a spot opens, you&apos;re in automatically.
                     </p>
                   )}
-
-                  <RsvpButton event={event} onChange={setEvent} size="lg" className="w-full" />
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button variant="secondary" size="sm" onClick={addToCalendar} className="flex-col gap-1 py-6">
-                      <CalendarPlus /> <span className="text-[11px]">Calendar</span>
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={share} disabled={event.visibility !== 'public'} className="flex-col gap-1 py-6">
-                      <Share2 /> <span className="text-[11px]">Share</span>
-                    </Button>
-                    {directions ? (
-                      <a href={directions} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface py-1.5 text-xs font-medium shadow-soft transition hover:bg-surface-muted [&_svg]:size-4">
-                        <Navigation /> <span className="text-[11px]">Directions</span>
-                      </a>
-                    ) : (
-                      <Button variant="secondary" size="sm" disabled className="flex-col gap-1 py-6">
-                        <Navigation /> <span className="text-[11px]">Directions</span>
-                      </Button>
-                    )}
+                  <RsvpButton event={event} onChange={setEvent} size="xl" className="w-full" />
+                  <div className="flex justify-around pt-1">
+                    <RoundAction label="Calendar" onClick={addToCalendar}>
+                      <CalendarPlus />
+                    </RoundAction>
+                    <RoundAction label="Share" onClick={event.visibility === 'public' ? share : undefined}>
+                      <Share2 />
+                    </RoundAction>
+                    <RoundAction label="Directions" href={directionsUrl(event)} onClick={undefined}>
+                      <Navigation />
+                    </RoundAction>
                   </div>
-                </Card>
-              </aside>
-            </div>
-          </FadeIn>
-        )}
-      </main>
+                </div>
+              </div>
+            </aside>
+          </main>
+        </>
+      )}
     </div>
   );
 }

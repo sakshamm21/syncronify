@@ -12,11 +12,11 @@ import { useEventsSync } from '@/context/EventContext';
 import { errorMessage, meApi, type SyncEvent } from '@/lib/api';
 
 export const CALENDAR_LEGEND = [
-  { key: 'going', label: 'Going', color: 'oklch(0.62 0.15 155)' },
-  { key: 'waitlisted', label: 'Waitlisted', color: 'oklch(0.72 0.15 70)' },
-  { key: 'organizing', label: 'Organizing', color: 'oklch(0.55 0.22 282)' },
-  { key: 'personal', label: 'Personal', color: 'oklch(0.6 0.13 230)' },
-  { key: 'cancelled', label: 'Cancelled', color: 'oklch(0.7 0.01 275)' },
+  { key: 'going', label: 'Going', color: '#d4ff3a', text: '#09090d' },
+  { key: 'waitlisted', label: 'Waitlisted', color: '#ff7a1a', text: '#09090d' },
+  { key: 'organizing', label: 'Organizing', color: '#ff4fd8', text: '#ffffff' },
+  { key: 'personal', label: 'Personal', color: '#3df5ff', text: '#09090d' },
+  { key: 'cancelled', label: 'Cancelled', color: '#6d6a78', text: '#ffffff' },
 ] as const;
 
 function toCalendarEvent(event: SyncEvent): EventInput {
@@ -30,7 +30,7 @@ function toCalendarEvent(event: SyncEvent): EventInput {
           : event.viewer.registration === 'waitlisted'
             ? 'waitlisted'
             : 'going';
-  const color = CALENDAR_LEGEND.find((l) => l.key === key)!.color;
+  const { color, text } = CALENDAR_LEGEND.find((l) => l.key === key)!;
   return {
     id: event.id,
     title: event.title,
@@ -38,7 +38,7 @@ function toCalendarEvent(event: SyncEvent): EventInput {
     end: event.endsAt,
     backgroundColor: color,
     borderColor: color,
-    textColor: '#fff',
+    textColor: text,
     classNames: key === 'cancelled' ? ['line-through', 'opacity-70'] : [],
   };
 }

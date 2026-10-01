@@ -66,8 +66,8 @@ export default function VenueMap({ onPick, className }: VenueMapProps) {
 
   return (
     <div className={cn('grid gap-4 lg:grid-cols-[1fr_20rem]', className)}>
-      <div className="relative min-h-[420px] overflow-hidden rounded-2xl border border-border bg-surface-muted shadow-soft">
-        <iframe title="Map" src={osmEmbedUrl(center.latitude, center.longitude)} className="absolute inset-0 size-full border-0" />
+      <div className="relative min-h-[420px] overflow-hidden rounded-[32px] border border-border bg-surface-muted">
+        <iframe title="Map" src={osmEmbedUrl(center.latitude, center.longitude)} className="map-frame absolute inset-0 size-full border-0" />
 
         <div className="absolute inset-x-3 top-3 z-10">
           <div className="relative">
@@ -78,7 +78,7 @@ export default function VenueMap({ onPick, className }: VenueMapProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Search places"
-              className="h-11 w-full rounded-xl border border-border bg-surface/95 pl-10 pr-10 text-sm shadow-lifted outline-none backdrop-blur-md transition focus:border-primary focus:ring-4 focus:ring-ring/20"
+              className="h-12 w-full rounded-full border border-border bg-surface/90 pl-11 pr-10 text-[15px] shadow-lifted outline-none backdrop-blur-md transition focus:border-primary focus:ring-4 focus:ring-ring/25"
             />
             {searching && <LoaderCircle className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted" />}
           </div>
@@ -101,7 +101,7 @@ export default function VenueMap({ onPick, className }: VenueMapProps) {
         </div>
 
         {selected && (
-          <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-3 rounded-xl border border-border bg-surface/95 p-3 shadow-lifted backdrop-blur-md sm:right-auto sm:max-w-sm">
+          <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-3 rounded-3xl border border-border bg-surface/90 p-3.5 shadow-lifted backdrop-blur-md sm:right-auto sm:max-w-sm">
             <div className="min-w-0">
               <p className="flex items-center gap-1.5 text-sm font-semibold">
                 <MapPin className="size-4 shrink-0 text-primary" />
@@ -128,8 +128,8 @@ export default function VenueMap({ onPick, className }: VenueMapProps) {
       </div>
 
       <aside className="flex flex-col gap-4">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-soft">
-          <h3 className="text-sm font-semibold">Venues with upcoming events</h3>
+        <div className="rounded-[28px] border border-border bg-surface p-4">
+          <h3 className="font-display text-lg font-extrabold">Venues with upcoming events</h3>
           <div className="mt-3 space-y-1.5">
             {venues === null &&
               Array.from({ length: 4 }, (_, i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-surface-muted" />)}
@@ -143,15 +143,15 @@ export default function VenueMap({ onPick, className }: VenueMapProps) {
                   onClick={() => choose(toLocation(v))}
                   className={cn(
                     'flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition',
-                    active ? 'border-primary/30 bg-primary-soft' : 'border-transparent hover:bg-surface-muted'
+                    active ? 'border-transparent bg-primary text-primary-foreground' : 'border-transparent hover:bg-surface-muted'
                   )}
                 >
-                  <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-lg', active ? 'bg-primary text-primary-foreground' : 'bg-surface-muted text-muted')}>
+                  <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-lg', active ? 'bg-black/15' : 'bg-surface-muted text-muted')}>
                     <MapPin className="size-4" />
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium">{v.name}</span>
-                    <span className="text-xs text-muted">
+                    <span className="font-mono text-[10px] uppercase tracking-wider opacity-70">
                       {v.events.length} upcoming event{v.events.length === 1 ? '' : 's'}
                     </span>
                   </span>
@@ -162,8 +162,8 @@ export default function VenueMap({ onPick, className }: VenueMapProps) {
         </div>
 
         {eventsHere.length > 0 && !onPick && (
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-soft">
-            <h3 className="text-sm font-semibold">Happening here</h3>
+          <div className="rounded-[28px] border border-border bg-surface p-4">
+            <h3 className="font-display text-lg font-extrabold">Happening here</h3>
             <ul className="mt-3 space-y-2">
               {eventsHere.map((e) => (
                 <li key={e.id}>

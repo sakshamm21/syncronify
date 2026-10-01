@@ -7,7 +7,7 @@ import { Check, Clock, Megaphone, Monitor, Moon, Sun, XCircle } from 'lucide-rea
 import { useAuth } from '@/context/AuthContext';
 import { useEventsSync } from '@/context/EventContext';
 import { errorMessage, meApi, organizerApi, type CategoryValue, type OrganizerApplication } from '@/lib/api';
-import { CATEGORIES, CATEGORY_LABELS, ROLE_LABELS, formatDay } from '@/lib/format';
+import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_LABELS, ROLE_LABELS, formatDay } from '@/lib/format';
 import { Button, ButtonLink } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import { Avatar, Badge, Card, PageHeader } from '@/components/ui/surface';
@@ -16,9 +16,9 @@ import { cn } from '@/lib/cn';
 
 function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <Card className="grid gap-6 p-6 md:grid-cols-[16rem_1fr]">
+    <Card className="grid gap-6 p-6 sm:p-8 md:grid-cols-[16rem_1fr]">
       <div>
-        <h2 className="font-semibold">{title}</h2>
+        <h2 className="font-display text-xl font-extrabold">{title}</h2>
         <p className="mt-1 text-sm text-muted">{description}</p>
       </div>
       <div className="min-w-0">{children}</div>
@@ -77,7 +77,7 @@ function ProfileSection() {
         </div>
       </Section>
 
-      <Section title="Interests" description="We use these to pick events for you on Home.">
+      <Section title="Your vibes" description="Pick what you’re into. It powers “Picked for you” on Home.">
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => {
             const on = interests.includes(c);
@@ -89,10 +89,10 @@ function ProfileSection() {
                 onClick={() => toggleInterest(c)}
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition',
-                  on ? 'border-primary bg-primary-soft text-primary-soft-foreground' : 'border-border text-muted hover:border-border-strong hover:text-foreground'
+                  on ? 'border-transparent bg-primary text-primary-foreground' : 'border-border text-muted hover:border-border-strong hover:text-foreground'
                 )}
               >
-                {on && <Check className="size-3.5" />}
+                {on ? <Check className="size-3.5" /> : <span aria-hidden="true">{CATEGORY_EMOJI[c]}</span>}
                 {CATEGORY_LABELS[c]}
               </button>
             );
@@ -267,7 +267,7 @@ function PasswordSection() {
 export default function SettingsView() {
   return (
     <>
-      <PageHeader title="Settings" description="Your profile, preferences and account." />
+      <PageHeader kicker="Profile, vibes & account" title={<>Your <em>settings</em></>} />
       <div className="space-y-6">
         <ProfileSection />
         <AppearanceSection />

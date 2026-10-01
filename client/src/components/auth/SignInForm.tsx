@@ -51,13 +51,13 @@ export default function SignInForm({ onSwitchToRegister, onForgotPassword, onNee
 
   return (
     <AuthCard
-      title="Welcome back"
-      subtitle="Sign in to see what's happening and what you're going to."
+      title={<>welcome <em>back</em>.</>}
+      subtitle="Your plans missed you. Sign in to see what’s on."
       footer={
         <>
           New here?{' '}
           <button type="button" onClick={onSwitchToRegister} className={linkClass}>
-            Create an account
+            Make an account
           </button>
         </>
       }
@@ -68,7 +68,7 @@ export default function SignInForm({ onSwitchToRegister, onForgotPassword, onNee
         </Field>
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium">Password</label>
+            <label htmlFor="password" className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Password</label>
             <button type="button" onClick={() => onForgotPassword(email)} className="text-xs font-medium text-muted hover:text-foreground">
               Forgot password?
             </button>

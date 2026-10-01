@@ -13,8 +13,9 @@ export default function SchedulePage() {
   return (
     <>
       <PageHeader
-        title="Schedule"
-        description="Everything you're attending, organizing and planning. Click a day to add something."
+        kicker="Your month at a glance"
+        title={<>My <em>schedule</em></>}
+        description="Everything you're going to, running, or planning. Tap a day to add something."
         actions={
           <Button onClick={() => openCreateEvent()}>
             <Plus /> Add event

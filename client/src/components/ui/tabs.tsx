@@ -12,11 +12,11 @@ interface SegmentedProps<T extends string> {
   size?: 'sm' | 'md';
 }
 
-/** Pill tabs with a sliding highlight. */
+/** Pill tabs; the highlight slides between options. */
 export function Segmented<T extends string>({ value, onChange, options, className, size = 'md' }: SegmentedProps<T>) {
   const id = useId();
   return (
-    <div className={cn('inline-flex items-center gap-1 rounded-xl border border-border bg-surface-muted p-1', className)} role="tablist">
+    <div className={cn('inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted p-1', className)} role="tablist">
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -26,21 +26,23 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
             aria-selected={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'relative whitespace-nowrap rounded-lg font-medium transition-colors',
-              size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-sm',
-              active ? 'text-foreground' : 'text-muted hover:text-foreground'
+              'relative whitespace-nowrap rounded-full font-semibold transition-colors',
+              size === 'sm' ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-sm',
+              active ? 'text-primary-foreground' : 'text-muted hover:text-foreground'
             )}
           >
             {active && (
               <motion.span
                 layoutId={`seg-${id}`}
-                className="absolute inset-0 rounded-lg bg-surface shadow-soft"
-                transition={{ type: 'spring', bounce: 0.15, duration: 0.45 }}
+                className="absolute inset-0 rounded-full bg-primary"
+                transition={{ type: 'spring', bounce: 0.25, duration: 0.5 }}
               />
             )}
             <span className="relative flex items-center gap-1.5">
               {option.label}
-              {option.count !== undefined && <span className="text-xs text-subtle tabular-nums">{option.count}</span>}
+              {option.count !== undefined && (
+                <span className={cn('rounded-full px-1.5 text-[10px] tabular-nums', active ? 'bg-black/15' : 'bg-surface-raised text-subtle')}>{option.count}</span>
+              )}
             </span>
           </button>
         );
@@ -52,30 +54,30 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
 interface ChipsProps<T extends string> {
   value: T | null;
   onChange: (value: T | null) => void;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; emoji?: string }[];
   allLabel?: string;
 }
 
-/** Horizontally scrolling filter chips. */
-export function FilterChips<T extends string>({ value, onChange, options, allLabel = 'All' }: ChipsProps<T>) {
-  const all = [{ value: null as T | null, label: allLabel }, ...options];
+/** Horizontally scrolling filter chips, with optional emoji. */
+export function FilterChips<T extends string>({ value, onChange, options, allLabel = 'Everything' }: ChipsProps<T>) {
+  const all = [{ value: null as T | null, label: allLabel, emoji: '✨' }, ...options];
   return (
-    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+    <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-1">
       {all.map((option) => {
         const active = option.value === value;
         return (
-          <button
+          <motion.button
             key={option.value ?? 'all'}
+            whileTap={{ scale: 0.94 }}
             onClick={() => onChange(option.value)}
             className={cn(
-              'shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
-              active
-                ? 'border-transparent bg-foreground text-background'
-                : 'border-border bg-surface text-muted hover:border-border-strong hover:text-foreground'
+              'flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors',
+              active ? 'border-transparent bg-foreground text-background' : 'border-border bg-surface text-muted hover:border-border-strong hover:text-foreground'
             )}
           >
+            {option.emoji && <span aria-hidden="true">{option.emoji}</span>}
             {option.label}
-          </button>
+          </motion.button>
         );
       })}
     </div>

@@ -65,9 +65,9 @@ function CodeInput({ value, onChange, disabled }: { value: string; onChange: (v:
             if (e.key === 'Backspace' && !digit && i > 0) refs.current[i - 1]?.focus();
           }}
           className={cn(
-            'size-12 rounded-xl border border-border bg-surface text-center text-lg font-semibold tabular-nums shadow-soft outline-none transition',
-            'focus:border-primary focus:ring-4 focus:ring-ring/20',
-            digit && 'border-border-strong'
+            'h-16 w-12 rounded-2xl border border-border bg-surface-muted text-center font-display text-3xl font-extrabold tabular-nums outline-none transition sm:w-14',
+            'focus:-translate-y-1 focus:border-primary focus:ring-4 focus:ring-ring/25',
+            digit && 'border-primary bg-primary-soft'
           )}
         />
       ))}
@@ -134,7 +134,7 @@ export default function VerifyEmail({ email, devCode: initialDevCode, sendOnMoun
 
   return (
     <AuthCard
-      title="Check your email"
+      title={<>check your <em>inbox</em>.</>}
       subtitle={
         <>
           Enter the 6-digit code we sent to <span className="font-medium text-foreground">{email}</span>.

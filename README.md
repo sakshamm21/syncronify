@@ -49,14 +49,15 @@ This software system was developed as a flagship project for **CS253 (Software D
 
 ## 🎨 Design
 
-A calm, professional interface with event photography up front and motion that explains what's happening.
+**"After dark campus"**: a loud, playful interface built like a night-out flyer. Events are tickets, plans are stickers and the whole app is one tap away from the floating dock.
 
-- **Design tokens**: semantic colours (`bg-surface`, `text-muted`, `bg-primary`, …) defined once in `client/src/app/globals.css` (OKLCH), with full **light and dark themes** that follow the system setting.
-- **Accent**: indigo → violet → fuchsia gradients; soft layered shadows; 12–24px radii.
-- **Typography**: *Geist* (via `next/font`), tight tracking on headings.
-- **Motion** (Motion for React): page transitions, staggered lists, sliding tab and nav highlights, spring-animated dialogs and menus, floating cards on the landing page, scroll reveals.
-- **Building blocks** in `client/src/components/ui`: Button, Field/Input/Select/Textarea, Card, Badge, Avatar, Dialog, ConfirmDialog, Popover/Menu, Segmented tabs, FilterChips, Skeleton, EmptyState, StatCard.
-- **Responsive**: sidebar on desktop, slide-over drawer on mobile.
+- **Themes**: dark by default (ink `#09090d` with acid-lime `#d4ff3a`) and a warm paper day mode (`#f3efe6` with electric violet). Accents are hot pink, cyan and orange, all defined once as tokens in `client/src/app/globals.css`, with a subtle film-grain overlay and ambient glow.
+- **Typography**: *Bricolage Grotesque* (variable width/optical size) for big display headings, *Instrument Serif* italics for the accent word (`What's the <em>move</em>?`), *Geist* for UI text and *Geist Mono* for uppercase kickers.
+- **Signature pieces**: events as tear-off tickets with notches and a perforated stub; tilted stickers for category and status; rotated marquee bands; sticky notes with tape; a dark-tinted OpenStreetMap.
+- **Navigation**: a floating glass dock with a centre "new event" button, plus a <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd> command palette that searches events and jumps anywhere.
+- **Motion** (Motion for React): 3D tilt and spotlight on cards, confetti on RSVP, draggable stickers on the landing page, a sliding dock highlight, spring dialogs, page transitions and scroll reveals. Everything respects reduced-motion settings.
+- **Building blocks** in `client/src/components/ui`: Button, Field/Input/Select/Textarea, Card, Badge, Sticker, Avatar, Dialog, ConfirmDialog, Popover/Menu, Segmented tabs, FilterChips, Marquee, Tilt, Skeleton, EmptyState, StatCard, PageHeader.
+- **Responsive**: the dock adapts to phones (secondary pages move into a "More" menu) and every page works from 360px up.
 
 ---
 
@@ -65,7 +66,7 @@ A calm, professional interface with event photography up front and motion that e
 ### 1. ⚡ Event Discovery & RSVP
 - Search and filter upcoming public events by category, and sort by soonest, most popular or newest.
 - One-click **RSVP** with capacity limits and an automatic **waitlist**. When someone leaves, the next person moves up and is notified.
-- **Picked for you** recommendations based on the interests in your profile, plus an **Up next** strip of your own upcoming events.
+- **Picked for you** recommendations based on the interests in your profile, plus a **Your tickets** row of your own upcoming events.
 - Shareable event pages (`/events/:id`) with **Add to calendar** (`.ics`), directions and share.
 
 ### 2. 📅 My Schedule

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 import { Check, Hourglass, Settings2, Plus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEventsSync } from '@/context/EventContext';
@@ -12,8 +13,21 @@ import { Button, ButtonLink } from '@/components/ui/button';
 interface RsvpButtonProps {
   event: SyncEvent;
   onChange: (event: SyncEvent) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+}
+
+const BRAND_CONFETTI = ['#d4ff3a', '#ff4fd8', '#3df5ff', '#ff7a1a', '#8b5cff'];
+
+/** Confetti bursting from the button that was clicked. */
+function celebrate(from: HTMLElement | null) {
+  if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const rect = from?.getBoundingClientRect();
+  const origin = rect
+    ? { x: (rect.left + rect.width / 2) / window.innerWidth, y: (rect.top + rect.height / 2) / window.innerHeight }
+    : { x: 0.5, y: 0.6 };
+  confetti({ particleCount: 90, spread: 75, startVelocity: 38, origin, colors: BRAND_CONFETTI, scalar: 0.9, zIndex: 80 });
+  setTimeout(() => confetti({ particleCount: 40, spread: 110, startVelocity: 25, origin, colors: BRAND_CONFETTI, shapes: ['star'], zIndex: 80 }), 180);
 }
 
 /** One button for every registration state: RSVP, join waitlist, going, waitlisted, manage. */
@@ -22,6 +36,7 @@ export default function RsvpButton({ event, onChange, size = 'sm', className }: 
   const router = useRouter();
   const { eventsChanged } = useEventsSync();
   const [pending, setPending] = useState(false);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   if (event.visibility === 'private') return null;
 
@@ -52,9 +67,14 @@ export default function RsvpButton({ event, onChange, size = 'sm', className }: 
       const updated = registration ? await eventsApi.unregister(event.id) : await eventsApi.register(event.id);
       onChange(updated);
       eventsChanged();
-      if (!registration && updated.viewer.registration === 'going') toast.success("You're going!", { description: "It's on your schedule. We'll remind you the day before." });
-      else if (!registration) toast.info("You're on the waitlist", { description: "It's full right now. We'll move you in and tell you if a spot opens." });
-      else toast(registration === 'going' ? 'Registration cancelled' : 'You left the waitlist');
+      if (!registration && updated.viewer.registration === 'going') {
+        celebrate(buttonRef.current);
+        toast.success("You're in! 🎉", { description: "It's on your schedule. We'll nudge you the day before." });
+      } else if (!registration) {
+        toast("You're on the waitlist ⏳", { description: "It's packed rn. If a spot opens, you're in automatically." });
+      } else {
+        toast(registration === 'going' ? 'Plans cancelled. Your spot went back in the pool.' : 'You left the waitlist');
+      }
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
@@ -64,25 +84,22 @@ export default function RsvpButton({ event, onChange, size = 'sm', className }: 
 
   if (registration) {
     return (
-      <Button
-        variant="soft"
-        size={size}
-        loading={pending}
-        onClick={toggle}
-        title="Click to cancel"
-        className={`group/rsvp ${className ?? ''}`}
-      >
-        {!pending && (registration === 'going' ? <Check /> : <Hourglass />)}
-        <span className="group-hover/rsvp:hidden">{registration === 'going' ? 'Going' : 'Waitlisted'}</span>
-        <span className="hidden group-hover/rsvp:inline">{registration === 'going' ? 'Cancel RSVP' : 'Leave waitlist'}</span>
-      </Button>
+      <div ref={buttonRef} className={className}>
+        <Button variant="soft" size={size} loading={pending} onClick={toggle} title="Click to cancel" className="group/rsvp w-full">
+          {!pending && (registration === 'going' ? <Check /> : <Hourglass />)}
+          <span className="group-hover/rsvp:hidden">{registration === 'going' ? "You're in" : 'Waitlisted'}</span>
+          <span className="hidden group-hover/rsvp:inline">{registration === 'going' ? 'Cancel plans' : 'Leave waitlist'}</span>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Button variant={event.spotsLeft === 0 ? 'secondary' : 'primary'} size={size} loading={pending} onClick={toggle} className={className}>
-      {!pending && <Plus />}
-      {event.spotsLeft === 0 ? 'Join waitlist' : 'RSVP'}
-    </Button>
+    <div ref={buttonRef} className={className}>
+      <Button variant={event.spotsLeft === 0 ? 'secondary' : 'primary'} size={size} loading={pending} onClick={toggle} className="w-full">
+        {!pending && <Plus />}
+        {event.spotsLeft === 0 ? 'Join waitlist' : "I'm in"}
+      </Button>
+    </div>
   );
 }

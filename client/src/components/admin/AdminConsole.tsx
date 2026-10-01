@@ -238,7 +238,7 @@ function Applications() {
       {!items ? (
         <div className="grid gap-4 md:grid-cols-2">{[0, 1].map((i) => <div key={i} className="h-44 animate-pulse rounded-2xl bg-surface-muted" />)}</div>
       ) : items.length === 0 ? (
-        <EmptyState icon={<Inbox />} title={filter === 'pending' ? 'Inbox zero' : `No ${filter === 'rejected' ? 'declined' : filter} requests`} description={filter === 'pending' ? 'No organizer requests are waiting.' : undefined} />
+        <EmptyState emoji={filter === 'pending' ? '📭' : '🗂️'} title={filter === 'pending' ? 'Inbox zero' : `No ${filter === 'rejected' ? 'declined' : filter} requests`} description={filter === 'pending' ? 'No organizer requests are waiting.' : undefined} />
       ) : (
         <Stagger key={filter} className="grid gap-4 md:grid-cols-2">
           {items.map((a) => {
@@ -304,7 +304,7 @@ export default function AdminConsole() {
 
   return (
     <>
-      <PageHeader title="Admin" description="People, organizer approvals and platform activity." />
+      <PageHeader kicker="Platform admin" title={<>Admin <em>HQ</em></>} description="People, organizer approvals and what’s happening across the platform." />
       <Segmented<Tab>
         value={tab}
         onChange={setTab}

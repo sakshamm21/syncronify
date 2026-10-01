@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/surface';
 export default function ChatPage() {
   return (
     <>
-      <PageHeader title="Chats" description="Talk with organizers and everyone going to your events." />
+      <PageHeader kicker="One group chat per event" title={<>The <em>chats</em></>} description="Talk to the organizer and everyone else who’s going." />
       <ChatWorkspace />
     </>
   );

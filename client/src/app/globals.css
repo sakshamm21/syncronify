@@ -1,66 +1,79 @@
 @import 'tailwindcss';
 
-/* Dark mode follows the `dark` class that next-themes puts on <html>. */
+/* Dark ("after dark") is the default identity; "day" mode is the light theme. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------------------
-   Design tokens. Components use the semantic names (bg-surface, text-muted,
-   bg-primary ...) so light and dark themes only differ here.
+   Design tokens. Components only use the semantic names (bg-surface,
+   text-muted, bg-primary ...), so the two themes differ only here.
+   Dark  = ink black + acid lime.   Day = warm paper + electric violet.
    --------------------------------------------------------------------------- */
 :root {
-  --background: oklch(0.985 0.003 275);
-  --surface: oklch(1 0 0);
-  --surface-muted: oklch(0.965 0.006 275);
-  --surface-raised: oklch(1 0 0);
-  --border: oklch(0.915 0.008 275);
-  --border-strong: oklch(0.86 0.012 275);
-  --foreground: oklch(0.2 0.025 275);
-  --muted: oklch(0.52 0.025 275);
-  --subtle: oklch(0.65 0.02 275);
+  --background: #f3efe6;
+  --surface: #fffdf8;
+  --surface-muted: #ebe5d8;
+  --surface-raised: #ffffff;
+  --border: #e1d9c9;
+  --border-strong: #cbc0ab;
+  --foreground: #0b0b10;
+  --muted: #5d5866;
+  --subtle: #8b8693;
 
-  --primary: oklch(0.55 0.22 282);
-  --primary-hover: oklch(0.5 0.23 282);
-  --primary-soft: oklch(0.955 0.035 282);
-  --primary-soft-foreground: oklch(0.45 0.2 282);
-  --primary-foreground: oklch(0.99 0 0);
+  --primary: #6a3dff;
+  --primary-hover: #5a2cf0;
+  --primary-soft: rgb(106 61 255 / 0.1);
+  --primary-soft-foreground: #5a2cf0;
+  --primary-foreground: #ffffff;
 
-  --success: oklch(0.6 0.15 155);
-  --success-soft: oklch(0.95 0.05 155);
-  --warning: oklch(0.68 0.16 70);
-  --warning-soft: oklch(0.96 0.06 85);
-  --danger: oklch(0.58 0.21 25);
-  --danger-soft: oklch(0.96 0.03 25);
+  --pink: #ff3fb4;
+  --cyan: #00b8d9;
+  --lime: #b8f000;
+  --orange: #ff6a1a;
 
-  --ring: oklch(0.55 0.22 282 / 0.45);
-  --shadow-color: 275 30% 20%;
+  --success: #0e9f5f;
+  --success-soft: rgb(14 159 95 / 0.12);
+  --warning: #c27800;
+  --warning-soft: rgb(255 176 32 / 0.18);
+  --danger: #e5244a;
+  --danger-soft: rgb(229 36 74 / 0.1);
+
+  --ring: rgb(106 61 255 / 0.4);
+  --glow: rgb(106 61 255 / 0.25);
+  --grain-opacity: 0.05;
 }
 
 .dark {
-  --background: oklch(0.155 0.014 275);
-  --surface: oklch(0.195 0.016 275);
-  --surface-muted: oklch(0.235 0.018 275);
-  --surface-raised: oklch(0.225 0.018 275);
-  --border: oklch(0.29 0.02 275);
-  --border-strong: oklch(0.36 0.024 275);
-  --foreground: oklch(0.965 0.006 275);
-  --muted: oklch(0.72 0.02 275);
-  --subtle: oklch(0.58 0.02 275);
+  --background: #09090d;
+  --surface: #121219;
+  --surface-muted: #1a1a23;
+  --surface-raised: #1d1d27;
+  --border: #25252f;
+  --border-strong: #34343f;
+  --foreground: #f5f2ea;
+  --muted: #a4a1ad;
+  --subtle: #6d6a78;
 
-  --primary: oklch(0.67 0.19 282);
-  --primary-hover: oklch(0.72 0.17 282);
-  --primary-soft: oklch(0.3 0.08 282);
-  --primary-soft-foreground: oklch(0.85 0.1 282);
-  --primary-foreground: oklch(0.99 0 0);
+  --primary: #d4ff3a;
+  --primary-hover: #e3ff78;
+  --primary-soft: rgb(212 255 58 / 0.1);
+  --primary-soft-foreground: #d4ff3a;
+  --primary-foreground: #09090d;
 
-  --success: oklch(0.72 0.15 155);
-  --success-soft: oklch(0.3 0.06 155);
-  --warning: oklch(0.8 0.14 80);
-  --warning-soft: oklch(0.32 0.06 75);
-  --danger: oklch(0.7 0.18 25);
-  --danger-soft: oklch(0.31 0.07 25);
+  --pink: #ff4fd8;
+  --cyan: #3df5ff;
+  --lime: #d4ff3a;
+  --orange: #ff7a1a;
 
-  --ring: oklch(0.67 0.19 282 / 0.5);
-  --shadow-color: 275 40% 2%;
+  --success: #3dffa0;
+  --success-soft: rgb(61 255 160 / 0.12);
+  --warning: #ffc53d;
+  --warning-soft: rgb(255 197 61 / 0.12);
+  --danger: #ff4d6d;
+  --danger-soft: rgb(255 77 109 / 0.12);
+
+  --ring: rgb(212 255 58 / 0.45);
+  --glow: rgb(212 255 58 / 0.18);
+  --grain-opacity: 0.07;
 }
 
 @theme inline {
@@ -78,6 +91,10 @@
   --color-primary-soft: var(--primary-soft);
   --color-primary-soft-foreground: var(--primary-soft-foreground);
   --color-primary-foreground: var(--primary-foreground);
+  --color-pink: var(--pink);
+  --color-cyan: var(--cyan);
+  --color-lime: var(--lime);
+  --color-orange: var(--orange);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -88,15 +105,30 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-bricolage), var(--font-geist-sans), sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
 
-  --shadow-soft: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 2px 8px -2px hsl(var(--shadow-color) / 0.08);
-  --shadow-lifted: 0 2px 4px hsl(var(--shadow-color) / 0.06), 0 12px 32px -8px hsl(var(--shadow-color) / 0.18);
-  --shadow-overlay: 0 24px 64px -12px hsl(var(--shadow-color) / 0.35);
+  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 1px 2px rgb(0 0 0 / 0.12);
+  --shadow-lifted: 0 18px 40px -16px rgb(0 0 0 / 0.45);
+  --shadow-overlay: 0 30px 80px -20px rgb(0 0 0 / 0.6);
+  --shadow-glow: 0 0 0 1px var(--primary), 0 8px 32px -6px var(--glow);
 
   --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+
   @keyframes shimmer {
     from { background-position: 200% 0; }
     to { background-position: -200% 0; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+    50% { transform: translateY(-10px) rotate(var(--r, 0deg)); }
   }
 }
 
@@ -111,23 +143,61 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: 'ss01', 'cv11';
   }
+  h1, h2, h3 {
+    @apply font-display tracking-tight;
+    font-variation-settings: 'opsz' 96;
+  }
   ::selection {
-    background: var(--primary-soft);
-    color: var(--primary-soft-foreground);
+    background: var(--primary);
+    color: var(--primary-foreground);
   }
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
-  }
-  h1, h2, h3, h4 {
-    @apply tracking-tight;
   }
 }
 
-/* Calm scrollbars. */
+/* Film grain over everything: subtle texture that makes flat UI feel printed. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Squashed / stretched display type via Bricolage's width axis. */
+@utility font-condensed {
+  font-variation-settings: 'wdth' 75, 'opsz' 96;
+}
+
+/* Ticket stubs: half-circle bites where the cover meets the stub. */
+@utility ticket-top {
+  mask-image: radial-gradient(circle at 0 100%, transparent 11px, #000 11.5px), radial-gradient(circle at 100% 100%, transparent 11px, #000 11.5px);
+  mask-composite: intersect;
+}
+@utility ticket-bottom {
+  mask-image: radial-gradient(circle at 0 0, transparent 11px, #000 11.5px), radial-gradient(circle at 100% 0, transparent 11px, #000 11.5px);
+  mask-composite: intersect;
+}
+
+/* OpenStreetMap tiles are light-only; invert them for the dark theme. */
+.dark .map-frame {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.7) brightness(0.95) contrast(0.9);
 }
 
 /* ---------------------------------------------------------------------------
@@ -135,51 +205,72 @@
    --------------------------------------------------------------------------- */
 .calendar-theme {
   --fc-border-color: var(--border);
-  --fc-page-bg-color: var(--surface);
+  --fc-page-bg-color: transparent;
   --fc-neutral-bg-color: var(--surface-muted);
   --fc-today-bg-color: var(--primary-soft);
   --fc-event-border-color: transparent;
-  --fc-button-bg-color: var(--surface);
+  --fc-button-bg-color: var(--surface-muted);
   --fc-button-border-color: var(--border);
   --fc-button-text-color: var(--foreground);
-  --fc-button-hover-bg-color: var(--surface-muted);
+  --fc-button-hover-bg-color: var(--surface-raised);
   --fc-button-hover-border-color: var(--border-strong);
   --fc-button-active-bg-color: var(--primary);
   --fc-button-active-border-color: var(--primary);
   font-size: 0.8125rem;
 }
 .calendar-theme .fc .fc-toolbar-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 .calendar-theme .fc .fc-button {
-  border-radius: 0.6rem;
-  padding: 0.35rem 0.75rem;
-  font-weight: 500;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 600;
   font-size: 0.8125rem;
   text-transform: capitalize;
   box-shadow: none !important;
+}
+.calendar-theme .fc .fc-button-group > .fc-button {
+  border-radius: 0;
+}
+.calendar-theme .fc .fc-button-group > .fc-button:first-child {
+  border-radius: 999px 0 0 999px;
+}
+.calendar-theme .fc .fc-button-group > .fc-button:last-child {
+  border-radius: 0 999px 999px 0;
 }
 .calendar-theme .fc .fc-button-active {
   color: var(--primary-foreground) !important;
 }
 .calendar-theme .fc .fc-col-header-cell-cushion {
+  font-family: var(--font-mono);
   font-weight: 500;
-  color: var(--muted);
-  font-size: 0.75rem;
+  color: var(--subtle);
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.6rem 0;
+  letter-spacing: 0.12em;
+  padding: 0.7rem 0;
 }
 .calendar-theme .fc .fc-daygrid-day-number {
+  font-family: var(--font-display);
+  font-weight: 700;
   color: var(--muted);
-  font-size: 0.8rem;
-  padding: 0.4rem 0.55rem;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.6rem;
 }
 .calendar-theme .fc .fc-day-today .fc-daygrid-day-number {
-  color: var(--primary);
-  font-weight: 700;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-radius: 999px;
+  margin: 0.25rem;
+  min-width: 1.8rem;
+  text-align: center;
+  padding: 0.2rem 0.45rem;
+}
+.calendar-theme .fc .fc-day-other .fc-daygrid-day-number {
+  opacity: 0.35;
 }
 .calendar-theme .fc .fc-daygrid-day {
   cursor: pointer;
@@ -189,8 +280,12 @@
   background: var(--surface-muted);
 }
 .calendar-theme .fc .fc-event {
-  border-radius: 0.45rem;
-  padding: 1px 6px;
-  font-weight: 500;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-weight: 600;
   cursor: pointer;
+  transition: transform 0.15s;
+}
+.calendar-theme .fc .fc-event:hover {
+  transform: translateY(-1px) scale(1.02);
 }
