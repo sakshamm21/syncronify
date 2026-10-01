@@ -1,0 +1,107 @@
+import { Router } from 'express';
+import { authenticate, currentUser, optionalAuth } from '../../middleware/auth';
+import validate from '../../middleware/validate';
+import { z, idParams } from '../../lib/schemas';
+import { REGISTRATION_STATUS } from '../../constants';
+import * as schemas from './events.schemas';
+import * as events from './events.service';
+import * as registrations from './registrations.service';
+import * as chat from '../chat/chat.service';
+
+const router = Router();
+
+// --- Discovery -------------------------------------------------------------
+
+router.get('/', optionalAuth, validate({ query: schemas.list }, async (req, res) => {
+  const { items, meta } = await events.listPublic(req.user, req.query);
+  res.json({ data: items, meta });
+}));
+
+router.get('/venues', async (_req, res) => {
+  res.json({ data: await events.venueDirectory() });
+});
+
+router.get('/recommended', authenticate, async (req, res) => {
+  res.json({ data: await events.recommendedFor(currentUser(req)) });
+});
+
+router.get('/:id', optionalAuth, validate({ params: idParams }, async (req, res) => {
+  res.json({ data: await events.getForViewer(req.user, req.params.id) });
+}));
+
+router.get('/:id/calendar.ics', optionalAuth, validate({ params: idParams }, async (req, res) => {
+  const { filename, content } = await events.toCalendarFile(req.user, req.params.id);
+  res.type('text/calendar').attachment(filename).send(content);
+}));
+
+// --- Management ------------------------------------------------------------
+
+router.post('/', authenticate, validate({ body: schemas.create }, async (req, res) => {
+  res.status(201).json({ data: await events.create(currentUser(req), req.body) });
+}));
+
+router.patch('/:id', authenticate, validate({ params: idParams, body: schemas.update }, async (req, res) => {
+  res.json({ data: await events.update(currentUser(req), req.params.id, req.body) });
+}));
+
+router.post('/:id/cancel', authenticate, validate({ params: idParams, body: schemas.cancel }, async (req, res) => {
+  res.json({ data: await events.cancel(currentUser(req), req.params.id, req.body) });
+}));
+
+router.delete('/:id', authenticate, validate({ params: idParams }, async (req, res) => {
+  await events.remove(currentUser(req), req.params.id);
+  res.status(204).end();
+}));
+
+// --- Registration ----------------------------------------------------------
+
+router.post('/:id/registration', authenticate, validate({ params: idParams }, async (req, res) => {
+  res.json({ data: await registrations.register(currentUser(req), req.params.id) });
+}));
+
+router.delete('/:id/registration', authenticate, validate({ params: idParams }, async (req, res) => {
+  res.json({ data: await registrations.unregister(currentUser(req), req.params.id) });
+}));
+
+const attendeesQuery = z.object({ status: z.enum(REGISTRATION_STATUS).optional() });
+
+router.get(
+  '/:id/attendees',
+  authenticate,
+  validate({ params: idParams, query: attendeesQuery }, async (req, res) => {
+    res.json({ data: await registrations.listForEvent(currentUser(req), req.params.id, req.query) });
+  })
+);
+
+router.put(
+  '/:id/attendees/:userId/check-in',
+  authenticate,
+  validate({ params: schemas.registrationParams, body: schemas.checkIn }, async (req, res) => {
+    const { id, userId } = req.params;
+    res.json({ data: await registrations.setCheckIn(currentUser(req), id, userId, req.body.checkedIn) });
+  })
+);
+
+// --- Discussion ------------------------------------------------------------
+
+const messagesQuery = z.object({
+  before: z.coerce.date().optional(),
+  after: z.coerce.date().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+const messageBody = z.object({
+  text: z.string().trim().min(1, 'Message cannot be empty').max(2000),
+  announcement: z.boolean().default(false),
+});
+
+router.get('/:id/messages', authenticate, validate({ params: idParams, query: messagesQuery }, async (req, res) => {
+  const { items, hasMore } = await chat.listMessages(currentUser(req), req.params.id, req.query);
+  res.json({ data: items, meta: { hasMore } });
+}));
+
+router.post('/:id/messages', authenticate, validate({ params: idParams, body: messageBody }, async (req, res) => {
+  res.status(201).json({ data: await chat.postMessage(currentUser(req), req.params.id, req.body) });
+}));
+
+export default router;

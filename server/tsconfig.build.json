@@ -1,0 +1,11 @@
+{
+  // Compiles the app for long-running hosts: `npm run build` then `npm start`.
+  // (Vercel compiles api/index.ts itself and doesn't use this.)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

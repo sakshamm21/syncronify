@@ -1,0 +1,9 @@
+{
+  // Tests read untyped JSON response bodies (`res.body.data.map((e) => e.title)`),
+  // so implicit `any` is allowed here. Everything else stays as strict as the app.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false
+  },
+  "include": [".", "../src/types"]
+}

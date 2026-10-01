@@ -22,6 +22,8 @@ interface AuthContextValue {
   status: AuthStatus;
   /** How live updates arrive: a socket, or polling on serverless hosts. Null until known. */
   realtime: ServerMeta['realtime'] | null;
+  /** Whether the server has the AI assistant turned on. */
+  assistant: boolean;
   /** Connected while signed in on socket-capable servers; null otherwise. */
   socket: Socket | null;
   login: (email: string, password: string) => Promise<User>;
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [realtime, setRealtime] = useState<ServerMeta['realtime'] | null>(null);
+  const [assistant, setAssistant] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
 
   const logout = useCallback(() => {
@@ -68,7 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     metaApi
       .get()
-      .then((meta) => setRealtime(meta.realtime))
+      .then((meta) => {
+        setRealtime(meta.realtime);
+        setAssistant(Boolean(meta.assistant));
+      })
       .catch(() => setRealtime('polling'));
 
     const stored = tokenStore.get();
@@ -106,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       status,
       realtime,
+      assistant,
       socket,
       login: async (email, password) => startSession(await authApi.login({ email, password })),
       register: (input) => authApi.register(input),
@@ -116,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       refreshUser,
       logout,
     }),
-    [user, status, realtime, socket, startSession, refreshUser, logout]
+    [user, status, realtime, assistant, socket, startSession, refreshUser, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

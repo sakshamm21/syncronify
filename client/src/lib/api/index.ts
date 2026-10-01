@@ -38,6 +38,8 @@ export interface ServerMeta {
   /** 'socket' on long-running hosts; 'polling' on serverless hosts like Vercel. */
   realtime: 'socket' | 'polling';
   emailDelivery: boolean;
+  /** Whether the AI assistant is set up (the server has an AI_API_KEY). */
+  assistant: boolean;
 }
 
 export const metaApi = {
@@ -189,3 +191,22 @@ export const adminApi = {
     data<OrganizerApplication>(http.post(`/admin/organizer-applications/${id}/reject`, { note })),
 };
 
+// --- AI assistant -----------------------------------------------------------------
+
+export interface AssistantMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface AssistantReply {
+  /** Markdown-ish text; events are linked as [Title](/events/<id>). */
+  reply: string;
+  /** The events the reply links to, for showing as cards. */
+  events: SyncEvent[];
+}
+
+export const assistantApi = {
+  /** Sends the recent conversation (ending with the user's question) and gets the next reply. */
+  chat: (messages: AssistantMessage[], timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone) =>
+    data<AssistantReply>(http.post('/assistant/chat', { messages, timeZone }, { timeout: 60_000 })),
+};

@@ -11,6 +11,7 @@ import NotificationBell from './NotificationBell';
 import ThemeToggle from './ThemeToggle';
 import UserMenu from './UserMenu';
 import { CommandPaletteProvider, usePalette } from './CommandPalette';
+import { AssistantButton, AssistantProvider } from '@/components/assistant/Assistant';
 
 /** Soft colour fields behind everything; the grain overlay sits on top of them. */
 export function AmbientGlow() {
@@ -46,35 +47,38 @@ function MobileSearchButton() {
   );
 }
 
-/** Signed-in layout: top bar, animated content, floating dock. */
+/** Signed-in layout: top bar, animated content, floating dock, and the AI assistant panel. */
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
     <CommandPaletteProvider>
-      <AmbientGlow />
-      <header className="sticky top-0 z-30 bg-background/60 backdrop-blur-xl">
-        <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-          <Logo href="/dashboard" />
-          <div className="hidden flex-1 justify-center sm:flex">
-            <SearchTrigger />
+      <AssistantProvider>
+        <AmbientGlow />
+        <header className="sticky top-0 z-30 bg-background/60 backdrop-blur-xl">
+          <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <Logo href="/dashboard" />
+            <div className="hidden flex-1 justify-center sm:flex">
+              <SearchTrigger />
+            </div>
+            <div className="ml-auto flex items-center gap-1 sm:ml-0">
+              <AssistantButton />
+              <MobileSearchButton />
+              <ThemeToggle />
+              <NotificationBell />
+              <UserMenu />
+            </div>
           </div>
-          <div className="ml-auto flex items-center gap-1 sm:ml-0">
-            <MobileSearchButton />
-            <ThemeToggle />
-            <NotificationBell />
-            <UserMenu />
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-40 pt-6 sm:px-6 lg:px-8">
-        <motion.div key={pathname} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: motionEase }}>
-          {children}
-        </motion.div>
-      </main>
+        <main className="mx-auto max-w-7xl px-4 pb-40 pt-6 sm:px-6 lg:px-8">
+          <motion.div key={pathname} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: motionEase }}>
+            {children}
+          </motion.div>
+        </main>
 
-      <Dock />
+        <Dock />
+      </AssistantProvider>
     </CommandPaletteProvider>
   );
 }

@@ -1,0 +1,87 @@
+import { z, objectId, pagination, queryBoolean, optionalUrl } from '../../lib/schemas';
+import { CATEGORY_VALUES, EVENT_VISIBILITY, EVENT_STATUS } from '../../constants';
+
+const venue = z.object({
+  name: z.string().trim().max(160).optional(),
+  address: z.string().trim().max(300).optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+});
+
+const fields = {
+  title: z.string().trim().min(3, 'Title must be at least 3 characters').max(140),
+  description: z.string().trim().max(5000),
+  category: z.enum(CATEGORY_VALUES),
+  tags: z.array(z.string().trim().toLowerCase().min(1).max(30)).max(10),
+  coverImageUrl: optionalUrl,
+  startsAt: z.coerce.date({ error: 'Enter a valid start date' }),
+  endsAt: z.coerce.date({ error: 'Enter a valid end date' }),
+  venue,
+  onlineUrl: optionalUrl,
+  visibility: z.enum(EVENT_VISIBILITY),
+  // Cancelling has its own endpoint so attendees are always notified.
+  status: z.enum([EVENT_STATUS.DRAFT, EVENT_STATUS.PUBLISHED]),
+  capacity: z.number().int().min(1).max(100_000).nullable(),
+};
+
+const endsAfterStart = (e: { startsAt?: Date; endsAt?: Date }) => !e.startsAt || !e.endsAt || e.endsAt > e.startsAt;
+const endsAfterStartMessage = { message: 'The event must end after it starts', path: ['endsAt'] };
+
+export const create = z
+  .object({
+    title: fields.title,
+    description: fields.description.default(''),
+    category: fields.category.default('other'),
+    tags: fields.tags.default([]),
+    coverImageUrl: fields.coverImageUrl.optional(),
+    startsAt: fields.startsAt,
+    endsAt: fields.endsAt,
+    venue: fields.venue.optional(),
+    onlineUrl: fields.onlineUrl.optional(),
+    visibility: fields.visibility.optional(),
+    status: fields.status.optional(),
+    capacity: fields.capacity.optional(),
+  })
+  .refine(endsAfterStart, endsAfterStartMessage);
+export type CreateEventInput = z.output<typeof create>;
+
+export const update = z
+  .object(fields)
+  .partial()
+  .refine((body) => Object.keys(body).length > 0, 'Nothing to update')
+  .refine(endsAfterStart, endsAfterStartMessage);
+export type UpdateEventInput = z.output<typeof update>;
+
+export const list = z.object({
+  q: z.string().trim().max(100).optional(),
+  category: z.enum(CATEGORY_VALUES).optional(),
+  organizer: objectId.optional(),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  sort: z.enum(['soonest', 'popular', 'newest']).default('soonest'),
+  includePast: queryBoolean.default(false),
+  ...pagination,
+});
+export type ListEventsQuery = z.output<typeof list>;
+
+export const cancel = z.object({
+  reason: z.string().trim().max(500).default(''),
+});
+
+export const registrationParams = z.object({ id: objectId, userId: objectId });
+
+export const checkIn = z.object({
+  checkedIn: z.boolean().default(true),
+});
+
+export const calendarRange = z
+  .object({
+    from: z.coerce.date({ error: 'Enter a valid start date' }),
+    to: z.coerce.date({ error: 'Enter a valid end date' }),
+  })
+  .refine((r) => r.to > r.from, { message: '`to` must be after `from`', path: ['to'] })
+  .refine((r) => r.to.getTime() - r.from.getTime() <= 400 * 24 * 60 * 60 * 1000, {
+    message: 'Range can be at most about a year',
+    path: ['to'],
+  });
+export type CalendarRange = z.output<typeof calendarRange>;
