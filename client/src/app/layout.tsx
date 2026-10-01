@@ -1,31 +1,34 @@
-import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google'
-import './globals.css'
-import ContextWrapper from './contextWrapper'
+import type { Metadata, Viewport } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import Providers from './providers';
 
-const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-jakarta' })
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-space' })
+const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 
 export const metadata: Metadata = {
-  title: 'Syncronify — Modern Event & Team Execution Platform',
-  description: 'Plan, discover, navigate, and collaborate on personal and organization events with a high-contrast Neo-Brutalist interface.',
-  icons: {
-    icon: '/logo.png',
+  title: {
+    default: 'Syncronify — Discover, plan and run campus events',
+    template: '%s · Syncronify',
   },
-}
+  description: 'Find events worth going to, RSVP in a tap, and run your own with waitlists, check-in and live chat.',
+  icons: { icon: '/logo.png' },
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fbfbfd' },
+    { media: '(prefers-color-scheme: dark)', color: '#14141c' },
+  ],
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${spaceGrotesk.variable}`}>
-      <body className="min-h-screen bg-[#F4F4F0] text-black selection:bg-[#FFE600] selection:text-black">
-        <ContextWrapper>
-          {children}
-        </ContextWrapper>
+    // next-themes sets the theme class before paint, which React would otherwise flag.
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }

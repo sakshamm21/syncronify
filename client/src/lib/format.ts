@@ -27,11 +27,19 @@ export const ROLE_LABELS: Record<Role, string> = {
   admin: 'Super Admin',
 };
 
-/** Where each role lands after signing in. */
-export const ROLE_HOME: Record<Role, string> = {
-  member: '/dashboard',
-  organizer: '/admin-dashboard',
-  admin: '/application-admin-dashboard',
+/** Where people land after signing in; role-specific tools are reachable from there. */
+export const APP_HOME = '/dashboard';
+
+/** Cover art for events without a photo: a gradient per category. */
+export const CATEGORY_GRADIENTS: Record<CategoryValue, string> = {
+  tech: 'from-indigo-500 via-violet-500 to-fuchsia-500',
+  workshop: 'from-sky-500 via-cyan-500 to-teal-400',
+  cultural: 'from-rose-500 via-pink-500 to-orange-400',
+  sports: 'from-emerald-500 via-green-500 to-lime-400',
+  meetup: 'from-amber-500 via-orange-500 to-rose-500',
+  conference: 'from-blue-600 via-indigo-500 to-violet-500',
+  social: 'from-fuchsia-500 via-purple-500 to-indigo-500',
+  other: 'from-slate-500 via-slate-600 to-zinc-700',
 };
 
 const dayFormat = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
@@ -76,4 +84,19 @@ export function capacityLabel(event: Pick<SyncEvent, 'capacity' | 'attendeeCount
   if (event.capacity == null) return `${event.attendeeCount} going`;
   if (event.spotsLeft === 0) return `Full · ${event.attendeeCount}/${event.capacity}`;
   return `${event.spotsLeft} of ${event.capacity} spots left`;
+}
+
+/** Date -> value for <input type="datetime-local"> (local time, minute precision). */
+export function toDateTimeInput(date: Date): string {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
+
+/** <input type="datetime-local"> value -> Date (interpreted as local time). */
+export const fromDateTimeInput = (value: string) => new Date(value);
+
+/** "Good morning" / "Good afternoon" / "Good evening". */
+export function greeting(date = new Date()): string {
+  const hour = date.getHours();
+  return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 }

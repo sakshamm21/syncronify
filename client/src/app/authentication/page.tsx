@@ -2,14 +2,14 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'react-toastify';
-import Navbar from '@/components/Navbar/Navbar';
-import Login from '@/components/Login/Login';
-import UserRegister from '@/components/UserRegister/UserRegister';
-import VerifyEmail from '@/components/Auth/VerifyEmail';
-import ForgotPassword from '@/components/Auth/ForgotPassword';
+import { toast } from 'sonner';
+import AuthLayout from '@/components/auth/AuthLayout';
+import SignInForm from '@/components/auth/SignInForm';
+import RegisterForm from '@/components/auth/RegisterForm';
+import VerifyEmail from '@/components/auth/VerifyEmail';
+import ForgotPassword from '@/components/auth/ForgotPassword';
 import { useAuth } from '@/context/AuthContext';
-import { ROLE_HOME } from '@/lib/format';
+import { APP_HOME } from '@/lib/format';
 import type { User } from '@/lib/api';
 
 type Step =
@@ -26,22 +26,22 @@ function AuthenticationFlow() {
 
   // Only follow same-site relative paths to avoid open redirects.
   const next = params.get('next');
-  const destinationFor = (u: User) => (next && next.startsWith('/') && !next.startsWith('//') ? next : ROLE_HOME[u.role]);
+  const destination = next && next.startsWith('/') && !next.startsWith('//') ? next : APP_HOME;
 
   useEffect(() => {
-    if (status === 'authenticated' && user && step.name !== 'verify') router.replace(destinationFor(user));
+    if (status === 'authenticated' && user && step.name !== 'verify') router.replace(destination);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, user]);
 
   const onSignedIn = (signedIn: User) => {
     toast.success(`Welcome, ${signedIn.name.split(' ')[0]}!`);
-    router.replace(destinationFor(signedIn));
+    router.replace(destination);
   };
 
   switch (step.name) {
     case 'register':
       return (
-        <UserRegister
+        <RegisterForm
           onSwitchToLogin={() => setStep({ name: 'login' })}
           onRegistered={(result) => setStep({ name: 'verify', email: result.email, devCode: result.devCode })}
         />
@@ -60,7 +60,7 @@ function AuthenticationFlow() {
       return <ForgotPassword initialEmail={step.email} onBack={() => setStep({ name: 'login' })} />;
     default:
       return (
-        <Login
+        <SignInForm
           onSwitchToRegister={() => setStep({ name: 'register' })}
           onForgotPassword={(email) => setStep({ name: 'forgot', email })}
           onNeedsVerification={(email) => setStep({ name: 'verify', email, sendOnMount: true })}
@@ -72,16 +72,10 @@ function AuthenticationFlow() {
 
 export default function AuthenticationPage() {
   return (
-    <div className="min-h-screen bg-[#F4F4F0] text-black font-sans flex flex-col justify-between">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center p-6 my-8">
-        <Suspense fallback={null}>
-          <AuthenticationFlow />
-        </Suspense>
-      </main>
-      <footer className="border-t-4 border-black bg-white py-4 text-center text-xs font-bold text-black">
-        Syncronify Platform — Account Authentication
-      </footer>
-    </div>
+    <AuthLayout>
+      <Suspense fallback={null}>
+        <AuthenticationFlow />
+      </Suspense>
+    </AuthLayout>
   );
 }

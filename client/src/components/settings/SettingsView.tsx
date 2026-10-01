@@ -1,0 +1,279 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
+import { Check, Clock, Megaphone, Monitor, Moon, Sun, XCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useEventsSync } from '@/context/EventContext';
+import { errorMessage, meApi, organizerApi, type CategoryValue, type OrganizerApplication } from '@/lib/api';
+import { CATEGORIES, CATEGORY_LABELS, ROLE_LABELS, formatDay } from '@/lib/format';
+import { Button, ButtonLink } from '@/components/ui/button';
+import { Field, Input, Textarea } from '@/components/ui/field';
+import { Avatar, Badge, Card, PageHeader } from '@/components/ui/surface';
+import { Segmented } from '@/components/ui/tabs';
+import { cn } from '@/lib/cn';
+
+function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+  return (
+    <Card className="grid gap-6 p-6 md:grid-cols-[16rem_1fr]">
+      <div>
+        <h2 className="font-semibold">{title}</h2>
+        <p className="mt-1 text-sm text-muted">{description}</p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </Card>
+  );
+}
+
+function ProfileSection() {
+  const { user, setUser } = useAuth();
+  const { eventsChanged } = useEventsSync();
+  const [name, setName] = useState(user?.name ?? '');
+  const [bio, setBio] = useState(user?.bio ?? '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
+  const [interests, setInterests] = useState<CategoryValue[]>(user?.interests ?? []);
+  const [emailNotifications, setEmailNotifications] = useState(user?.preferences.emailNotifications ?? true);
+  const [saving, setSaving] = useState(false);
+
+  const toggleInterest = (value: CategoryValue) =>
+    setInterests((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      setUser(await meApi.update({ name, bio, avatarUrl: avatarUrl.trim(), interests, preferences: { emailNotifications } }));
+      eventsChanged(); // Recommendations depend on interests.
+      toast.success('Profile saved');
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={save} className="space-y-6">
+      <Section title="Profile" description="How you appear to organizers and other attendees.">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Avatar name={name || user?.name || '?'} src={avatarUrl.trim() || undefined} size={64} />
+            <Field label="Profile picture URL" htmlFor="profile-avatar" className="flex-1">
+              <Input id="profile-avatar" type="url" placeholder="https://…" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Name" htmlFor="profile-name">
+              <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </Field>
+            <Field label="Email" htmlFor="profile-email" hint="Used to sign in. It can't be changed.">
+              <Input id="profile-email" value={user?.email ?? ''} disabled />
+            </Field>
+          </div>
+          <Field label="About you" htmlFor="profile-bio">
+            <Textarea id="profile-bio" rows={2} maxLength={500} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A line about you" />
+          </Field>
+        </div>
+      </Section>
+
+      <Section title="Interests" description="We use these to pick events for you on Home.">
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => {
+            const on = interests.includes(c);
+            return (
+              <button
+                key={c}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggleInterest(c)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition',
+                  on ? 'border-primary bg-primary-soft text-primary-soft-foreground' : 'border-border text-muted hover:border-border-strong hover:text-foreground'
+                )}
+              >
+                {on && <Check className="size-3.5" />}
+                {CATEGORY_LABELS[c]}
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Notifications" description="In-app notifications are always on.">
+        <label className="flex cursor-pointer items-start justify-between gap-4 rounded-xl border border-border p-4">
+          <span>
+            <span className="block text-sm font-medium">Email me too</span>
+            <span className="block text-sm text-muted">Reminders, changes and announcements for events you&apos;re attending.</span>
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={emailNotifications}
+            onClick={() => setEmailNotifications((v) => !v)}
+            className={cn('relative h-6 w-11 shrink-0 rounded-full transition', emailNotifications ? 'bg-primary' : 'bg-border-strong')}
+          >
+            <span className={cn('absolute top-0.5 size-5 rounded-full bg-white shadow transition-all', emailNotifications ? 'left-[22px]' : 'left-0.5')} />
+          </button>
+        </label>
+      </Section>
+
+      <div className="flex justify-end">
+        <Button type="submit" loading={saving}>Save changes</Button>
+      </div>
+    </form>
+  );
+}
+
+function AppearanceSection() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return (
+    <Section title="Appearance" description="Match your system, or pick a theme.">
+      {mounted && (
+        <Segmented
+          value={(theme as 'system' | 'light' | 'dark') ?? 'system'}
+          onChange={setTheme}
+          options={[
+            { value: 'system', label: <><Monitor className="size-4" /> System</> },
+            { value: 'light', label: <><Sun className="size-4" /> Light</> },
+            { value: 'dark', label: <><Moon className="size-4" /> Dark</> },
+          ]}
+        />
+      )}
+    </Section>
+  );
+}
+
+function OrganizerSection() {
+  const { user } = useAuth();
+  const [application, setApplication] = useState<OrganizerApplication | null | undefined>(undefined);
+  const [organization, setOrganization] = useState('');
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user?.role !== 'member') return;
+    organizerApi.latestApplication().then(setApplication).catch(() => setApplication(null));
+  }, [user?.role]);
+
+  if (!user) return null;
+
+  if (user.role !== 'member') {
+    return (
+      <Section title="Organizer access" description="Publish public events and manage attendees.">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border p-4">
+          <div>
+            <Badge tone="primary">{ROLE_LABELS[user.role]}</Badge>
+            <p className="mt-2 text-sm text-muted">You can publish public events{user.organization ? ` for ${user.organization}` : ''}.</p>
+          </div>
+          <ButtonLink href="/organizer" variant="secondary"><Megaphone /> Organizer console</ButtonLink>
+        </div>
+      </Section>
+    );
+  }
+
+  async function apply(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      setApplication(await organizerApi.apply({ organization, reason }));
+      toast.success('Application sent', { description: "We'll notify you once an admin reviews it." });
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const pending = application?.status === 'pending';
+
+  return (
+    <Section title="Host your own events" description="Organizers publish public events, manage RSVPs and waitlists, check people in and send announcements.">
+      <div className="space-y-4">
+        {application && (
+          <div
+            className={cn(
+              'flex gap-3 rounded-xl border p-4 text-sm',
+              application.status === 'pending' && 'border-warning/30 bg-warning-soft',
+              application.status === 'approved' && 'border-success/30 bg-success-soft',
+              application.status === 'rejected' && 'border-border bg-surface-muted'
+            )}
+          >
+            {application.status === 'pending' ? <Clock className="mt-0.5 size-4 shrink-0 text-warning" /> : application.status === 'approved' ? <Check className="mt-0.5 size-4 shrink-0 text-success" /> : <XCircle className="mt-0.5 size-4 shrink-0 text-muted" />}
+            <p>
+              {application.status === 'pending' && `Your application for ${application.organization} (sent ${formatDay(application.createdAt)}) is being reviewed.`}
+              {application.status === 'approved' && 'Approved! Organizer tools are now in the sidebar.'}
+              {application.status === 'rejected' &&
+                `Your application for ${application.organization} wasn't approved.${application.reviewNote ? ` Reviewer's note: “${application.reviewNote}”` : ''} You can apply again.`}
+            </p>
+          </div>
+        )}
+        {!pending && application !== undefined && (
+          <form onSubmit={apply} className="space-y-4">
+            <Field label="Club or organization" htmlFor="org-name">
+              <Input id="org-name" value={organization} onChange={(e) => setOrganization(e.target.value)} required minLength={2} placeholder="e.g. Robotics Club" />
+            </Field>
+            <Field label="What will you host?" htmlFor="org-reason" hint="Optional, but it helps the review.">
+              <Textarea id="org-reason" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
+            </Field>
+            <Button type="submit" loading={submitting}>Apply to be an organizer</Button>
+          </form>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+function PasswordSection() {
+  const { startSession } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      startSession(await meApi.changePassword({ currentPassword, newPassword }));
+      setCurrentPassword('');
+      setNewPassword('');
+      toast.success('Password changed', { description: 'Your other devices have been signed out.' });
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Section title="Password" description="Changing it signs you out everywhere else.">
+      <form onSubmit={save} className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Current password" htmlFor="current-password">
+            <Input id="current-password" type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+          </Field>
+          <Field label="New password" htmlFor="new-password" hint="8 or more characters.">
+            <Input id="new-password" type="password" autoComplete="new-password" minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+          </Field>
+        </div>
+        <Button type="submit" variant="secondary" loading={saving}>Update password</Button>
+      </form>
+    </Section>
+  );
+}
+
+export default function SettingsView() {
+  return (
+    <>
+      <PageHeader title="Settings" description="Your profile, preferences and account." />
+      <div className="space-y-6">
+        <ProfileSection />
+        <AppearanceSection />
+        <OrganizerSection />
+        <PasswordSection />
+      </div>
+    </>
+  );
+}

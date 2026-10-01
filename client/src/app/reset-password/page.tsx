@@ -1,15 +1,15 @@
 'use client';
 
 import React, { Suspense, useState } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'react-toastify';
-import { FaKey } from 'react-icons/fa';
-import Navbar from '@/components/Navbar/Navbar';
-import AuthCard, { FormError, inputClass, labelClass, primaryButtonClass } from '@/components/Auth/AuthCard';
+import { toast } from 'sonner';
+import AuthLayout from '@/components/auth/AuthLayout';
+import AuthCard from '@/components/auth/AuthCard';
+import { Button, ButtonLink } from '@/components/ui/button';
+import { Field, FormAlert, Input } from '@/components/ui/field';
 import { useAuth } from '@/context/AuthContext';
 import { authApi, errorMessage } from '@/lib/api';
-import { ROLE_HOME } from '@/lib/format';
+import { APP_HOME } from '@/lib/format';
 
 function ResetPasswordForm() {
   const token = useSearchParams().get('token') ?? '';
@@ -22,10 +22,10 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <AuthCard title="Link Missing" subtitle="This page needs the link from your reset email.">
-        <Link href="/authentication" className={primaryButtonClass}>
+      <AuthCard title="This link is incomplete" subtitle="Open the reset link from your email, or request a new one.">
+        <ButtonLink href="/authentication" size="lg" className="w-full">
           Back to sign in
-        </Link>
+        </ButtonLink>
       </AuthCard>
     );
   }
@@ -39,9 +39,9 @@ function ResetPasswordForm() {
     setError(null);
     setLoading(true);
     try {
-      const user = startSession(await authApi.resetPassword({ token, password }));
+      startSession(await authApi.resetPassword({ token, password }));
       toast.success('Password updated. You are signed in.');
-      router.replace(ROLE_HOME[user.role]);
+      router.replace(APP_HOME);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -50,38 +50,18 @@ function ResetPasswordForm() {
   }
 
   return (
-    <AuthCard title="Choose a New Password">
+    <AuthCard title="Choose a new password" subtitle="Other devices will be signed out.">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="new-password" className={labelClass}>New password</label>
-          <input
-            id="new-password"
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-            placeholder="At least 8 characters"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="confirm-password" className={labelClass}>Confirm password</label>
-          <input
-            id="confirm-password"
-            type="password"
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            className={inputClass}
-            required
-          />
-        </div>
-        <FormError message={error} />
-        <button type="submit" disabled={loading} className={primaryButtonClass}>
-          <FaKey /> {loading ? 'Saving…' : 'Save password'}
-        </button>
+        <Field label="New password" htmlFor="new-password" hint="Use 8 or more characters.">
+          <Input id="new-password" type="password" autoComplete="new-password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus />
+        </Field>
+        <Field label="Confirm password" htmlFor="confirm-password">
+          <Input id="confirm-password" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+        </Field>
+        <FormAlert message={error} />
+        <Button type="submit" size="lg" loading={loading} className="w-full">
+          Save password
+        </Button>
       </form>
     </AuthCard>
   );
@@ -89,13 +69,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen bg-[#F4F4F0] text-black font-sans flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center p-6 my-8">
-        <Suspense fallback={null}>
-          <ResetPasswordForm />
-        </Suspense>
-      </main>
-    </div>
+    <AuthLayout>
+      <Suspense fallback={null}>
+        <ResetPasswordForm />
+      </Suspense>
+    </AuthLayout>
   );
 }

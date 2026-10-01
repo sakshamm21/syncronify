@@ -21,7 +21,7 @@ Developed for **CS253: Software Development and Operations**, Indian Institute o
 ## 📖 Table of Contents
 
 - [About & Course Context](#-about--course-context)
-- [🎨 Neo-Brutalist Design Philosophy](#-neo-brutalist-design-philosophy)
+- [🎨 Design](#-design)
 - [✨ Key Features](#-key-features)
 - [🏗️ System Architecture](#️-system-architecture)
 - [🛠️ Tech Stack](#️-tech-stack)
@@ -47,14 +47,16 @@ This software system was developed as a flagship project for **CS253 (Software D
 
 ---
 
-## 🎨 Neo-Brutalist Design Philosophy
+## 🎨 Design
 
-Syncronify employs a custom **Neo-Brutalist UI** engineered for optimal contrast, instant readability, and physical tactile responsiveness:
+A calm, professional interface with event photography up front and motion that explains what's happening.
 
-- **Thick Solid Outlines**: Crisp 2px–4px black borders (`border-4 border-black`) outlining cards, inputs, buttons, and popups.
-- **Hard Offset Shadows**: Unblurred offset box-shadows (`shadow-[4px_4px_0px_#000]`) with active translation compression effects.
-- **High-Contrast Palette**: Curated accent tokens including Electric Yellow (`#FFE600`), Cyber Cyan (`#00F0FF`), Neon Pink (`#FF007A`), Lime Green (`#00FF66`), and Canvas Off-white (`#F4F4F0`).
-- **Typography System**: Headlines powered by *Space Grotesk* for bold uppercase tracking, with body UI rendered in *Plus Jakarta Sans*.
+- **Design tokens**: semantic colours (`bg-surface`, `text-muted`, `bg-primary`, …) defined once in `client/src/app/globals.css` (OKLCH), with full **light and dark themes** that follow the system setting.
+- **Accent**: indigo → violet → fuchsia gradients; soft layered shadows; 12–24px radii.
+- **Typography**: *Geist* (via `next/font`), tight tracking on headings.
+- **Motion** (Motion for React): page transitions, staggered lists, sliding tab and nav highlights, spring-animated dialogs and menus, floating cards on the landing page, scroll reveals.
+- **Building blocks** in `client/src/components/ui`: Button, Field/Input/Select/Textarea, Card, Badge, Avatar, Dialog, ConfirmDialog, Popover/Menu, Segmented tabs, FilterChips, Skeleton, EmptyState, StatCard.
+- **Responsive**: sidebar on desktop, slide-over drawer on mobile.
 
 ---
 
@@ -122,9 +124,9 @@ flowchart LR
 
 ### Frontend
 - **Framework**: Next.js 16 (App Router, React 19, TypeScript)
-- **Styling**: Tailwind CSS & Neo-Brutalist component classes (`globals.css`)
+- **Styling**: Tailwind CSS v4 with design tokens, Motion for animation, Lucide icons, light/dark themes via next-themes
 - **Data**: typed API client in `src/lib/api` (axios), realtime via `socket.io-client`
-- **Calendar**: FullCalendar · **Maps**: OpenStreetMap (embed + place search via the API) · **Toasts**: React Toastify
+- **Calendar**: FullCalendar · **Maps**: OpenStreetMap (embed + place search via the API) · **Toasts**: Sonner
 
 ### Backend
 - **Runtime**: Node.js 20+ & Express 5
@@ -144,11 +146,11 @@ flowchart LR
 Syncronify/
 ├── client/                      # Next.js web app
 │   └── src/
-│       ├── app/                 # Routes: /, /authentication, /reset-password, /events/[id],
-│       │                        #   /dashboard (members), /admin-dashboard (organizers),
-│       │                        #   /application-admin-dashboard (super admins)
-│       ├── components/          # UI components (Auth, EventPage, Chat, Calendar, Profile, ...)
-│       ├── context/             # AuthContext (session + socket), EventContext, LocationContext
+│       ├── app/                 # Public: /, /authentication, /reset-password, /events/[id]
+│       │   └── (app)/           # Signed-in shell: /dashboard, /explore, /schedule, /chat, /notes,
+│       │                        #   /map, /settings, /organizer (+ /events/[id]), /admin
+│       ├── components/          # ui/ (design system), shell/, events/, chat/, organizer/, admin/, ...
+│       ├── context/             # AuthContext (session + realtime), EventContext
 │       └── lib/
 │           ├── api/             # Typed API client and response types
 │           ├── format.ts        # Dates, labels, role routing
