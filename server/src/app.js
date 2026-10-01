@@ -41,6 +41,7 @@ function createApp() {
   app.use('/api/me', require('./modules/me/me.routes'));
   app.use('/api/events', require('./modules/events/events.routes'));
   app.use('/api/notes', require('./modules/notes/notes.routes'));
+  app.use('/api/places', require('./modules/places/places.routes'));
   app.use('/api/notifications', require('./modules/notifications/notifications.routes'));
   app.use('/api/organizer', require('./modules/organizer/organizer.routes'));
   app.use('/api/admin', require('./modules/admin/admin.routes'));

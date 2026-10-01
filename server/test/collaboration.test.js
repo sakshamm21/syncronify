@@ -73,17 +73,15 @@ describe('notifications', () => {
       await api().post(`/api/events/${event.id}/messages`).set(organizer.auth).send({ text, announcement: true });
     }
 
-    let count = await api().get('/api/notifications/unread-count').set(attendee.auth).expect(200);
-    assert.equal(count.body.data.count, 2);
+    const unread = async () => (await api().get('/api/notifications').set(attendee.auth).expect(200)).body.meta.unread;
+    assert.equal(await unread(), 2);
 
     const list = await api().get('/api/notifications').set(attendee.auth).expect(200);
     await api().post(`/api/notifications/${list.body.data[0].id}/read`).set(attendee.auth).expect(200);
-    count = await api().get('/api/notifications/unread-count').set(attendee.auth);
-    assert.equal(count.body.data.count, 1);
+    assert.equal(await unread(), 1);
 
     await api().post('/api/notifications/read-all').set(attendee.auth).expect(200);
-    count = await api().get('/api/notifications/unread-count').set(attendee.auth);
-    assert.equal(count.body.data.count, 0);
+    assert.equal(await unread(), 0);
   });
 
   it("does not let users read someone else's notifications", async () => {

@@ -66,7 +66,11 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenCreateEvent }) => {
             <>
               <NotificationBell />
               <div className="flex items-center gap-2 bg-[#F4F4F0] border-2 border-black px-3 py-1 font-bold text-xs brutal-shadow-sm">
-                <FaUserCircle className="text-lg text-black" />
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="w-6 h-6 border border-black object-cover" />
+                ) : (
+                  <FaUserCircle className="text-lg text-black" />
+                )}
                 <span className="hidden sm:inline truncate max-w-[140px]">{user.name}</span>
               </div>
               <button

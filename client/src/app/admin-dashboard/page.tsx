@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import {
@@ -20,14 +19,13 @@ import {
 import Navbar from '@/components/Navbar/Navbar';
 import SideBar, { type SidebarTab } from '@/components/Sidebar/Sidebar';
 import CreateEvent from '@/components/CreateEvent/CreateEvent';
+import VenueMap from '@/components/VenueMap/VenueMap';
 import Calendar from '@/components/Calendar/Calendar';
 import NotesManager from '@/components/Notes/NotesManager';
 import ChatInterface from '@/components/Chat/ChatInterface';
 import { useEventsSync } from '@/context/EventContext';
 import { errorMessage, eventsApi, organizerApi, type OrganizedEvent, type OrganizerOverview, type SyncEvent } from '@/lib/api';
 import { CATEGORY_LABELS, formatEventWhen, formatVenue } from '@/lib/format';
-
-const BrowseMap = dynamic(() => import('@/components/MapBox/BrowseMap'), { ssr: false });
 
 const ORGANIZER_TABS: SidebarTab[] = [
   { id: 'events', name: 'My Events', icon: <FaLayerGroup /> },
@@ -49,7 +47,6 @@ export default function OrganizerDashboard() {
   const [activeTab, setActiveTab] = useState('events');
   const [overview, setOverview] = useState<OrganizerOverview | null>(null);
   const [editor, setEditor] = useState<{ open: boolean; event: SyncEvent | null; date: Date | null }>({ open: false, event: null, date: null });
-  const [isMapModalActive, setIsMapModalActive] = useState(false);
 
   const load = useCallback(() => {
     organizerApi
@@ -61,10 +58,6 @@ export default function OrganizerDashboard() {
   useEffect(load, [load, version]);
 
   const openEditor = (event: SyncEvent | null = null, date: Date | null = null) => setEditor({ open: true, event, date });
-  const toggleMap = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    setIsMapModalActive((open) => !open);
-  };
 
   async function cancelEvent(event: OrganizedEvent) {
     const reason = window.prompt(
@@ -191,7 +184,7 @@ export default function OrganizerDashboard() {
           {activeTab === 'notes' && <NotesManager />}
           {activeTab === 'map' && (
             <div className="h-[600px]">
-              <BrowseMap />
+              <VenueMap />
             </div>
           )}
           {activeTab === 'chat' && <ChatInterface inline />}
@@ -201,18 +194,10 @@ export default function OrganizerDashboard() {
       <CreateEvent
         isCreateActive={editor.open}
         handleCreateActive={(open) => setEditor((prev) => ({ ...prev, open }))}
-        handleBrowseMap={toggleMap}
         event={editor.event}
         initialDate={editor.date}
       />
 
-      {isMapModalActive && (
-        <div className="fixed inset-0 z-[60] bg-black/80 p-6 flex items-center justify-center">
-          <div className="w-full max-w-4xl h-[90vh]">
-            <BrowseMap handleBrowseMap={toggleMap} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -14,10 +14,6 @@ router.get('/', validate({ query: listQuery }), async (req, res) => {
   res.json({ data: items, meta });
 });
 
-router.get('/unread-count', async (req, res) => {
-  res.json({ data: { count: await service.unreadCount(req.user) } });
-});
-
 router.post('/read-all', async (req, res) => {
   res.json({ data: await service.markAllRead(req.user) });
 });

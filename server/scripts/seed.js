@@ -87,7 +87,7 @@ async function seed() {
     tags: ['rust', 'beginner'],
     startsAt: at(1, 17),
     endsAt: at(1, 19),
-    venue: { name: 'CC Lab 2' },
+    venue: { name: 'Computer Centre Lab 2', latitude: 26.511, longitude: 80.2341 },
     capacity: 40,
   });
   const fest = await create(cultural, {
@@ -107,7 +107,7 @@ async function seed() {
     coverImageUrl: img('photo-1431324155629-1a6deb1dec8d'),
     startsAt: at(5, 16),
     endsAt: at(5, 18),
-    venue: { name: 'Sports Complex Ground' },
+    venue: { name: 'Sports Complex Ground', latitude: 26.5072, longitude: 80.2268 },
   });
   await create(cultural, {
     title: 'Open Mic & Poetry Evening',
@@ -115,7 +115,7 @@ async function seed() {
     category: 'social',
     startsAt: at(14, 19),
     endsAt: at(14, 21),
-    venue: { name: 'Student Activity Centre' },
+    venue: { name: 'Student Activity Centre', latitude: 26.5058, longitude: 80.2312 },
     capacity: 60,
   });
   await create(tech, {

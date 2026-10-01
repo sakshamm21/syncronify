@@ -89,7 +89,7 @@ Syncronify employs a custom **Neo-Brutalist UI** engineered for optimal contrast
 
 ### 7. 📝 Notes & 🗺️ Venue Map
 - Notes stored on the server (search, tags, pinning), optionally linked to an event.
-- Venue picker map with optional Mapbox place search.
+- Venue map of every location with upcoming events and what's on there, plus free place search (OpenStreetMap, no API key) used when creating events.
 
 ---
 
@@ -124,7 +124,7 @@ flowchart LR
 - **Framework**: Next.js 16 (App Router, React 19, TypeScript)
 - **Styling**: Tailwind CSS & Neo-Brutalist component classes (`globals.css`)
 - **Data**: typed API client in `src/lib/api` (axios), realtime via `socket.io-client`
-- **Calendar**: FullCalendar · **Maps**: Mapbox / OpenStreetMap · **Toasts**: React Toastify
+- **Calendar**: FullCalendar · **Maps**: OpenStreetMap (embed + place search via the API) · **Toasts**: React Toastify
 
 ### Backend
 - **Runtime**: Node.js 20+ & Express 5
@@ -202,6 +202,7 @@ npm run dev                       # API on :4000, web app on :3000
 # Option B: no MongoDB installed (persistent local DB in server/.data, auto-seeded)
 npm run dev:memory
 ```
+Open the URL the `[web]` line prints (usually http://localhost:3000; if that port is busy Next.js picks 3001, and the API accepts any localhost port in development). The first `dev:memory` run downloads a local MongoDB binary (~780 MB) once; later runs start in seconds. Delete `server/.data` to start over with fresh demo data.
 
 ### Demo accounts (from the seed script)
 All use the password `syncronify123`: `member@syncronify.dev`, `organizer@syncronify.dev`, `admin@syncronify.dev`, plus `asha@` (has a pending organizer application) and `rahul@`. Set `NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS=true` to show one-click buttons on the sign-in page.
@@ -244,11 +245,12 @@ All endpoints are under `/api`. Successful responses are `{ "data": ... }` (list
 | Health | `GET /health` |
 | Auth | `POST /auth/register`, `/auth/verify-email`, `/auth/resend-verification`, `/auth/login`, `/auth/forgot-password`, `/auth/reset-password` |
 | Me | `GET/PATCH /me`, `POST /me/password`, `GET /me/calendar?from&to`, `GET /me/registrations` |
-| Events | `GET /events` (`q, category, sort, page, limit, ...`), `GET /events/categories`, `GET /events/recommended`, `GET /events/:id`, `GET /events/:id/calendar.ics`, `POST /events`, `PATCH /events/:id`, `POST /events/:id/cancel`, `DELETE /events/:id` |
+| Events | `GET /events` (`q, category, sort, page, limit, ...`), `GET /events/recommended`, `GET /events/venues`, `GET /events/:id`, `GET /events/:id/calendar.ics`, `POST /events`, `PATCH /events/:id`, `POST /events/:id/cancel`, `DELETE /events/:id` |
 | Registration | `POST/DELETE /events/:id/registration`, `GET /events/:id/attendees`, `PUT /events/:id/attendees/:userId/check-in` |
 | Chat | `GET/POST /events/:id/messages` |
 | Notes | `GET/POST /notes`, `PATCH/DELETE /notes/:id` |
-| Notifications | `GET /notifications`, `GET /notifications/unread-count`, `POST /notifications/:id/read`, `POST /notifications/read-all` |
+| Places | `GET /places/search?q=` (venue search, signed-in users) |
+| Notifications | `GET /notifications`, `POST /notifications/:id/read`, `POST /notifications/read-all` |
 | Organizer | `POST /organizer/applications`, `GET /organizer/applications/latest`, `GET /organizer/overview` |
 | Admin | `GET /admin/stats`, `GET /admin/users`, `PATCH /admin/users/:id`, `GET /admin/organizer-applications`, `POST /admin/organizer-applications/:id/approve` \| `/reject` |
 
@@ -271,7 +273,7 @@ Private (personal) events are visible only to their owner, including to admins.
 ## 🧪 Testing & Quality Assurance
 
 ```bash
-npm --prefix server test            # 73 API tests against an in-memory MongoDB
+npm --prefix server test            # 78 API tests against an in-memory MongoDB
 npm --prefix client run build       # type-checks and builds the web app
 ```
 The API tests cover auth flows (verification, lockout, reset, suspension), visibility rules, concurrent registration (no overselling), waitlist promotion, notifications, reminders, chat permissions, admin workflows and realtime delivery.

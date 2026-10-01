@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { authenticate, optionalAuth } = require('../../middleware/auth');
 const validate = require('../../middleware/validate');
 const { z, idParams } = require('../../lib/schemas');
-const { EVENT_CATEGORIES, REGISTRATION_STATUS } = require('../../constants');
+const { REGISTRATION_STATUS } = require('../../constants');
 const schemas = require('./events.schemas');
 const events = require('./events.service');
 const registrations = require('./registrations.service');
@@ -12,13 +12,13 @@ const router = Router();
 
 // --- Discovery -------------------------------------------------------------
 
-router.get('/categories', (_req, res) => {
-  res.json({ data: EVENT_CATEGORIES });
-});
-
 router.get('/', optionalAuth, validate({ query: schemas.list }), async (req, res) => {
   const { items, meta } = await events.listPublic(req.user, req.query);
   res.json({ data: items, meta });
+});
+
+router.get('/venues', async (_req, res) => {
+  res.json({ data: await events.venueDirectory() });
 });
 
 router.get('/recommended', authenticate, async (req, res) => {

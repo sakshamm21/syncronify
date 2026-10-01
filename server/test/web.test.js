@@ -23,14 +23,14 @@ describe('HTTP basics', () => {
   });
 
   it('sets security headers and allows the configured client origin', async () => {
-    const res = await api().get('/api/events/categories').set('Origin', 'http://localhost:3000').expect(200);
+    const res = await api().get('/api/meta').set('Origin', 'http://localhost:3000').expect(200);
     assert.equal(res.headers['x-content-type-options'], 'nosniff');
     assert.equal(res.headers['access-control-allow-origin'], 'http://localhost:3000');
     assert.equal(res.headers['x-powered-by'], undefined);
   });
 
   it('does not allow other origins', async () => {
-    const res = await api().get('/api/events/categories').set('Origin', 'https://evil.example').expect(200);
+    const res = await api().get('/api/meta').set('Origin', 'https://evil.example').expect(200);
     assert.equal(res.headers['access-control-allow-origin'], undefined);
   });
 });

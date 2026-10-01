@@ -2,20 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { FaTimes, FaMapMarkerAlt, FaCalendarPlus, FaImage, FaCheck, FaTag, FaSave } from 'react-icons/fa';
+import { FaTimes, FaMapMarkerAlt, FaCalendarPlus, FaImage, FaCheck, FaTag, FaSave, FaLink } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useAuth } from '@/context/AuthContext';
-import { useLocation } from '@/context/LocationContext';
 import { useEventsSync } from '@/context/EventContext';
 import { ApiError, errorMessage, eventsApi, type CategoryValue, type EventInput, type SyncEvent } from '@/lib/api';
 import { CATEGORIES, CATEGORY_LABELS } from '@/lib/format';
-import getPlaces, { type PlaceSuggestion } from '../MapBox/API/getPlaces';
+import VenueMap, { type PickedLocation } from '../VenueMap/VenueMap';
+import { usePlaceSearch } from '../VenueMap/usePlaceSearch';
 
 interface CreateEventProps {
   isCreateActive: boolean;
   handleCreateActive: (active: boolean) => void;
-  handleBrowseMap: (event: React.MouseEvent) => void;
   /** Edit this event instead of creating a new one. */
   event?: SyncEvent | null;
   /** Pre-fills the start date (e.g. a day clicked on the calendar). */
@@ -30,8 +29,11 @@ interface FormState {
   startsAt: Date;
   endsAt: Date;
   venueName: string;
+  venueAddress: string;
   latitude?: number;
   longitude?: number;
+  onlineUrl: string;
+  tags: string;
   coverImageUrl: string;
   capacity: string;
   isPublic: boolean;
@@ -53,8 +55,11 @@ function initialState(event: SyncEvent | null | undefined, canPublish: boolean, 
       startsAt: new Date(event.startsAt),
       endsAt: new Date(event.endsAt),
       venueName: event.venue?.name ?? '',
+      venueAddress: event.venue?.address ?? '',
       latitude: event.venue?.latitude,
       longitude: event.venue?.longitude,
+      onlineUrl: event.onlineUrl,
+      tags: event.tags.join(', '),
       coverImageUrl: event.coverImageUrl,
       capacity: event.capacity ? String(event.capacity) : '',
       isPublic: event.visibility === 'public',
@@ -68,67 +73,64 @@ function initialState(event: SyncEvent | null | undefined, canPublish: boolean, 
     startsAt,
     endsAt: new Date(startsAt.getTime() + 2 * 60 * 60 * 1000),
     venueName: '',
+    venueAddress: '',
+    onlineUrl: '',
+    tags: '',
     coverImageUrl: '',
     capacity: '',
     isPublic: canPublish,
   };
 }
 
+const parseTags = (value: string) =>
+  [...new Set(value.split(',').map((t) => t.trim().replace(/^#/, '').toLowerCase()).filter(Boolean))].slice(0, 10);
+
 const inputClass = 'w-full bg-[#F4F4F0] border-2 border-black p-3 font-bold text-sm outline-none focus:bg-white';
 const labelClass = 'block text-xs font-black uppercase mb-1 text-black';
 
-export default function CreateEvent({
-  isCreateActive,
-  handleCreateActive,
-  handleBrowseMap,
-  event,
-  initialDate,
-  onSaved,
-}: CreateEventProps) {
+export default function CreateEvent({ isCreateActive, handleCreateActive, event, initialDate, onSaved }: CreateEventProps) {
   const { user } = useAuth();
   const { eventsChanged } = useEventsSync();
-  const { location, setLocation } = useLocation();
   const canPublish = user?.role === 'organizer' || user?.role === 'admin';
   const isEdit = Boolean(event);
 
   const [form, setForm] = useState<FormState>(() => initialState(event, canPublish, initialDate));
-  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [venueQuery, setVenueQuery] = useState('');
+  const [mapOpen, setMapOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [saving, setSaving] = useState(false);
+  const places = usePlaceSearch(venueQuery);
 
   // Reset whenever the modal is (re)opened.
   useEffect(() => {
     if (isCreateActive) {
       setForm(initialState(event, canPublish, initialDate));
       setErrors({});
+      setVenueQuery('');
     }
   }, [isCreateActive, event, canPublish, initialDate]);
-
-  // A location picked on the map fills in the venue.
-  useEffect(() => {
-    if (location?.selected) {
-      setForm((prev) => ({ ...prev, venueName: location.name || prev.venueName, latitude: location.latitude, longitude: location.longitude }));
-    }
-  }, [location]);
 
   if (!isCreateActive) return null;
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  async function handleVenueInput(value: string) {
-    setForm((prev) => ({ ...prev, venueName: value, latitude: undefined, longitude: undefined }));
-    setSuggestions(value.trim().length > 2 ? await getPlaces(value) : []);
+  function typeVenue(value: string) {
+    // Typing a new name drops any coordinates picked earlier.
+    setForm((prev) => ({ ...prev, venueName: value, venueAddress: '', latitude: undefined, longitude: undefined }));
+    setVenueQuery(value);
   }
 
-  function selectSuggestion(s: PlaceSuggestion) {
-    setForm((prev) => ({ ...prev, venueName: s.place_name, longitude: s.center[0], latitude: s.center[1] }));
-    setLocation({ name: s.place_name, latitude: s.center[1], longitude: s.center[0], selected: true });
-    setSuggestions([]);
-  }
-
-  function close() {
-    setLocation((prev) => ({ ...prev, selected: false }));
-    handleCreateActive(false);
+  function applyLocation(location: PickedLocation) {
+    setForm((prev) => ({
+      ...prev,
+      venueName: location.name,
+      venueAddress: location.address,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    }));
+    setVenueQuery('');
+    places.clear();
+    setMapOpen(false);
   }
 
   async function save(asDraft: boolean) {
@@ -136,11 +138,14 @@ export default function CreateEvent({
       title: form.title,
       description: form.description,
       category: form.category,
+      tags: parseTags(form.tags),
       startsAt: form.startsAt.toISOString(),
       endsAt: form.endsAt.toISOString(),
       coverImageUrl: form.coverImageUrl.trim(),
+      onlineUrl: form.onlineUrl.trim(),
       venue: {
         name: form.venueName.trim() || undefined,
+        address: form.venueAddress || undefined,
         latitude: form.latitude,
         longitude: form.longitude,
       },
@@ -159,7 +164,7 @@ export default function CreateEvent({
       toast.success(isEdit ? 'Event updated' : form.isPublic && !asDraft ? 'Event published' : 'Event saved');
       eventsChanged();
       onSaved?.(saved);
-      close();
+      handleCreateActive(false);
     } catch (err) {
       if (err instanceof ApiError && err.code === 'VALIDATION_ERROR') {
         const fieldErrors: Record<string, string> = {};
@@ -190,7 +195,7 @@ export default function CreateEvent({
               </p>
             </div>
           </div>
-          <button onClick={close} aria-label="Close" className="brutal-btn bg-[#FF007A] text-white w-9 h-9 flex items-center justify-center">
+          <button onClick={() => handleCreateActive(false)} aria-label="Close" className="brutal-btn bg-[#FF007A] text-white w-9 h-9 flex items-center justify-center">
             <FaTimes />
           </button>
         </div>
@@ -297,28 +302,31 @@ export default function CreateEvent({
 
           <div>
             <label htmlFor="event-venue" className={labelClass}>Venue</label>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex flex-col sm:flex-row gap-2">
               <input
                 id="event-venue"
-                placeholder="Search a venue or type an address…"
+                placeholder="Search a place or type a room name…"
                 value={form.venueName}
-                onChange={(e) => handleVenueInput(e.target.value)}
+                onChange={(e) => typeVenue(e.target.value)}
+                autoComplete="off"
                 className={`flex-1 ${inputClass}`}
               />
               <button
                 type="button"
-                onClick={handleBrowseMap}
+                onClick={() => setMapOpen(true)}
                 className="brutal-btn bg-[#00F0FF] text-black px-4 py-2 text-xs font-black uppercase flex items-center justify-center gap-2"
               >
                 <FaMapMarkerAlt /> Pick on map
               </button>
             </div>
-            {suggestions.length > 0 && (
-              <ul className="mt-1 bg-white border-2 border-black max-h-40 overflow-y-auto">
-                {suggestions.map((s) => (
-                  <li key={s.id}>
-                    <button type="button" onClick={() => selectSuggestion(s)} className="w-full text-left p-2 text-xs font-bold border-b border-black hover:bg-[#FFE600]">
-                      {s.place_name}
+            {venueQuery.trim().length >= 3 && (places.results.length > 0 || places.searching) && (
+              <ul className="mt-1 bg-white border-2 border-black max-h-44 overflow-y-auto">
+                {places.searching && <li className="p-2 text-xs font-bold">Searching…</li>}
+                {places.results.map((p) => (
+                  <li key={p.id}>
+                    <button type="button" onClick={() => applyLocation(p)} className="w-full text-left p-2 text-xs border-b border-black hover:bg-[#FFE600]">
+                      <span className="font-black">{p.name}</span>
+                      <span className="block text-[11px] text-gray-600 truncate">{p.address}</span>
                     </button>
                   </li>
                 ))}
@@ -326,9 +334,37 @@ export default function CreateEvent({
             )}
             {form.latitude != null && form.longitude != null && (
               <p className="mt-1 text-[11px] font-extrabold text-[#00FF66] bg-black px-2 py-0.5 w-fit flex items-center gap-1">
-                <FaCheck /> Pinned on map ({form.latitude.toFixed(3)}, {form.longitude.toFixed(3)})
+                <FaCheck /> Pinned on the map{form.venueAddress ? `: ${form.venueAddress.split(',').slice(0, 2).join(',')}` : ''}
               </p>
             )}
+          </div>
+
+          <div>
+            <label htmlFor="event-online" className={`${labelClass} flex items-center gap-1`}>
+              <FaLink /> Online link <span className="normal-case font-bold text-gray-600">(optional, for hybrid or online events)</span>
+            </label>
+            <input
+              id="event-online"
+              placeholder="https://meet.google.com/…"
+              value={form.onlineUrl}
+              onChange={(e) => set('onlineUrl', e.target.value)}
+              className={`${inputClass} font-mono text-xs`}
+            />
+            <FieldError name="onlineUrl" />
+          </div>
+
+          <div>
+            <label htmlFor="event-tags" className={labelClass}>
+              Tags <span className="normal-case font-bold text-gray-600">(comma-separated, helps people find it in search)</span>
+            </label>
+            <input
+              id="event-tags"
+              placeholder="ai, beginner-friendly, free food"
+              value={form.tags}
+              onChange={(e) => set('tags', e.target.value)}
+              className={inputClass}
+            />
+            <FieldError name="tags" />
           </div>
 
           {form.isPublic && (
@@ -364,7 +400,7 @@ export default function CreateEvent({
           )}
 
           <div className="pt-4 border-t-4 border-black flex flex-wrap items-center justify-end gap-3">
-            <button type="button" onClick={close} className="brutal-btn bg-[#F4F4F0] px-5 py-2.5 text-xs font-black uppercase">
+            <button type="button" onClick={() => handleCreateActive(false)} className="brutal-btn bg-[#F4F4F0] px-5 py-2.5 text-xs font-black uppercase">
               Cancel
             </button>
             {form.isPublic && (!isEdit || event?.status === 'draft') && (
@@ -394,6 +430,14 @@ export default function CreateEvent({
           </div>
         </form>
       </div>
+
+      {mapOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/80 p-4 md:p-6 flex items-center justify-center">
+          <div className="w-full max-w-5xl h-[90vh]">
+            <VenueMap onPick={applyLocation} onClose={() => setMapOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

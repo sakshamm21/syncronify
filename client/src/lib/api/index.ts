@@ -2,7 +2,6 @@ import { http } from './client';
 import type {
   AppNotification,
   AttendeeList,
-  Category,
   CategoryValue,
   ChatMessage,
   EventInput,
@@ -11,6 +10,7 @@ import type {
   OrganizerApplication,
   OrganizerOverview,
   Page,
+  Place,
   PageMeta,
   PlatformStats,
   RegistrationStatus,
@@ -19,6 +19,7 @@ import type {
   SyncEvent,
   User,
   UserStatus,
+  VenueSummary,
 } from './types';
 
 export * from './client';
@@ -96,9 +97,9 @@ export interface EventQuery {
 }
 
 export const eventsApi = {
-  categories: () => data<Category[]>(http.get('/events/categories')),
   list: (query: EventQuery = {}) => page<SyncEvent>(http.get('/events', { params: query })),
   recommended: () => data<SyncEvent[]>(http.get('/events/recommended')),
+  venues: () => data<VenueSummary[]>(http.get('/events/venues')),
   get: (id: string) => data<SyncEvent>(http.get(`/events/${id}`)),
   create: (body: EventInput) => data<SyncEvent>(http.post('/events', body)),
   update: (id: string, body: Partial<EventInput>) => data<SyncEvent>(http.patch(`/events/${id}`, body)),
@@ -129,6 +130,12 @@ export const eventsApi = {
   },
 };
 
+// --- Places -------------------------------------------------------------------
+
+export const placesApi = {
+  search: (q: string) => data<Place[]>(http.get('/places/search', { params: { q } })),
+};
+
 // --- Notes ----------------------------------------------------------------------
 
 export interface NoteInput {
@@ -154,7 +161,6 @@ export const notificationsApi = {
     http
       .get<{ data: AppNotification[]; meta: PageMeta & { unread: number } }>('/notifications', { params: query })
       .then((r) => ({ items: r.data.data, meta: r.data.meta })),
-  unreadCount: () => data<{ count: number }>(http.get('/notifications/unread-count')).then((d) => d.count),
   markRead: (id: string) => data<AppNotification>(http.post(`/notifications/${id}/read`)),
   markAllRead: () => data<{ updated: number }>(http.post('/notifications/read-all')),
 };

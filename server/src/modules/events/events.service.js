@@ -74,6 +74,27 @@ async function recommendedFor(user, limit = 6) {
   return withViewerContext(events, user);
 }
 
+/** Venues of upcoming public events that have map coordinates, with what's on at each. */
+async function venueDirectory() {
+  const events = await Event.find({
+    ...publicListing(),
+    endsAt: { $gte: new Date() },
+    'venue.latitude': { $ne: null },
+    'venue.longitude': { $ne: null },
+  })
+    .sort({ startsAt: 1 })
+    .select('title category startsAt endsAt venue');
+
+  const venues = new Map();
+  for (const event of events) {
+    const { name, address, latitude, longitude } = event.venue;
+    const key = `${(name || '').toLowerCase()}|${latitude.toFixed(4)}|${longitude.toFixed(4)}`;
+    if (!venues.has(key)) venues.set(key, { name: name || address || 'Unnamed venue', address: address || '', latitude, longitude, events: [] });
+    venues.get(key).events.push({ id: event.id, title: event.title, category: event.category, startsAt: event.startsAt, endsAt: event.endsAt });
+  }
+  return [...venues.values()].sort((a, b) => b.events.length - a.events.length || a.name.localeCompare(b.name));
+}
+
 async function getForViewer(viewer, id) {
   return present(await findViewableEvent(viewer, id), viewer);
 }
@@ -210,4 +231,4 @@ async function toCalendarFile(viewer, id) {
   };
 }
 
-module.exports = { listPublic, recommendedFor, getForViewer, calendarFor, create, update, cancel, remove, toCalendarFile };
+module.exports = { listPublic, recommendedFor, venueDirectory, getForViewer, calendarFor, create, update, cancel, remove, toCalendarFile };

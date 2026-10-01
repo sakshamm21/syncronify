@@ -59,6 +59,24 @@ export interface Venue {
   longitude?: number;
 }
 
+/** A search result from the place lookup (OpenStreetMap). */
+export interface Place {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+}
+
+/** A venue in use by upcoming public events. */
+export interface VenueSummary {
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  events: { id: string; title: string; category: CategoryValue; startsAt: string; endsAt: string }[];
+}
+
 export interface EventViewer {
   isOwner: boolean;
   canManage: boolean;

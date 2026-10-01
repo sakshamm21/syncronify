@@ -37,10 +37,6 @@ async function list(user, { unreadOnly, page, limit }) {
   return { items, meta: { ...paginationMeta({ page, limit }, total), unread } };
 }
 
-function unreadCount(user) {
-  return Notification.countDocuments({ user: user.id, readAt: null });
-}
-
 async function markRead(user, id) {
   const notification = await Notification.findOneAndUpdate(
     { _id: id, user: user.id },
@@ -56,4 +52,4 @@ async function markAllRead(user) {
   return { updated: modifiedCount };
 }
 
-module.exports = { notify, list, unreadCount, markRead, markAllRead };
+module.exports = { notify, list, markRead, markAllRead };

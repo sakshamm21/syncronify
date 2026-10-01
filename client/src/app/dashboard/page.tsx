@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
 import { FaPlus } from 'react-icons/fa';
 import Navbar from '@/components/Navbar/Navbar';
 import SideBar from '@/components/Sidebar/Sidebar';
@@ -13,26 +12,20 @@ import NotesManager from '@/components/Notes/NotesManager';
 import ChatInterface from '@/components/Chat/ChatInterface';
 import ChatButton from '@/components/Chat/ChatButton';
 import CreateEvent from '@/components/CreateEvent/CreateEvent';
+import VenueMap from '@/components/VenueMap/VenueMap';
 import ProfilePanel from '@/components/Profile/ProfilePanel';
 import { useAuth } from '@/context/AuthContext';
-
-const BrowseMap = dynamic(() => import('@/components/MapBox/BrowseMap'), { ssr: false });
 
 export default function MemberDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('events');
   const [isCreateActive, setIsCreateActive] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
-  const [isMapModalActive, setIsMapModalActive] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const openCreate = (date: Date | null = null) => {
     setCreateDate(date);
     setIsCreateActive(true);
-  };
-  const toggleMap = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    setIsMapModalActive((open) => !open);
   };
 
   return (
@@ -67,7 +60,7 @@ export default function MemberDashboard() {
           {activeTab === 'notes' && <NotesManager />}
           {activeTab === 'map' && (
             <div className="h-[650px] w-full">
-              <BrowseMap />
+              <VenueMap />
             </div>
           )}
           {activeTab === 'chat' && <ChatInterface inline />}
@@ -78,17 +71,8 @@ export default function MemberDashboard() {
       <CreateEvent
         isCreateActive={isCreateActive}
         handleCreateActive={setIsCreateActive}
-        handleBrowseMap={toggleMap}
         initialDate={createDate}
       />
-
-      {isMapModalActive && (
-        <div className="fixed inset-0 z-[60] bg-black/80 p-6 flex items-center justify-center">
-          <div className="w-full max-w-4xl h-[90vh]">
-            <BrowseMap handleBrowseMap={toggleMap} />
-          </div>
-        </div>
-      )}
 
       {activeTab !== 'chat' && (
         <>

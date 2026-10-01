@@ -17,6 +17,7 @@ function ProfileDetails() {
   const { eventsChanged } = useEventsSync();
   const [name, setName] = useState(user?.name ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
   const [interests, setInterests] = useState<CategoryValue[]>(user?.interests ?? []);
   const [emailNotifications, setEmailNotifications] = useState(user?.preferences.emailNotifications ?? true);
   const [saving, setSaving] = useState(false);
@@ -28,7 +29,7 @@ function ProfileDetails() {
     e.preventDefault();
     setSaving(true);
     try {
-      setUser(await meApi.update({ name, bio, interests, preferences: { emailNotifications } }));
+      setUser(await meApi.update({ name, bio, avatarUrl: avatarUrl.trim(), interests, preferences: { emailNotifications } }));
       eventsChanged(); // Recommendations depend on interests.
       toast.success('Profile saved');
     } catch (err) {
@@ -51,6 +52,19 @@ function ProfileDetails() {
         <div>
           <span className={label}>Email</span>
           <p className="p-2.5 text-xs font-bold border-2 border-dashed border-black">{user?.email}</p>
+        </div>
+      </div>
+      <div className="flex items-end gap-3">
+        {avatarUrl.trim() ? (
+          <img src={avatarUrl.trim()} alt="" className="w-14 h-14 border-2 border-black object-cover shrink-0" />
+        ) : (
+          <span className="w-14 h-14 border-2 border-black bg-[#FFE600] flex items-center justify-center font-black text-xl shrink-0">
+            {name.charAt(0).toUpperCase() || '?'}
+          </span>
+        )}
+        <div className="flex-1">
+          <label htmlFor="profile-avatar" className={label}>Profile picture URL</label>
+          <input id="profile-avatar" type="url" placeholder="https://…" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className={input} />
         </div>
       </div>
       <div>

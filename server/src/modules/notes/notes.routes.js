@@ -36,10 +36,6 @@ const listQuery = z.object({
   ...pagination,
 });
 
-router.get('/tags', (_req, res) => {
-  res.json({ data: NOTE_TAGS });
-});
-
 router.get('/', validate({ query: listQuery }), async (req, res) => {
   const { items, meta } = await service.list(req.user, req.query);
   res.json({ data: items, meta });

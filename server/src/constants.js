@@ -9,17 +9,8 @@ const USER_STATUS = Object.freeze({
   SUSPENDED: 'suspended',
 });
 
-const EVENT_CATEGORIES = Object.freeze([
-  { value: 'tech', label: 'Tech & Code' },
-  { value: 'workshop', label: 'Workshop' },
-  { value: 'cultural', label: 'Cultural' },
-  { value: 'sports', label: 'Sports' },
-  { value: 'meetup', label: 'Meetup' },
-  { value: 'conference', label: 'Conference' },
-  { value: 'social', label: 'Social' },
-  { value: 'other', label: 'Other' },
-]);
-const CATEGORY_VALUES = EVENT_CATEGORIES.map((c) => c.value);
+// Display labels live in the web app (client/src/lib/format.ts).
+const CATEGORY_VALUES = Object.freeze(['tech', 'workshop', 'cultural', 'sports', 'meetup', 'conference', 'social', 'other']);
 
 const EVENT_VISIBILITY = Object.freeze({
   PUBLIC: 'public', // listed in discovery, open for registration
@@ -58,7 +49,6 @@ const NOTIFICATION_TYPES = Object.freeze({
 module.exports = {
   ROLES,
   USER_STATUS,
-  EVENT_CATEGORIES,
   CATEGORY_VALUES,
   EVENT_VISIBILITY,
   EVENT_STATUS,

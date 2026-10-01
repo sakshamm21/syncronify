@@ -79,7 +79,11 @@ const env = Object.freeze({
   jwtSecret: raw.JWT_SECRET,
   jwtExpiresIn: raw.JWT_EXPIRES_IN,
   // Allowed CORS origins: exact strings, or RegExps for entries containing '*'.
-  clientOrigins: raw.CLIENT_URL.split(',').map((o) => o.trim()).filter(Boolean).map(toOriginMatcher),
+  // Outside production any localhost port is allowed, since Next.js picks another port when 3000 is busy.
+  clientOrigins: [
+    ...raw.CLIENT_URL.split(',').map((o) => o.trim()).filter(Boolean).map(toOriginMatcher),
+    ...(raw.NODE_ENV === 'production' ? [] : [/^http:\/\/localhost:\d+$/]),
+  ],
   // First origin is used to build links in emails.
   clientUrl: raw.CLIENT_URL.split(',')[0].trim(),
   trustProxy: raw.TRUST_PROXY,
