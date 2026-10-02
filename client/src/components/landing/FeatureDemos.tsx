@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { AnimatePresence, motion, useInView } from 'motion/react';
 import { Bell, Check, Megaphone, PartyPopper, Plus } from 'lucide-react';

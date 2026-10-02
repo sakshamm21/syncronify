@@ -113,15 +113,10 @@
   --shadow-overlay: 0 30px 80px -20px rgb(0 0 0 / 0.6);
   --shadow-glow: 0 0 0 1px var(--primary), 0 8px 32px -6px var(--glow);
 
-  --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-spin-slow: spin 14s linear infinite;
 
-  @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
-  }
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }

@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useRouter } from 'next/navigation';
 import { LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';

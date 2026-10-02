@@ -30,7 +30,7 @@ const SUGGESTIONS = [
 
 const AssistantContext = createContext<{ openAssistant: () => void; enabled: boolean } | null>(null);
 
-export function useAssistant() {
+function useAssistant() {
   const context = useContext(AssistantContext);
   if (!context) throw new Error('useAssistant must be used inside AssistantProvider');
   return context;

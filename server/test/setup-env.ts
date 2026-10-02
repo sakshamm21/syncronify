@@ -2,6 +2,8 @@
 // reads the environment. Test files that need extra settings set them in their
 // own *.env.ts module and import it before helpers.
 process.env.NODE_ENV = 'test';
+// Tests never send real email, whatever .env says.
+process.env.BREVO_API_KEY = '';
 process.env.SMTP_HOST = '';
 process.env.CLIENT_URL ??= 'http://localhost:3000';
 // The assistant is tested against a fake provider, never a real one.

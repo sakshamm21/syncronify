@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, Hourglass } from 'lucide-react';
 import type { SyncEvent } from '@/lib/api';
 import { CATEGORY_EMOJI, CATEGORY_GRADIENTS, CATEGORY_LABELS } from '@/lib/format';

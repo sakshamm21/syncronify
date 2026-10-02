@@ -70,18 +70,7 @@ export function Avatar({ name, src, size = 36, className }: { name: string; src?
   );
 }
 
-export function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        'rounded-3xl bg-[linear-gradient(90deg,var(--surface-muted)_25%,var(--surface-raised)_50%,var(--surface-muted)_75%)] bg-[length:200%_100%] animate-shimmer',
-        className
-      )}
-    />
-  );
-}
-
-export function EmptyState({ emoji = '🫥', title, description, action, className }: { emoji?: string; icon?: React.ReactNode; title: string; description?: React.ReactNode; action?: React.ReactNode; className?: string }) {
+export function EmptyState({ emoji = '🫥', title, description, action, className }: { emoji?: string; title: string; description?: React.ReactNode; action?: React.ReactNode; className?: string }) {
   return (
     <div className={cn('flex flex-col items-center justify-center rounded-[28px] border border-dashed border-border-strong px-6 py-16 text-center', className)}>
       <span className="mb-4 text-5xl" style={{ rotate: '-8deg' }} aria-hidden="true">

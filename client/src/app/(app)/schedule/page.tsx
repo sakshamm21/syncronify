@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Plus } from 'lucide-react';
 import Calendar, { CALENDAR_LEGEND } from '@/components/calendar/ScheduleCalendar';
 import { useCreateEvent } from '@/components/events/CreateEventDialog';

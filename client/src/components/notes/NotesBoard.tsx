@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { AnimatePresence, motion } from 'motion/react';
-import { CalendarDays, Pencil, Pin, Plus, Search, StickyNote, Trash2 } from 'lucide-react';
+import { CalendarDays, Pencil, Pin, Plus, Search, Trash2 } from 'lucide-react';
 import { errorMessage, meApi, notesApi, type Note, type NoteTag, type SyncEvent } from '@/lib/api';
 import { NOTE_TAGS, NOTE_TAG_EMOJI, NOTE_TAG_LABELS, formatRelative } from '@/lib/format';
 import { Button } from '@/components/ui/button';

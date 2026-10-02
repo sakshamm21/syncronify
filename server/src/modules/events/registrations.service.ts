@@ -11,7 +11,7 @@ type AttendeeUser = Pick<UserDocument, 'id' | 'name' | 'email' | 'avatarUrl'>;
  * Atomically takes a seat if one is free. Two people can never get the last
  * seat because the capacity check and the increment are a single update.
  */
-export async function claimSeat(eventId: Types.ObjectId): Promise<boolean> {
+async function claimSeat(eventId: Types.ObjectId): Promise<boolean> {
   const claimed = await Event.updateOne(
     { _id: eventId, $or: [{ capacity: null }, { $expr: { $lt: ['$attendeeCount', '$capacity'] } }] },
     { $inc: { attendeeCount: 1 } }

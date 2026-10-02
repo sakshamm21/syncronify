@@ -98,13 +98,6 @@ export function formatRelative(iso: string): string {
   return 'just now';
 }
 
-/** Short description of how full an event is. */
-export function capacityLabel(event: Pick<SyncEvent, 'capacity' | 'attendeeCount' | 'spotsLeft'>): string {
-  if (event.capacity == null) return `${event.attendeeCount} going`;
-  if (event.spotsLeft === 0) return `Full · ${event.attendeeCount}/${event.capacity}`;
-  return `${event.spotsLeft} of ${event.capacity} spots left`;
-}
-
 /** Date -> value for <input type="datetime-local"> (local time, minute precision). */
 export function toDateTimeInput(date: Date): string {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -113,9 +106,3 @@ export function toDateTimeInput(date: Date): string {
 
 /** <input type="datetime-local"> value -> Date (interpreted as local time). */
 export const fromDateTimeInput = (value: string) => new Date(value);
-
-/** "Good morning" / "Good afternoon" / "Good evening". */
-export function greeting(date = new Date()): string {
-  const hour = date.getHours();
-  return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-}

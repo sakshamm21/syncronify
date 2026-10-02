@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { Ban, CalendarCheck, CalendarDays, Hourglass, Megaphone, Pencil, Plus, Trash2, TrendingUp, Users } from 'lucide-react';
+import { Ban, CalendarCheck, CalendarDays, Hourglass, Pencil, Plus, Trash2, TrendingUp, Users } from 'lucide-react';
 import { useEventsSync } from '@/context/EventContext';
 import { errorMessage, eventsApi, organizerApi, type OrganizedEvent, type OrganizerOverview } from '@/lib/api';
 import { formatEventWhen, formatVenue } from '@/lib/format';

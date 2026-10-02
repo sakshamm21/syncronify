@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { CalendarDays, Check, Inbox, Megaphone, Search, ShieldCheck, Ticket, UserCheck, UserX, Users, X } from 'lucide-react';

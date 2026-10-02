@@ -20,7 +20,7 @@ export function canManage(user: Viewer, event: EventDocument): boolean {
   return user.role === ROLES.ADMIN && event.visibility === EVENT_VISIBILITY.PUBLIC;
 }
 
-export function canView(user: Viewer, event: EventDocument): boolean {
+function canView(user: Viewer, event: EventDocument): boolean {
   if (event.visibility === EVENT_VISIBILITY.PRIVATE) return Boolean(user) && event.isOwnedBy(user?.id);
   if (event.status === EVENT_STATUS.DRAFT) return canManage(user, event);
   return true;

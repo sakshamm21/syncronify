@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowLeft, Info } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';

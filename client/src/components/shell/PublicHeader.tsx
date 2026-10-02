@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ButtonLink } from '@/components/ui/button';
 import { APP_HOME } from '@/lib/format';
