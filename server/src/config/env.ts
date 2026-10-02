@@ -32,10 +32,12 @@ const schema = z
     // Secret Vercel Cron sends as a bearer token when calling scheduled job endpoints.
     CRON_SECRET: z.string().optional(),
     // Show verification codes / reset links in the API response when email can't be sent.
-    // Always on outside production; in production only for demos without SMTP.
+    // Always on outside production; in production only for demos without email.
     EXPOSE_VERIFICATION_CODES: booleanFlag('false'),
     ENABLE_JOBS: booleanFlag('true'),
 
+    // Brevo's HTTP API (preferred on serverless). If set, it's used instead of SMTP.
+    BREVO_API_KEY: z.string().optional(),
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.coerce.number().int().positive().default(587),
     SMTP_USER: z.string().optional(),
@@ -103,12 +105,13 @@ const env = Object.freeze({
   cronSecret: raw.CRON_SECRET,
   exposeVerificationCodes: raw.NODE_ENV !== 'production' || raw.EXPOSE_VERIFICATION_CODES,
   mail: {
+    brevoApiKey: raw.BREVO_API_KEY,
     host: raw.SMTP_HOST,
     port: raw.SMTP_PORT,
     user: raw.SMTP_USER,
     password: raw.SMTP_PASSWORD,
     from: raw.MAIL_FROM || raw.SMTP_USER,
-    enabled: Boolean(raw.SMTP_HOST && raw.SMTP_USER && raw.SMTP_PASSWORD),
+    enabled: Boolean(raw.BREVO_API_KEY ? raw.MAIL_FROM : raw.SMTP_HOST && raw.SMTP_USER && raw.SMTP_PASSWORD),
   },
   ai: {
     apiKey: raw.AI_API_KEY,

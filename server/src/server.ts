@@ -8,7 +8,7 @@ import { startEventReminders } from './jobs/eventReminders';
 
 export async function start(): Promise<void> {
   if (env.usingDevJwtSecret) logger.warn('JWT_SECRET is not set — using an insecure development secret');
-  if (!env.mail.enabled) logger.warn('SMTP is not configured — emails will be logged instead of sent');
+  if (!env.mail.enabled) logger.warn('Email is not configured — emails will be logged instead of sent');
   if (!env.ai.enabled) logger.warn('AI_API_KEY is not set — the AI assistant is turned off');
 
   try {

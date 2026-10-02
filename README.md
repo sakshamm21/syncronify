@@ -69,7 +69,7 @@ Settings live in `server/.env` and `client/.env`; the `.env.example` files list 
 | `JWT_SECRET` | Long random string for signing logins (required in production) |
 | `CLIENT_URL` | Web app address(es) allowed to call the API |
 | `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL` | Turn on the AI assistant; leave the key empty to turn it off |
-| `SMTP_*` | Send real emails (optional) |
+| `BREVO_API_KEY` or `SMTP_*`, plus `MAIL_FROM` | Send real emails (optional) |
 | `NEXT_PUBLIC_API_URL` | Where the web app finds the API |
 
 ## Project structure

@@ -82,15 +82,11 @@ Plus notes for Kabir and the organizers, and the two organizer applications abov
 
 ---
 
-## Signing up and resetting passwords without email
+## Signing up and resetting passwords
 
-You can still create your own account:
+The live app sends real emails (from `Syncronify <sak.projects.auth@gmail.com>` via Brevo), so to create your own account you need a **real inbox**: the verification code and password reset links arrive by email. Check spam if they don't show up within a minute. The test accounts above are already verified and need no email.
 
-1. **Sign up** with any email address (it doesn't need to be real).
-2. The verification code that would normally be emailed is **shown on the screen** instead. Enter it to finish.
-3. **Forgot password** works the same way: the reset link appears on screen.
-
-This is on everywhere while no email service is configured. When SMTP settings are added, codes go to real inboxes and are no longer shown (see `EXPOSE_VERIFICATION_CODES` in the README).
+When running locally without `BREVO_API_KEY` or SMTP settings, codes and reset links are **shown on screen** instead, so any made-up address works.
 
 ---
 
