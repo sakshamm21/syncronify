@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s · Syncronify',
   },
   description: 'Campus plans, minus the chaos. Find what’s on, RSVP in a tap, and never miss the good stuff.',
-  icons: { icon: '/logo.png' },
+  icons: { icon: '/icon.svg' },
 };
 
 export const viewport: Viewport = {
